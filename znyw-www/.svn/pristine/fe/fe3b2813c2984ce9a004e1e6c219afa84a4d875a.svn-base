@@ -1,0 +1,410 @@
+/**
+ * notificationFx.js v1.0.0
+ * http://www.codrops.com
+ *
+ * Licensed under the MIT license.
+ * http://www.opensource.org/licenses/mit-license.php
+ *
+ * Copyright 2014, Codrops
+ * http://www.codrops.com
+ */
+;( function( window ) {
+
+	'use strict';
+
+	var docElem = window.document.documentElement,
+		support = { animations : Modernizr.cssanimations },
+		animEndEventNames = {
+			'WebkitAnimation' : 'webkitAnimationEnd',
+			'OAnimation' : 'oAnimationEnd',
+			'msAnimation' : 'MSAnimationEnd',
+			'animation' : 'animationend'
+		},
+	// animation end event name
+		animEndEventName = animEndEventNames[ Modernizr.prefixed( 'animation' ) ];
+
+	/**
+	 * extend obj function
+	 */
+	function extend( a, b ) {
+		for( var key in b ) {
+			if( b.hasOwnProperty( key ) ) {
+				a[key] = b[key];
+			}
+		}
+		return a;
+	}
+
+	/**
+	 * NotificationFx function
+	 */
+	function NotificationFx( options ) {
+		var _defaultOptions={
+			// element to which the notification will be appended
+			// defaults to the document.body
+			wrapper : document.body,
+			// the message
+			message : 'yo!',
+			// layout type: growl|attached|bar|other
+			layout : 'growl',
+			// effects for the specified layout:
+			// for growl layout: scale|slide|genie|jelly
+			// for attached layout: flip|bouncyflip
+			// for other layout: boxspinner|cornerexpand|loadingcircle|thumbslider
+			// ...
+			effect : 'slide',
+			// notice, warning, error, success
+			// will add class ns-type-warning, ns-type-error or ns-type-success
+			type : 'error',
+			// if the user doesn´t close the notification then we remove it
+			// after the following time
+			ttl : 3000,
+			styles:null, //初始化以后添加什么样式。
+			// callbacks
+			onClose : function() { return false; },
+			onOpen : function() { return false; }
+		};
+		this.options = extend( {}, _defaultOptions );
+		extend( this.options, options );
+		this._init();
+	}
+
+	/**
+	 * NotificationFx options
+	 */
+	NotificationFx.prototype.options = {
+		// element to which the notification will be appended
+		// defaults to the document.body
+		wrapper : document.body,
+		// the message
+		message : 'yo!',
+		// layout type: growl|attached|bar|other
+		layout : 'growl',
+		// effects for the specified layout:
+		// for growl layout: scale|slide|genie|jelly
+		// for attached layout: flip|bouncyflip
+		// for other layout: boxspinner|cornerexpand|loadingcircle|thumbslider
+		// ...
+		effect : 'slide',
+		// notice, warning, error, success
+		// will add class ns-type-warning, ns-type-error or ns-type-success
+		type : 'error',
+		// if the user doesn´t close the notification then we remove it 
+		// after the following time
+		ttl : 3000,
+		styles:null, //初始化以后添加什么样式。
+		// callbacks
+		onClose : function() { return false; },
+		onOpen : function() { return false; }
+	}
+
+	/**
+	 * init function
+	 * initialize and cache some vars
+	 */
+	NotificationFx.prototype._init = function() {
+		// create HTML structure
+		this.ntf = document.createElement( 'div' );
+		this.ntf.className = 'ns-box ns-' + this.options.layout + ' ns-effect-' + this.options.effect + ' ns-type-' + this.options.type;
+		var strinner = '<div class="ns-box-inner">';
+		// 注稀了就没弹款了
+		strinner += this.options.message;
+		strinner += '</div>';
+		strinner += '<span class="ns-close"></span></div>';
+		this.ntf.innerHTML = strinner;
+
+		// append to body or the element specified in options.wrapper
+		//this.options.wrapper.insertBefore( this.ntf, this.options.wrapper.firstChild );
+		$(this.options.wrapper).append(this.ntf);
+		if(this.options.styles!=null&&this.options.styles!=undefined){$(this.ntf).css(this.options.styles);}
+
+		// dismiss after [options.ttl]ms
+		var self = this;
+		this.dismissttl = setTimeout( function() {
+			if( self.active ) {
+				self.dismiss();
+			}
+		}, this.options.ttl );
+
+		// init events
+		this._initEvents();
+	}
+
+	/**
+	 * init events
+	 */
+	NotificationFx.prototype._initEvents = function() {
+		var self = this;
+		// dismiss notification
+
+		this.ntf.querySelector( '.ns-close' ).addEventListener( 'click', function() { self.dismiss(); } );
+	}
+
+	/**
+	 * show the notification
+	 */
+	NotificationFx.prototype.show = function() {
+		this.active = true;
+		$(this.ntf).removeClass("ns-hide").addClass("ns-show");
+		this.options.onOpen();
+	}
+	NotificationFx.prototype.getRoot = function() {
+		return this.ntf;
+	}
+	/**
+	 * dismiss the notification
+	 */
+	NotificationFx.prototype.dismiss = function() {
+		var self = this;
+		this.active = false;
+		clearTimeout( this.dismissttl );
+		$(this.ntf).removeClass("ns-show");
+
+		setTimeout( function() {
+			//classie.add( self.ntf, 'ns-hide' );
+			$(self.ntf).addClass("ns-hide");
+			// callback
+			self.options.onClose();
+		}, 25);
+
+		// after animation ends remove ntf from the DOM
+		var onEndAnimationFn = function( ev ) {
+			if( support.animations ) {
+				if( ev.target !== self.ntf ) return false;
+				this.removeEventListener( animEndEventName, onEndAnimationFn );
+			}
+			//self.options.wrapper.removeChild( this );
+			//self.options.wrapper.removeChild( this );
+			//$(this).remove();
+			$(self.ntf).remove();
+		};
+
+		if( support.animations ) {
+			this.ntf.addEventListener( animEndEventName, onEndAnimationFn );
+		}
+		else {
+			onEndAnimationFn();
+		}
+	}
+
+	/**
+	 * add to global namespace
+	 */
+	window.NotificationFx = NotificationFx;
+
+	var ValidateNotice=function(_opts){
+
+		var _settings={
+			location:"left",
+			element:"",
+			sepDistance:5,
+			ttl:2000,
+			message:"hello",
+			considerScroll:false,//是否考虑滚动条的影响，假如考虑的话，那么会自动削减滚动条的高度和宽度。
+			mode:"absolute", //absolute或者fixed
+			parentObj:'' //需要是dom元素，必须要mode=absolute，解决弹层滚动条的问题
+		};//这个的默认参数。
+
+		//如果传入了父级
+		var __wrapper = '';
+		if(_opts.parentObj!=undefined&&_opts.parentObj!=''){
+			__wrapper=_opts.parentObj;
+		}else{
+			__wrapper=document.body;
+		}
+
+		var notification={};
+
+		var _notice_settings={
+			wrapper : __wrapper,
+			// the message
+			message : 'yo!',
+			// layout type: growl|attached|bar|other
+			layout : 'growl',
+			// effects for the specified layout:
+			// for growl layout: scale|slide|genie|jelly
+			// for attached layout: flip|bouncyflip
+			// for other layout: boxspinner|cornerexpand|loadingcircle|thumbslider
+			// ...
+			effect : 'jelly',
+			// notice, warning, error, success
+			// will add class ns-type-warning, ns-type-error or ns-type-success
+			type : 'validate',
+			// if the user doesn´t close the notification then we remove it
+			// after the following time
+			ttl : 6000,
+			styles:null, //初始化以后添加什么样式。
+			// callbacks
+			onClose : function() { return false; },
+			onOpen : function() { return false; }
+		};
+		var appData={
+			targetElementLocInfo:{}
+			,tipsElementLocInfo:{
+				w:0
+				,h:0
+			}
+			,tipsLocation:{
+				x:0
+				,y:0
+			}
+		};
+		var innerTools={};
+		var _tipsRoot={};
+		var app={
+			init:function(){
+				var me=this;
+				me.initSettings();
+				var _html=me.renderTpl(_settings.location,_settings.message);
+				_notice_settings.message=_html;
+				_notice_settings.ttl=_settings.ttl;
+				_notice_settings.styles={
+					//visibility:"hidden"
+				};
+				notification=new NotificationFx(_notice_settings);
+				_tipsRoot=notification.getRoot();
+				var _locInfo=app.caculateLocation(_settings.location,_settings.element,_tipsRoot);
+
+				appData.tipsLocation={
+					x:_locInfo.x
+					,y:_locInfo.y
+
+				};
+				$(_tipsRoot).css({
+					left:_locInfo.x+"px",
+					top:_locInfo.y+"px",
+
+					position:_settings.mode
+				});
+			}
+			,initSettings:function(){
+				$.extend(_settings,_opts);
+				_settings.element=$(_settings.element)[0];
+
+			}//负责对各种设定进行设置已经转换成为NotificationFx的相关参数。
+			,renderTpl:function(location,message){
+				var _now_msg="";
+				var _location=location;
+				if(_location=="top"){
+					_now_msg='<span class="ns-tips-panel ns-arrow-bottom"><span class="ns-tips-desc">'+message+'</span></span>';
+				}
+				else if(_location=="bottom"){
+					_now_msg='<span class="ns-tips-panel ns-arrow-top"><span class="ns-tips-desc">'+message+'</span></span>';
+				}
+				else if(_location=="right"){
+					_now_msg='<span class="ns-tips-panel ns-arrow-left"><span class="ns-tips-desc">'+message+'</span></span>';
+				}
+				else if(_location=="inner-right"){
+					_now_msg='<span class="ns-tips-panel"><span class="ns-tips-desc">'+message+'</span></span>';
+				}
+
+				else if(_location=="inner-left"){
+					_location="left";
+					_now_msg='<span class="ns-tips-panel"><span class="ns-tips-desc">'+message+'</span></span>';
+				}
+				else{
+					_location="left";
+					_now_msg='<span class="ns-tips-panel ns-arrow-right"><span class="ns-tips-desc">'+message+'</span></span>';
+				}
+
+				return _now_msg;
+			}//生成相关模板，需要知道location和message
+			,caculateLocation:function(location,originElement,tipsElement){
+				var _dom_el=$(originElement)[0];
+				var _tipsRoot=$(tipsElement)[0];
+
+				if(_settings.parentObj!=''){
+					var locInfo=UiUtil.getLocation(_dom_el,_settings.parentObj);
+				}else{
+					var locInfo=UiUtil.getLocation(_dom_el);
+				}
+
+				appData.targetElementLocInfo=locInfo;
+				var _x=0;
+				var _y=0;
+
+				var _tips_panel=$(_tipsRoot).find(".ns-tips-panel");
+				var ui_w=_tips_panel.width();
+				var ui_h=_tips_panel.height();
+				appData.tipsElementLocInfo.w=ui_w;
+				appData.tipsElementLocInfo.h=ui_h;
+
+
+				//--还要削减scroll的高度及宽度。
+				if(_settings.mode=="absolute"){
+					if(_settings.considerScroll){
+						locInfo.y=locInfo.y+$(window).scrollTop();
+						locInfo.x=locInfo.x+$(window).scrollLeft();
+					}
+				}
+				else if(_settings.mode=="fixed"){
+					//if(_settings.considerScroll){
+					//	locInfo.y=locInfo.y-$(window).scrollTop();
+					//	locInfo.x=locInfo.x-$(window).scrollLeft();
+					//}
+				}
+				//--现在计算需要到得位置了。
+				if(location=="top"){
+					_x=locInfo.x+parseInt((locInfo.w-ui_w)/2);
+					_y=locInfo.y-ui_h-_settings.sepDistance;
+				}
+				else if(location=="bottom"){
+					_x=locInfo.x+parseInt((locInfo.w-ui_w)/2);
+					_y=locInfo.y+locInfo.h+_settings.sepDistance;
+				}
+				else if(location=="right"){
+					_x=locInfo.x+parseInt(locInfo.w)+_settings.sepDistance;
+					_y=locInfo.y+parseInt((locInfo.h-ui_h)/2);
+				}
+
+				else if(location=="left"){
+					_x=locInfo.x-ui_w-_settings.sepDistance;
+					_y=locInfo.y+parseInt((locInfo.h-ui_h)/2);
+				}
+				else if(location=="inner-right"){
+					_x=locInfo.x+parseInt(locInfo.w)-ui_w-_settings.sepDistance;
+					_y=locInfo.y+parseInt((locInfo.h-ui_h)/2);
+				}
+
+				else if(location=="inner-left"){
+					_x=locInfo.x+_settings.sepDistance;
+					_y=locInfo.y+parseInt((locInfo.h-ui_h)/2);
+				}
+
+				return {
+					x:_x,
+					y:_y
+				};
+			}//通过需要紧贴的元素的位置和现在元素的位置还有方位来计算当前的提示的坐标。
+
+
+		};
+
+		app.init();
+
+		var robj={
+			show:function(callback){
+				//$(notification.getRoot()).css("visibility","visible");
+				notification.show();
+
+			}
+
+			,getRoot:function(){
+				return notification.getRoot();
+			}
+
+		};
+		this.show=function(){
+			notification.show();
+		}
+		this.getRoot=function(){
+			return notification.getRoot();
+		}
+
+		return robj;
+
+	};
+	window.ValidateNotice=ValidateNotice;
+
+
+} )( window );

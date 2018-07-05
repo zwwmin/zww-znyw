@@ -1,0 +1,206 @@
+<%@ page import="java.util.Date" %><%
+  Date _timeseed=new Date();
+%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no">
+  <title>微商</title>
+
+  <style>
+
+    /*项目已具有公共样式*/
+    *{-webkit-appearance: none;}
+    html{font-size: 62.5%; height: 100%;}
+
+    body, div, dl, dt, dd, ul, li,ol, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input,button, textarea, blockquote,p{margin:0; padding:0;font-family: "微软雅黑";font-size: 1.3rem; }
+    body{ height: 100%;background: #fff;-webkit-tap-highlight-color:rgba(0,0,0,0); color: #333;width:100%; /* max-width:640px; */ margin:0 auto;}
+    h1,h2,h3,h4,h5,h6,tt{font-weight:normal; font-family: "微软雅黑"; font-size: 2.6rem;}
+    li{list-style-type:none;}
+    ol,ul,dl{list-style:none;}
+    em{font-style:normal;}
+    img{border:none;vertical-align:middle;}
+    select,label,input{ padding:0; margin:0;outline:medium;font-size:12px;/*hide-focus: expression(this.hideFocus=true)*/}
+    textarea{resize: none; line-height:18px;}
+    table { border-collapse: collapse; border-spacing: 0; empty-cell:show;}
+    a{text-decoration:none;color:#333;outline:none; cursor:pointer;/*hide-focus: expression(this.hideFocus=true)*/}
+    a:hover{cursor:pointer;blr:expression(this.onFocus=this.blur());}
+    input::-moz-focus-inner{ border: 0;padding: 0;}/*针对Firefox*/
+    .clx:after{content:".";display:block;height:0;line-height:0;font-size:0;clear:both;visibility:hidden;}
+    .clx{zoom:1;}
+
+
+    /**自定义上传按钮样式，请修改。**/
+    .file {
+      position: relative;
+      display: inline-block;
+      background: #D0EEFF;
+      border: 1px solid #99D3F5;
+      border-radius: 4px;
+      padding: 4px 12px;
+      overflow: hidden;
+      color: #1E88C7;
+      text-decoration: none;
+      text-indent: 0;
+      line-height: 20px;
+    }
+    .file input {
+      position: absolute;
+      font-size: 100px;
+      right: 0;
+      top: 0;
+      opacity: 0;
+    }
+    .file:hover {
+      background: #AADFFD;
+      border-color: #78C3F3;
+      color: #004974;
+      text-decoration: none;
+    }
+
+  </style>
+  <link rel="stylesheet" type="text/css" href="style.css"/>
+  <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
+  <script type="text/javascript" src="js/exif.min.js"></script>
+  <script type="text/javascript" src="js/megapix-image.js"></script>
+  <script type="text/javascript" src="js/ImgCut.min.js"></script>
+  <script type="text/javascript" src="main.js"></script>
+
+</head>
+<body>
+<div id="upload_panel" style="width: 78px; margin: 0 auto; padding-top: 15px;">
+  <a href="javascript:;" class="file" style="margin: 0 auto;">选择文件
+    <input type="file" style="" id="uploadImage" accept="image/*">
+  </a>
+</div>
+
+
+<!--图片编辑器 html模板。。。-->
+<div class="crop_box" id="image-editor" style="display: none;">
+  <!--工具栏-->
+  <div class="crop_bar" ui="bar_tool" style="display: none;">
+                <span class="s4">
+                    <a class="a_select" ui="btn_reset"><i></i>退出</a>
+                    </span>
+    <span class="s1"><a class="a_trans" ui="btn_turn_right"><i></i>旋转</a></span>
+                <span class="s2">
+                    <a class="a_turn_big" ui="btn_zoom_in"><i></i>放大</a>
+                    <a class="a_turn_small" ui="btn_zoom_out"><i></i>缩小</a>
+                    <b></b>
+                </span>
+    <span class="s3"><a class="a_cut" ui="btn_cut"><i></i>裁剪</a></span>
+
+  </div>
+  <!--工具栏 end-->
+  <!--确认栏-->
+  <div class="crop_bar" ui="bar_confirm" style="display: none;">
+
+
+    <span class="s4"><a class="a_cancel" ui="btn_cancel"><i></i>取消</a></span>
+    <span class="s4"><a class="a_save" ui="btn_save"><i></i>完成</a></span>
+  </div>
+  <!--确认栏 end-->
+
+
+  <!--裁剪结果显示-->
+  <div class="" ui="previewer" style="display: none;">
+    <div class="" style="text-align: center;"><img ui="preview_img" /></div>
+  </div>
+  <!--裁剪结果显示 end-->
+
+  <!--加载中-->
+  <div ui="loading-tips" class="imgcut-loading-tips" style="display: none; ">
+
+  </div>
+  <!--加载中 end-->
+
+  <!--裁剪区域。-->
+  <div ui="cut-area" style="margin: 0 auto;">
+    <div ui="image-editor-panel">
+      <canvas ui="background-layout" style="position: absolute;"></canvas>
+      <canvas ui="cutter-layout" style="position: absolute; "></canvas>
+      <canvas ui="operation-layout" style="position: absolute; cursor: pointer; "></canvas>
+    </div>
+    </div>
+
+
+  <div ui="debug" style="color:green;"></div>
+
+</div>
+<!--图片编辑器 html模板。。。 end-->
+<script type="text/javascript">
+  $(function(){
+            //--获取窗口高度及宽度，尽量别超出窗口。
+            var _e_width = $(window).width() - 200;
+            var _e_height = $(window).height() - 200;
+            if (_e_width > 800) {
+              _e_width = 800;
+            }
+            else if (_e_width <300) {
+              _e_width = 300;
+            }
+            //--这是控件的课配置参数。
+            var opts = {
+              cutWidth: 150 //裁剪框的宽度。
+              , cutHeight: 200 //裁剪框的高度
+              , containerWidth: _e_width //容器宽度
+              , containerHeight: _e_height //容器高度
+              , imageShowWidth: 400 //图片默认显示的宽度【会按照要求的宽度及高度等比缩放】
+              , imageShowHeight: 500 //图片默认显示的高度【会按照要求的宽度及高度等比缩放】
+              ,imageEditorElement:$("#image-editor")
+              ,onSave:function(imgData){
+                console.log(imgData);
+              }//当用户点击保存按钮要保存图片数据时候的回调函数。
+              ,onBtnResetClick:function(){
+                if(_imageHandler){
+                  _imageHandler.hideEditor();
+                }
+              }//reset按钮点击以后。
+
+            };
+
+            var _imageHandler=ImageEditorHandler(opts);
+
+            //--逻辑方法定义
+            $("#uploadImage").change(function(){
+
+              if (document.getElementById("uploadImage").files.length === 0) {
+                alert("请选择图片！");
+                return; }
+              var oFile = document.getElementById("uploadImage").files[0];
+              //if (!rFilter.test(oFile.type)) { alert("You must select a valid image file!"); return; }
+
+              /*  if(oFile.size>5*1024*1024){
+               message(myCache.par.lang,{cn:"照片上传：文件不能超过5MB!请使用容量更小的照片。",en:"证书上传：文件不能超过100K!"})
+               changePanel("result");
+               return;
+               }*/
+              if(!new RegExp("(jpg|jpeg|gif|png)+","gi").test(oFile.type)){
+                alert("照片上传：文件类型必须是JPG、JPEG、PNG或GIF!");
+                return;
+              }
+
+              var reader = new FileReader();
+
+              reader.onload =function(e){
+                var _img_str=e.target.result;
+                // img 元素
+                _imageHandler.init(_img_str,oFile);
+
+              };
+              reader.readAsDataURL(oFile);
+              return;
+            });
+          }
+  );
+
+</script>
+</body>
+</html>
+
+

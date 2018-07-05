@@ -1,0 +1,244 @@
+/*
+ * 地区树插件
+ * 必需先引入: /res/common/js/ztree/zTreeStyle.css
+ *            /res/common/js/ztree/jquery.ztree.min.js
+ * author: huozhanyi
+ * email: huozhanyi.work@gmail.com
+ * Date: 2014-06-07
+ */
+var CityTree={};
+(function () {
+	function a(){
+		/***************************************************私有属性***************************************************/
+		//基本参数
+		var _this 	= this;
+		var _id 	= 'CityTree';
+		
+		//配置
+		var _config = {
+		    title: '地区选择',
+		    display: 'block',
+		    style: '',
+			template: 'default',
+			button:{
+				enter:{name:'CityTree-enter',text:'确认'},
+				cancel:{name:'CityTree-cancel',text:'取消'},
+			},
+		};
+		
+		var $ztree  = $.fn.zTree;
+		//ztree配置
+		_this.ztree  = {};
+		_this.ztree.id 	= 'CityTree-ztree';
+	    _this.ztree.setting = {
+			check: {
+				enable: true,
+				chkboxType: {"Y":"","N":""}
+			},
+			data: {
+				simpleData: {
+					enable: true,
+					idKey: 'id',
+					pIdKey: 'parent_id',
+					rootPId: 1
+				}
+			},
+			view:{
+				showIcon:false
+			},
+		};
+		//模板容器
+		var _template = {
+			'default': function(){return '<div id="'+_id+'" style="display:'+_config.display+';'+_config.style+'"><div id="'+_this.ztree.id+'" class="ztree"></div><div>';},
+			'box1':	function(){
+						return '<div id="'+_id+'" style="display:'+_config.display+';">'+
+						    '<div class="supop_bg"></div>'+
+						    '<div class="supmage_pop" style="width: 330px;">'+
+						        '<div class="top"><h2>'+_config.title+'</h2></div>'+
+						        '<dl class="close close_box" name="'+_config.button.cancel.name+'" ><a href="javascript:void()"></a></dl>'+
+						        '<div class="mid" style="min-height: 450px;">'+
+						            '<div class="chose_pack">'+
+						            '<div id="'+_this.ztree.id+'" class="ztree" style="height: 350px;overflow: auto;"></div>'+
+						            
+						            '<div class="mt15 clx pacbtn">'+
+						                    '<dl class="left">'+
+						                        '<a href="javascript://" class="btn01" name="'+_config.button.enter.name+'">'+_config.button.enter.text+'</a>'+
+						                        '<a href="javascript://" class="btn02 close_box" name="'+_config.button.cancel.name+'">'+_config.button.cancel.text+'</a>'+
+						                    '</dl>'+
+						                '</div>'+
+						            '</div>'+
+						        '</div>'+
+						        '<div class="bot"></div>'+
+						    '</div>'+
+						'</div>';
+					},
+		};
+		
+		
+		/***************************************************公共属性***************************************************/
+		/**
+		 * 初始化
+		 */
+		_this.init = function(){
+			/*事件绑定*/
+			$("[name='"+_config.button.enter.name+"']").click(ClickEnterEvenGroup);  	//确认事件
+			$("[name='"+_config.button.cancel.name+"']").click(ClickCancelEvenGroup);	//取消事件
+		};
+		
+		/**
+		 * 修改设置
+		 */
+		_this.config = function(cfg){
+			if(!cfg)
+				return _config;
+			_config = $.extend(_config, cfg);
+		};
+		
+		/**
+		 * 设置模板
+		 */
+		_this.setTemplate = function(name){
+			if(!_template[name])
+				return false;
+			_config.template = name;
+			return true;
+		};
+		
+		/**
+		 * 设置数据
+		 */
+		_this.setData = function(data){
+			_this.ztree.data = data;
+		};
+		
+		/**
+		 * 获取当前对象
+		 */
+		_this.obj = function(){
+			return $("#"+_id);
+		};
+		
+		/**
+		 * 获取当前ztree对象
+		 */
+		_this.getTree = function(){
+			return $ztree.getZTreeObj(_this.ztree.id); 
+		};
+		
+		/**
+		 * 获取选中id
+		 */
+		_this.getAllCheckedId = function(){
+			var rst = [];
+			var $nodes = _this.getTree().getCheckedNodes(true);
+			for(var i=0;i<$nodes.length;i++){
+				rst[i] = $nodes[i].id; 
+			}
+			return rst;
+		};
+		
+		/**
+		 * 获取选中Name
+		 */
+		_this.getAllCheckedName = function(){
+			var rst = [];
+			var $nodes = _this.getTree().getCheckedNodes(true);
+			for(var i=0;i<$nodes.length;i++){
+				rst[i] = $nodes[i].name; 
+			}
+			return rst;
+		};
+		
+		/**
+		 * 通过ID获取节点属性
+		 */
+		_this.getNodeById = function(id){
+			return _this.getTree().getNodeByParam('id',id);
+		};
+		
+		/**
+		 * 通过id选中节点
+		 */
+		_this.checkNodeById = function(ids){
+		    if(typeof(ids) == 'number')
+		    	ids = [ids];
+	        var $tree = _this.getTree();
+	        for(var i=0;i<ids.length;i++){
+	            $node = $tree.getNodeByParam('id',ids[i]);
+	            $tree.checkNode($node,true,false);
+	        }
+		};
+		/**
+		 * 取消所有选中
+		 */
+		_this.cancelAllChecked = function(){
+			var ids = _this.getAllCheckedId();
+			var $tree = _this.getTree();
+			for(var i=0;i<ids.length;i++){
+	            $node = $tree.getNodeByParam('id',ids[i]);
+	            $tree.checkNode($node,false,false);
+	        }
+            //这行也可以实现，但速度很慢  _this.getTree().checkAllNodes(false);
+		};
+		
+		/**
+		 * 显示插件
+		 */
+		_this.show = function(){
+			_this.beforeShow(_this);
+			_this.obj().show();
+		};
+		
+		/**
+		 * 隐藏插件
+		 */
+		_this.hide = function(){
+			_this.obj().hide();
+		};
+		
+		/**
+		 * 渲染模板
+		 * @param string tpl 模板名 默认default
+		 */
+		_this.render = function(id){
+			var tpl = _template[_config.template];
+			$("#"+id).html(tpl());
+			$ztree.init($("#"+_this.ztree.id), _this.ztree.setting, _this.ztree.data);
+			_this.init();
+		};
+		/***************************************************事件***************************************************/
+		/**
+		 * 确认点击事件组
+		 */
+		var ClickEnterEvenGroup = function(){
+			_this.enterEven(_this);
+		};
+		
+		/**
+		 * 点击取消事件组
+		 */
+		var ClickCancelEvenGroup = function(){
+			_this.cancelEven(_this);
+		};
+		
+		/**
+		 * 确认事件
+		 */
+		_this.enterEven = function(obj){
+			alert(obj.getAllCheckedId());
+		};
+		
+		/**
+		 * 取消事件
+		 */
+		_this.cancelEven = function(obj){
+			obj.hide();
+		};
+		
+		/**
+		 * 显示前事件
+		 */
+		_this.beforeShow = function(obj){};
+	}
+	CityTree = new a();
+}(this.CityTree));

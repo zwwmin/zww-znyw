@@ -1,0 +1,25 @@
+<table class="layui-table" lay-skin="nob"   lay-filter="test">
+    <thead>
+    <tr>
+        <th >编号</th>
+        <th >站点名称</th>
+        <th >告警内容</th>
+        <th >等级</th>
+        <th >告警时间</th>
+        <th >结束时间</th>
+    </tr>
+    </thead>
+    <tbody>
+    <%for (var i=0;i<data.length;i++){
+        var arr=data[i];
+    %>
+    <tr>
+        <td><%=arr.mun%></td>
+        <td><%=arr.s_name%></td>
+        <td><%=arr.alarminfo%></td>
+        <td><%=arr.level%></td>
+        <td><%=arr.stime%></td>
+        <td><%=arr.etime%></td>
+    </tr>
+    <%}%>
+</table>

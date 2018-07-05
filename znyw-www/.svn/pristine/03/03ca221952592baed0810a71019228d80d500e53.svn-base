@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>智能代维</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="" rel="stylesheet">
+
+    <script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="../AdminLTE-2.4.1/dist/js/adminlte.min.js"></script>
+    <script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/moment/min/moment.min.js"></script>
+    <script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/AdminLTE.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/Admintxt.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/bootstrap-daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/Ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/skins/skin-blue.css">
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+
+<div class="wrapper">
+
+    <%-partial("layout/Intelligent.ejs",{data:{TotalMenu:"usage",CurrentMenu:"load",memberInfo:memberInfo,BaseInfo:BaseInfo}})%>
+    <!--主体-->
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="content-site">
+                <span>监控点:</span>
+                <select name="" id="site">
+                    <% for (var i=0;i<BaseInfo.loads.length;i++){
+                        var arr = BaseInfo.loads[i];
+                    %>
+                    <option value="<%=arr.load_factor_item%>"><%=arr.name%></option>
+                    <%}%>
+                </select>
+            </div>
+
+            <div class=" row content-all-wrapper-menu " style="margin-top: 20px;">
+                <div class="col-xs-12 content-all-wrapper-menu-top " style="margin: 0;">
+                    <div class="conter-warning-header">
+                        <img src="/res/images/imgv6/green_left.png" alt="" class="conter-warning-top-img2" >
+                        <span style="font-weight: 900;">负荷概况</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="" style="margin:0 15px; ">
+                    <div class="col-sm-4  " style="background: white"  >
+                        <div id="main" style="width: 100%;height: 200px;"  >
+
+                        </div>
+
+                        <span class="load_pie_span1" id="real_time">0</span>
+                        <span class="load_pie_span2">实施负荷(kw)</span>
+                    </div>
+                    <div class="col-sm-4" style="background: white" >
+                        <div id="main2" style="width: 100%;height: 200px;"  >
+
+                        </div>
+
+                        <span class="load_pie_span1" id="day">0</span>
+                        <span class="load_pie_span2">本日最大负荷(kw)</span>
+                    </div>
+                    <div class="col-sm-4" style="background: white" >
+                        <div id="main3" style="width: 100%;height: 200px;" >
+
+                        </div>
+
+                        <span class="load_pie_span1" id="month">0</span>
+                        <span class="load_pie_span2">本月最大负荷(kw)</span>
+                    </div>
+                </div>
+
+            </div>
+            <div class=" row content-all-wrapper-menu " style="margin-top: 20px;">
+                <div class="col-xs-12 content-all-wrapper-menu-top " style="margin: 0;">
+                    <div class="conter-warning-header">
+                        <img src="/res/images/imgv6/green_left.png" alt="" class="conter-warning-top-img2" >
+                        <span style="font-weight: 900;">负荷概况</span>
+                        <div class="title_time">
+                            <div class="input-group" style="width: 70%;float: left">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" style="height: 40px;" class="form-control pull-right" id="reservationtime">
+                            </div>
+                            <button type="submit" id="submit_btn" class="btn btn-info " style="float: right;margin:4px 15px 0 0; ">查询</button>
+                        </div>
+                    </div>
+                    <div id="" style="width: 100%;height: 400px;background: white" >
+                        <div id="assd" style="width: 100%;height: 400px;background: white" >
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- /.content -->
+    </div>
+    <!--底部-->
+    <!--<footer class="main-footer">-->
+
+    <!--<div class="pull-right hidden-xs">-->
+    <!--Anything you want-->
+    <!--</div>-->
+    <!--&lt;!&ndash; Default to the left &ndash;&gt;-->
+    <!--<strong>Copyright &copy; 2016 <a href="#">Company</a>.</strong> All rights reserved.-->
+    <!--</footer>-->
+
+    <!--点击打开right的侧边栏-->
+    <!--<div class="control-sidebar-bg"></div>-->
+
+    <input type="hidden" name="begin" id="stimes" value="">
+    <input type="hidden" name="end" id="etimes" value="">
+
+</div>
+<!--ECharts-->
+<script type="text/javascript" src="../dist/echarts.common.min.js"></script>
+<script>
+    var myDate = new Date();
+    var times= myDate.setDate(myDate.getDate()-5);
+    var eimes= myDate.setDate(myDate.getDate());
+        $('#stimes').val(times)
+        $('#etimes').val(eimes)
+    $('#reservationtime').daterangepicker({
+        "locale": {
+            "direction": "ltr",
+            "format": "YYYY/MM/DD",
+            "separator": " - ",
+            "applyLabel": "Apply",
+            "cancelLabel": "Cancel",
+            "fromLabel": "From",
+            "toLabel": "To",
+            "customRangeLabel": "Custom",
+            "daysOfWeek": [
+                "一",
+                "二",
+                "三",
+                "四",
+                "五",
+                "六",
+                "日"
+            ],
+            "monthNames": [
+                "01月",
+                "02月",
+                "03月",
+                "04月",
+                "05月",
+                "06月",
+                "07月",
+                "08月",
+                "09月",
+                "10月",
+                "11月",
+                "12月"
+            ],
+            "firstDay": 1
+        },
+        autoclose: true
+    }, function(start, end, label) {
+        var etime =end.format('YYYY/MM/DD');
+        var stime =start.format('YYYY/MM/DD');
+        $('#stimes').val(Date.parse(stime));
+        $('#etimes').val(Date.parse(etime));
+    });
+</script>
+<% include layout/inc_js.ejs%>
+
+<script>
+
+    var pageOptions={};
+    seajs.use("p.Intelligent_load",function(page){
+        page.init(pageOptions);
+    });
+</script>
+</body>
+
+</html>

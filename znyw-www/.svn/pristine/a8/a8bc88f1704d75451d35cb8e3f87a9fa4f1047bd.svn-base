@@ -1,0 +1,61 @@
+<div class=" mask_center_mappage" id="mask">
+    <div class="center_mappage">
+        <div class="center_mappage_map" id="allmap">
+
+        </div>
+        <div class="center_mappage_nav">
+            <ul>
+                <%
+                    if(amount == 0){
+
+
+                for (var i= 0;i<data.stationInfo.length;i++){
+                    var arr= data.stationInfo[i];
+                %>
+                <li>
+                    <div class="mappage_nav_left">
+                        <div class="mappage_nav_top">
+                            <span class="mappage_com"><%=arr.name%></span>
+                            <span class="mappage_icon"><%=arr.contact%></span>
+                            <span class="mappage_icon2"><%=arr.phone%></span>
+                        </div>
+                        <div class="mappage_nav_center">
+                            <span>变压器数量：<%=arr.transformerNum%></span>
+                        </div>
+                        <div class="mappage_nav_center">
+                            <span>地址：<%=arr.adr%></span>
+                        </div>
+                    </div>
+                    <div class="mappage_nav_right" id="Switching" data-value="<%=arr.sid%>">
+
+                            <span>进入主页</span>
+
+                    </div>
+                </li>
+                <%} }else {%>
+                <li>
+                    <div class="mappage_nav_left">
+                        <div class="mappage_nav_top">
+                            <span class="mappage_com"><%=data.name%></span>
+                            <span class="mappage_icon"><%=data.contact%></span>
+                            <span class="mappage_icon2"><%=data.phone%></span>
+                        </div>
+                        <div class="mappage_nav_center">
+                            <span>变压器数量：<%=data.transformerNum%></span>
+                        </div>
+                        <div class="mappage_nav_center">
+                            <span>地址：<%=data.adr%></span>
+                        </div>
+                    </div>
+                    <div class="mappage_nav_right" id="Switching" data-value="<%=data.sid%>">
+
+                        <span>进入主页</span>
+
+                    </div>
+                </li>
+                <%}%>
+            </ul>
+        </div>
+        <div class="close" id="close_but" ></div>
+    </div>
+</div>

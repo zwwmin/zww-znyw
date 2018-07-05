@@ -1,0 +1,51 @@
+<div class="survey_three_left">
+    <span class="survey_three_left_span1">用电时间</span>
+    <%if(attr == 0){%>
+    <span class="survey_three_left_span2" style="font-size: 16px;"><%=data.date%></span>
+    <%}else {%>
+    <span class="survey_three_left_span2"><%=data.date%></span>
+    <%}%>
+    <div class="survey_three_left_nav">
+        <div class="three_left_nav_title">
+            <img src="/res/images/imgv7/ydgk_yxts_icon.png" alt="" width="20" height="20">
+            运行天数
+        </div>
+        <span><%=data.days%>天</span>
+    </div>
+</div>
+<div class="survey_three_right" >
+    <%
+    var num = 0;
+    for(var i = 0;i < data.items.length;i++){
+        var ss = data.items[i]
+        var arr;
+        switch (num) {
+            case 0:
+                arr = "three_right_nav_red"
+                break;
+            case 1:
+                arr = "three_right_nav_f5a"
+                break;
+            case 2:
+                arr = "three_right_nav_1fb"
+                break;
+            case 3:
+                arr = "three_right_nav_66c"
+                break;
+        }
+        num++;
+    %>
+    <div class="three_right_nav_title">
+        <span class="<%=arr%>"><%=num%> &nbsp</span>
+        <span class="three_right_nav_span2"><%=ss.name%></span>
+        <span class="three_right_nav_span3"> <%=(ss.value).toFixed(2)%> <span> &nbsp<%=ss.unit%> </span></span>
+        <%if(attr == 2){%>
+        <div class="compared"><%=ss.vos[0].name%>：<p><%=ss.vos[0].unit%><%=((ss.vos[0].value)*100).toFixed(2)%>%</p>
+            <%if(ss.vos[0].unit == "上升"){%>
+            <img src="/res/images/imgv7/Rise.png"  alt=""></div>
+            <%}else {%>
+            <img src="/res/images/imgv7/decline.png"  alt=""></div>
+        <%}}%>
+    </div>
+    <%}%>
+</div>

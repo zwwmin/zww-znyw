@@ -1,0 +1,49 @@
+
+<div class=" mask_center_mappage" id="mask">
+    <div class="center_mappage">
+        <div class="center_mappage_marn layui-row" id="mappage_warn">
+            <div class="layui-col-md12  content-all-wrapper-menu">
+                <div class="layui-row content-all-wrapper-menu-top">
+                    <ul class="layui-col-md6" >
+                        <li <%if(data == 0){%>class="acs"<%}%> >
+                            <div class="warning_choose" data-value="">全部 </div>
+                        </li>
+                        <li  <%if(data == 1){%>class="acs"<%}%> >
+                            <div class="warning_choose"  data-value="1"> 普通</div>
+                        </li>
+                        <li  <%if(data == 2){%>class="acs"<%}%> >
+                            <div class="warning_choose"  data-value="2">严重</div>
+                        </li>
+                        <li  <%if(data == 3){%>class="acs"<%}%> >
+                            <div class="warning_choose"  data-value="3">预警</div>
+                        </li>
+                    </ul>
+                    <div class="layui-col-md6">
+                        <div class="title_time" style="width: 100%">
+                            <div class=" title_time_group" style="width: 405px;">
+                                <p>查看历史数据：</p>
+                                <input class="title_time_group_input" style="width: 110px" id="reservation" readonly placeholder="开始时间"></input>
+                                <p style="margin:0 5px ">至</p>
+                                <input class="title_time_group_input" style="width: 110px" id="reser" readonly placeholder="结束时间"></input>
+                            </div>
+                            <div id="submit_btn" class="title_time_btn " >查询</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box" id="warning_total" >
+
+                </div>
+                <div class="layui-row" >
+                    <div class="layui-col-md10">
+                        <div id="test1" style="float: right;"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="close" id="close_but" ></div>
+    </div>
+    <input type="hidden" name="begin" id="stimes" value="">
+    <input type="hidden" name="end" id="etimes" value="">
+</div>

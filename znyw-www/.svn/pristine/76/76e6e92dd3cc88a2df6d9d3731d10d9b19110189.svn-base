@@ -1,0 +1,30 @@
+
+<!--多选-->
+<div class="analysis_radio">
+    <div class="form-group-span">对比项(可多选)：</div>
+    <div  class="form-group-span-rad" style="display: inline-block">
+    <%
+
+    for (var i=0;i< data.length;i++){
+        var res=data[i];
+        if(i==0){
+    %>
+    <label>
+        <input type="checkbox" value="<%=res.itemId%>" name="items" class="flat-red" checked><%=res.name%>
+    </label>
+    <%}else {%>
+    <label>
+        <input type="checkbox" value="<%=res.itemId%>" name="items" class="flat-red" ><%=res.name%>
+    </label>
+    <%}}%>
+    </div>
+</div>
+
+<link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/iCheck/all.css">
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/iCheck/icheck.js"></script>
+<script>
+    $('input[type="checkbox"].flat-red').iCheck({
+        checkboxClass: 'icheckbox_flat-green',
+        radioClass   : 'iradio_flat-green'
+    })
+</script>

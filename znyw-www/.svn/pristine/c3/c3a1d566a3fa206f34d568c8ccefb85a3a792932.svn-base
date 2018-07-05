@@ -1,0 +1,45 @@
+;(function(){
+if(window.__seajs_modules==undefined){
+window.__seajs_modules=[];
+}
+var __js_suffix=".min.js";
+var __js_m_folder="min";
+if(window.__js_debug==true){
+__js_m_folder="src";
+__js_suffix=".js";
+}
+if(window.ContextPath==undefined){
+    window.ContextPath="";
+}
+//
+window.__seajs_modules.push({
+    "p.all":window.ContextPath+"/res/module/"+__js_m_folder+"/p.all"+__js_suffix+"?v=201604111158"
+});
+window.__seajs_modules.push({
+    "p.cart":window.ContextPath+"/res/module/"+__js_m_folder+"/p.cart"+__js_suffix+"?v=201604111158"
+});
+window.__seajs_modules.push({
+    "p.fav-products":window.ContextPath+"/res/module/"+__js_m_folder+"/p.fav-products"+__js_suffix+"?v=201604111158"
+});
+window.__seajs_modules.push({
+    "p.hot-products":window.ContextPath+"/res/module/"+__js_m_folder+"/p.hot-products"+__js_suffix+"?v=201604111158"
+});
+window.__seajs_modules.push({
+    "p.list":window.ContextPath+"/res/module/"+__js_m_folder+"/p.list"+__js_suffix+"?v=201604111158"
+});
+window.__seajs_modules.push({
+    "p.login":window.ContextPath+"/res/module/"+__js_m_folder+"/p.login"+__js_suffix+"?v=201604111158"
+});
+window.__seajs_modules.push({
+    "p.orderConfirm":window.ContextPath+"/res/module/"+__js_m_folder+"/p.orderConfirm"+__js_suffix+"?v=201604111158"
+});
+window.__seajs_modules.push({
+    "p.product":window.ContextPath+"/res/module/"+__js_m_folder+"/p.product"+__js_suffix+"?v=201604111158"
+});
+window.__seajs_modules.push({
+    "p.recommend-products":window.ContextPath+"/res/module/"+__js_m_folder+"/p.recommend-products"+__js_suffix+"?v=201604111128"
+});
+window.__seajs_modules.push({
+    "p.reg":window.ContextPath+"/res/module/"+__js_m_folder+"/p.reg"+__js_suffix+"?v=201604111158"
+});
+})();

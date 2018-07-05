@@ -1,0 +1,426 @@
+
+.ui-clearFix:after{
+    content:"";
+    clear: both;
+
+
+}
+/**修正图片常见到的撑开页面，布局错误、**/
+.fix-image-wrapper{
+    position:relative;
+    overflow: hidden;
+    display: inline-block;
+}
+.fix-image-wrapper .fix-image{
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+}
+
+
+/***这是常用的css3动画常用效果。****/
+/**摇头***/
+@keyframes wuwu-shake {
+    from{
+        -webkit-transform:translate3d(0,0,0);
+
+        transform:translate3d(0,0,0);
+    }
+    20%,60%{
+        -webkit-transform:translate3d(-10px,0,0);
+
+        transform:translate3d(0,0,0);
+
+    }
+    40%,80%{
+
+        -webkit-transform:translate3d(10px,0,0);
+        transform:translate3d(10px,0,0);
+    }
+    to{
+        -webkit-transform:translate3d(0,0,0);
+        transform:translate3d(0,0,0);
+    }
+}
+
+@-webkit-keyframes wuwu-shake {
+    from{
+        -webkit-transform:translate3d(0,0,0);
+
+        transform:translate3d(0,0,0);
+    }
+    20%,60%{
+        -webkit-transform:translate3d(-10px,0,0);
+
+        transform:translate3d(0,0,0);
+
+    }
+    40%,80%{
+
+        -webkit-transform:translate3d(10px,0,0);
+        transform:translate3d(10px,0,0);
+    }
+    to{
+        -webkit-transform:translate3d(0,0,0);
+        transform:translate3d(0,0,0);
+    }
+}
+.i_cannt_do_that{
+    animation-name: wuwu-shake;
+    animation-delay: 0s;
+    animation-duration:1s;
+    animation-iteration-count: 1;
+    -webkit-animation-name: wuwu-shake;
+    -webkit-animation-delay: 0s;
+    -webkit-animation-duration: 1s;
+    -webkit-animation-iteration-count: 1;
+}
+/**摇头 end***/
+@-webkit-keyframes zoomIn {
+    from {
+        opacity: 0;
+        -webkit-transform: scale3d(.3, .3, .3);
+        transform: scale3d(.3, .3, .3);
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        -webkit-transform: scale3d(.3, .3, .3);
+        transform: scale3d(.3, .3, .3);
+    }
+
+    100% {
+        opacity: 1;
+    }
+
+}
+
+.animate_zoomIn {
+    -webkit-animation-name: zoomIn;
+    animation-name: zoomIn;
+
+    animation-delay: 0s;
+    animation-duration:1s;
+    animation-iteration-count: 0.5;
+    -webkit-animation-delay: 0s;
+    -webkit-animation-duration: 0.5s;
+    -webkit-animation-iteration-count: 1;
+}
+/***美化文本上传框，使用方式：
+<a href="javascript:;" class="a-upload">
+    <input type="file" name="" id="">点击这里上传文件
+</a>
+---
+注意，这个上传选择框在admin后台下面还有一个ui。js
+里面有setFileUpload和setImageUpload方法，请配合使用，效果更好。
+***/
+.a-upload {
+    padding: 4px 10px;
+    height: 20px;
+    line-height: 20px;
+    position: relative;
+    cursor: pointer;
+    color: #888;
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    display: inline-block;
+    *display: inline;
+    *zoom: 1
+}
+
+.a-upload  input {
+    position: absolute;
+    font-size: 100px;
+    right: 0;
+    top: 0;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    cursor: pointer
+}
+
+.a-upload:hover {
+    color: #444;
+    background: #eee;
+    border-color: #ccc;
+    text-decoration: none
+}
+
+
+
+
+/*******single image uploader 及 muti image uploader 样式*******/
+/*-------------------------
+	Image Previews
+--------------------------*/
+
+
+.s-upload-img{
+    border-radius:3px;
+    position: relative;
+    margin:80px auto 90px;
+    min-height: 290px;
+    overflow: hidden;
+    padding-bottom: 40px;
+    width: 990px;
+
+    box-shadow:0 0 4px rgba(0,0,0,0.3) inset,0 -3px 2px rgba(0,0,0,0.1);
+}
+
+.s-upload-img .preview{
+    width:245px;
+    height: 215px;
+    float:left;
+    margin: 55px 0 0 60px;
+    position: relative;
+    text-align: center;
+}
+
+.s-upload-img .preview img{
+    max-width: 240px;
+    max-height:180px;
+    border:3px solid #fff;
+    display: block;
+
+    box-shadow:0 0 2px #000;
+    -webkit-box-shadow:0 0 2px #000;
+    -moz-box-shadow:0 0 2px #000;
+}
+
+.s-upload-img .imageHolder{
+    display: inline-block;
+    position:relative;
+    overflow: hidden;
+}
+.s-upload-img .imageHolder .s-upload-file {
+    position: absolute;
+    font-size: 150px;
+    right: 0;
+    top: 0;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    cursor: pointer
+}
+
+.s-upload-img .imageHolder .percentage
+{
+    width: 69px;
+    height: 69px;
+    display: inline-block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -34.5px;
+    margin-top: -34.5px;
+    text-align: center;
+    font-size: 18px;
+    line-height: 69px;
+    color: #fff;
+    border-radius: 34.5px;
+    background: rgba(0, 0, 0, .8);
+}
+.s-upload-img .imageHolder .progress-layer
+{
+    position: absolute;
+    display: inline-block;
+    height: 18%;
+    bottom: 0px;
+    width: 100%;
+    left: 0;
+    background: #000;
+    opacity: .5;
+}
+
+
+.s-upload-img .uploaded{
+    position: absolute;
+    top:0;
+    left:0;
+    height:100%;
+    width:100%;
+    background: url('img/done.png') no-repeat center center rgba(255,255,255,0.5);
+    display: none;
+}
+
+
+.s-upload-img .preview.done .uploaded{
+    display: block;
+}
+.s-upload-img .preview.no-done .uploaded{
+    display: block;
+    background: url('img/no-done.png') no-repeat center center rgba(255,255,255,0.5);
+}
+
+
+
+/*-------------------------
+	Progress Bars
+--------------------------*/
+
+
+
+.s-upload-img .progressHolder{
+    position: absolute;
+    background-color:#252f38;
+    height:12px;
+    width:100%;
+    left:0;
+    bottom: 0;
+
+    box-shadow:0 0 2px #000;
+    -webkit-box-shadow:0 0 2px #000;
+    -moz-box-shadow:0 0 2px #000;
+}
+
+.s-upload-img .progress{
+    background-color:#2586d0;
+    position: absolute;
+    height:100%;
+    left:0;
+    width:0;
+
+    box-shadow: 0 0 1px rgba(255, 255, 255, 0.4) inset;
+    -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.4) inset;
+    -moz-box-shadow: 0 0 1px rgba(255, 255, 255, 0.4) inset;
+
+    -moz-transition:0.25s;
+    -webkit-transition:0.25s;
+    -o-transition:0.25s;
+    transition:0.25s;
+}
+
+.s-upload-img .preview.done .progress{
+    width:100% !important;
+}
+.s-upload-img .preview.no-done .progress{
+    width:100% !important;
+    background-color: orangered;
+}
+
+/****这是新版image 图片上传器，建议用这个，大方得体而且美观。旧版不够简洁和美观。***/
+.single-image-uploader{
+    display: inline-block;
+    position:relative;
+    overflow: hidden;
+}
+.single-image-uploader .uploader-preview-img{
+    max-width: 240px;
+    max-height:180px;
+    border:3px solid #fff;
+    display: block;
+
+    box-shadow:0 0 2px #000;
+    -webkit-box-shadow:0 0 2px #000;
+    -moz-box-shadow:0 0 2px #000;
+}
+.single-image-uploader .uploader-file-input {
+    position: absolute;
+    font-size: 150px;
+    right: 0;
+    top: 0;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    cursor: pointer
+}
+.single-image-uploader .upload-state{
+    position: absolute;
+    top:0;
+    left:0;
+    height:100%;
+    width:100%;
+    background: url('img/done.png') no-repeat center center rgba(255,255,255,0.5);
+    display: none;
+}
+.single-image-uploader.done .upload-state{
+    display: block;
+}
+.single-image-uploader.no-done .upload-state{
+    display: block;
+    background: url('img/no-done.png') no-repeat center center rgba(255,255,255,0.5);
+}
+
+.single-image-uploader .uploader-progress-layer
+{
+    position: absolute;
+    display: inline-block;
+    height: 18%;
+    bottom: 0px;
+    width: 100%;
+    left: 0;
+    background: #000;
+    opacity: .5;
+}
+.single-image-uploader .upload-percentage
+{
+    width: 69px;
+    height: 69px;
+    display: inline-block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -34.5px;
+    margin-top: -34.5px;
+    text-align: center;
+    font-size: 18px;
+    line-height: 69px;
+    color: #fff;
+    border-radius: 34.5px;
+    background: rgba(0, 0, 0, .8);
+}
+.single-image-uploader.done .upload-percentage{
+    display: none;
+}
+.single-image-uploader.no-done .upload-percentage{
+    display: none;
+}
+.single-image-uploader.done .uploader-progress-layer{
+    display: none;
+}
+.single-image-uploader.no-done .uploader-progress-layer{
+    display: none;
+}
+
+
+/*loading*/
+.loading-wrap { width: 64px; height: 64px; position: relative; }
+.loading-outer { position: absolute; width: 100%; height: 100%; background: url(icon-spin-s.png) no-repeat; animation: spin-for-loading 800ms infinite linear; }
+.loading-inner, .loading-inner2 { position: absolute; width: 38px; height: 38px; border-radius: 40px; overflow: hidden; left: 13px; top: 13px; }
+.loading-inner { opacity: 1; background-color: #89abdd; animation: second-half-hide 1.6s steps(1, end) infinite; }
+.loading-inner2 { opacity: 0; background-color: #4b86db; animation: second-half-show 1.6s steps(1, end) infinite; }
+.loading-spiner, .filler, .masker { position: absolute; width: 50%; height: 100%; }
+.loading-spiner { border-radius: 40px 0 0 40px; background-color: #4b86db; transform-origin: right center; animation: spin-for-loading 800ms infinite linear; left: 0; top: 0; }
+.loading-filler { border-radius: 0 40px 40px 0; background-color: #4b86db; animation: second-half-hide 800ms steps(1, end) infinite; left: 50%; top: 0; opacity: 1; }
+.loading-masker { border-radius: 40px 0 0 40px; background-color: #89abdd; animation: second-half-show 800ms steps(1, end) infinite; left: 0; top: 0; opacity: 0; }
+
+.inner2 .spiner, .inner2 .filler { background-color: #89abdd; }
+.inner2 .masker { background-color: #4b86db; }
+
+@keyframes spin-for-loading {
+    0%   { transform: rotate(360deg); }
+    100% { transform: rotate(0deg); }
+}
+@keyframes second-half-hide {
+    0%        { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+@keyframes second-half-show {
+    0%        { opacity: 0; }
+    50%, 100% { opacity: 1; }
+}
+
+/*.bld_tips{background: none;display: none;z-index: 1000;}
+.bld_tips .refundCon{background: RGBA(0,0,0,0.8);padding-bottom: 60px;}
+.bld_tips .refundCon .con_3{font-size: 32px;color: #fff;padding: 60px 20px 0 20px;}*/
+
+.bld_tips{display: none;z-index: 1000;}
+.bld_tips .refundCon{background: #fff;padding-bottom: 60px;}
+.bld_tips .refundCon .con_3{font-size: 26px;color: #333;padding: 60px 20px 0 20px;}

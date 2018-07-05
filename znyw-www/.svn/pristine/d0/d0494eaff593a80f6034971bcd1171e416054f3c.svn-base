@@ -1,0 +1,1079 @@
+/**
+ * 注册页面逻辑。
+ */
+define("p.all",function(require,exports,module){
+
+    var queryObject=util.getQueryObject();
+    var to_count=$('a.go_btn1');
+
+    var app= {
+        //--获得上次发送验证的时间。
+        getLastSendVerifyCodeInfo: function (callback) {
+            $.ajax({
+                url: '/getLastSendVerifyCodeInfo'
+                , data: {}
+                , method: "get"
+                , error: function () {
+                }
+                , success: function (sdata) {
+                    if (callback) {
+                        callback(sdata);
+                    }
+
+                }
+
+            });
+        }
+        , sendVerifyCode: function (mobile,img_code,type, callback) {
+            $.ajax({
+                url: "/sendVerifyCode"
+                , data: {
+                    mobile: mobile
+                    ,img_code:img_code
+                    ,type:type
+                }
+                , method: "get"
+                , error: function () {
+                }
+                , success: function (sdata) {
+                    if (callback) {
+                        callback(sdata);
+                    }
+
+                }
+            });
+        }
+        , loginsendVerifyCode: function (mobile, callback) {
+            $.ajax({
+                url: "/loginsendVerifyCode"
+                , data: {
+                    mobile: mobile
+                }
+                , method: "get"
+                , error: function () {
+                }
+                , success: function (sdata) {
+                    if (callback) {
+                        callback(sdata);
+                    }
+
+                }
+            });
+        }
+        , sendBindSmsAuth: function (mobile, key, union_id, callback) {
+            if (key == undefined) {
+                key = ""
+            }
+            if (union_id == undefined) {
+                union_id = ""
+            }
+            $.ajax({
+                url: "/sendBindSmsAuth"
+                , data: {
+                    mobile: mobile
+                    , qq_key: key
+                    , union_id: union_id
+                }
+                , method: "get"
+                , error: function () {
+                }
+                , success: function (sdata) {
+                    if (callback) {
+                        callback(sdata);
+                    }
+
+                }
+            });
+        }
+        , sendVerifyCodeBySID: function (callback) {
+            $.ajax({
+                url: "/sendVerifyCodeBySID"
+                , data: {}
+                , method: "post"
+                , error: function () {
+                }
+                , success: function (sdata) {
+                    if (callback) {
+                        callback(sdata);
+                    }
+                }
+            });
+        }
+        , loginsendVerifyCodeBySID: function (callback) {
+            $.ajax({
+                url: "/loginsendVerifyCodeBySID"
+                , data: {}
+                , method: "get"
+                , error: function () {
+                }
+                , success: function (sdata) {
+                    if (callback) {
+                        callback(sdata);
+                    }
+                }
+            });
+        }
+        , initSendVerifyCodeButton: function (opts, the_way) {
+            var _parent_this = this;
+            var _inner_settings = {
+                button: ""
+                , key: ""
+                , union_id: ""
+                , input: ""
+                , normalText: "发送验证码"
+                , onValidateError: function (errorCode, errorMsg) {
+
+                }
+                , onClickButton: function () {
+
+                }
+                , onSending: function () {
+
+                }
+                , afterSend: function (sdata) {
+
+                }
+                , beforeSend: function () {
+                    return true;
+                }
+            };
+            $.extend(_inner_settings, opts);
+            var btn_send_code = $(_inner_settings.button);
+            var _send_interval = null;
+            var ipt_mobile = $(_inner_settings.input.ipt_mobile);
+            var ipt_img_code = $(_inner_settings.input.ipt_img_code);
+            var type = $(_inner_settings.input.type);
+            var key = $(_inner_settings.key);
+            var union_id = $(_inner_settings.union_id);
+            var _i_app = {
+                init: function () {
+                    var _sending = false;
+                    var me = this;
+                    _parent_this.getLastSendVerifyCodeInfo(function (sever_data) {
+                        var _client_now = new Date().getTime();
+                        var _server_now = sever_data.now;
+                        var _time_dif = _server_now - _client_now;
+                        var _send_limit_time = sever_data.limit;
+                        var _last_send_time = sever_data.lastTime;
+                        function _count_down() {
+                            btn_send_code.unbind("click");
+                            if(sever_data.moblie){
+                                ipt_mobile.val(sever_data.moblie)
+                            }
+
+                            _send_interval = setInterval(function () {
+                                var __client_now2 = new Date().getTime();
+                                var __server_now2 = __client_now2 + _time_dif;
+                                var _remain_secs = _send_limit_time - (__server_now2 - _last_send_time);
+                                if (_remain_secs <= 0) {
+                                    clearInterval(_send_interval);
+                                    _i_app.init();
+                                    return;
+                                }
+
+                                var _sec = parseInt(_remain_secs / 1000);
+                                btn_send_code.addClass("sendding");
+                                btn_send_code.text( _sec + "S");
+                            }, 1000);
+
+
+                        }
+
+                        function _rebindClickEvent() {
+                            if(sever_data.moblie){
+                                ipt_mobile.val(sever_data.moblie)
+                            }
+                            //--可以继续发送了。
+                            btn_send_code.removeClass("sendding");
+                            btn_send_code.text(_inner_settings.normalText);
+                            btn_send_code.unbind("click").click(function () {
+                                _inner_settings.onClickButton();
+
+                                if (_inner_settings.beforeSend() == false) {
+                                    return;
+                                }
+                                if(util.checkEmpty(ipt_mobile.val()) ){
+                                    var notification = new ValidateNotice({
+                                        message : '手机号码不能为空',
+                                        location:"inner-right",
+                                        element:ipt_mobile,
+                                        considerScroll:false,
+                                        ttl:3000
+                                    });
+                                    notification.show();
+                                    return;
+                                }
+                                if(util.checkEmpty(ipt_img_code.val()) ){
+                                    var notification = new ValidateNotice({
+                                        message : '图形验证码不能为空',
+                                        location:"inner-right",
+                                        element:ipt_img_code,
+                                        considerScroll:false,
+                                        ttl:3000
+                                    });
+                                    notification.show();
+                                    return;
+                                }
+                                if( !util.isMobile(ipt_mobile.val()) ){
+                                    var notification = new ValidateNotice({
+                                        message : '手机号码格式错误',
+                                        location:"inner-right",
+                                        element:ipt_mobile,
+                                        considerScroll:false,
+                                        ttl:3000
+                                    });
+                                    notification.show();
+                                    return;
+                                }
+                                if (_sending) {
+                                    return;
+                                }
+                                _sending = true;
+                                setTimeout(function () {
+                                    _sending = false;
+                                }, 2000);
+                                if (the_way == "reg") {
+                                    $.ajax({
+                                        url: 'api/checkMobileExist'
+                                        , data: {
+                                            mobile: $("[name='mobile']").val()
+                                        }
+                                        , type: 'get'
+                                        , success: function (sdata) {
+                                            if (sdata.data ==1) {
+
+
+                                            } else {
+                                                _inner_settings.onSending();
+                                                _parent_this.sendVerifyCode(ipt_mobile.val(),ipt_img_code.val(), function (_data2) {
+                                                    _inner_settings.afterSend(_data2);
+                                                    if (_data2.code == 0) {
+                                                        _count_down();
+                                                    }
+                                                    else {
+                                                        btn_send_code.text(_inner_settings.normalText);
+                                                    }
+                                                });
+                                            }
+                                        }
+                                        , error: function () {
+                                        }
+                                    })
+
+                                }
+                                else if (the_way == "login") {
+                                    $.ajax({
+                                        url: 'api/checkMobileExist'
+                                        , data: {
+                                            mobile: $("[name='mobile']").val()
+                                        }
+                                        , type: 'get'
+                                        , success: function (sdata) {
+                                            if (sdata.data == 0) {
+
+
+                                            } else {
+                                                _inner_settings.onSending();
+                                                _parent_this.loginsendVerifyCode(ipt_mobile.val(), function (_data2) {
+                                                    _inner_settings.afterSend(_data2);
+                                                    if (_data2.code == 0) {
+                                                        _count_down();
+                                                    }
+                                                    else {
+                                                        btn_send_code.text(_inner_settings.normalText);
+                                                    }
+                                                });
+                                            }
+                                        }
+                                            , error: function () {
+                                            }
+                                        })
+
+                                }
+                                else if (the_way == "bind") {
+                                    _inner_settings.onSending();
+                                    _parent_this.sendBindSmsAuth(ipt_mobile.val(), key.val(), union_id.val(), function (_data2) {
+                                        _inner_settings.afterSend(_data2);
+                                        if (_data2.code == 0) {
+                                            _count_down();
+                                        }
+                                        else {
+                                            btn_send_code.text(_inner_settings.normalText);
+                                        }
+                                    });
+                                }
+                                else if(the_way == "settled"){
+                                    _inner_settings.onSending();
+                                    _parent_this.sendVerifyCode(ipt_mobile.val(),ipt_img_code.val(),type.val(), function (_data2) {
+                                        _inner_settings.afterSend(_data2);
+                                        if (_data2.code == 0) {
+                                            _count_down();
+                                        }
+                                        else {
+                                            btn_send_code.text(_inner_settings.normalText);
+                                        }
+                                    });
+                                }
+
+
+                            });
+                        }
+
+                        if (_last_send_time <= -1) {
+                            _rebindClickEvent();
+                        }
+                        else
+                        if (_last_send_time + _send_limit_time < _server_now) {
+                            _rebindClickEvent();
+                        }
+                        else {
+                            _count_down();
+                        }
+
+
+                    });
+                }
+
+            };
+            _i_app.init();
+        }
+        , initSendVerifyCodeButtonBySID: function (opts) {
+            var _parent_this = this;
+            var _inner_settings = {
+                button: ""
+                , normalText: "发送验证码"
+                , onValidateError: function (errorCode, errorMsg) {
+
+                }
+                , onClickButton: function () {
+
+                }
+                , onSending: function () {
+
+                }
+                , afterSend: function (sdata) {
+
+                }
+                , beforeSend: function () {
+                    return true;
+                }
+            };
+            $.extend(_inner_settings, opts);
+            var btn_send_code = $(_inner_settings.button);
+            var _send_interval = null;
+
+
+            var _i_app = {
+                init: function () {
+                    var _sending = false;
+                    var me = this;
+                    _parent_this.getLastSendVerifyCodeInfo(function (sever_data) {
+                        var _client_now = new Date().getTime();
+                        var _server_now = sever_data.now;
+                        var _time_dif = _server_now - _client_now;
+                        var _send_limit_time = sever_data.limit;
+                        var _last_send_time = sever_data.lastTime;
+
+                        function _count_down() {
+                            btn_send_code.unbind("click");
+                            _send_interval = setInterval(function () {
+                                var __client_now2 = new Date().getTime();
+                                var __server_now2 = __client_now2 + _time_dif;
+                                var _remain_secs = _send_limit_time - (__server_now2 - _last_send_time);
+
+                                if (_remain_secs <= 0) {
+                                    clearInterval(_send_interval);
+                                    _i_app.init();
+                                    return;
+                                }
+                                var _sec = parseInt(_remain_secs / 1000);
+                                btn_send_code.text(_sec + "秒");
+                            }, 1000);
+                        }
+
+                        function _rebindClickEvent() {
+                            //--可以继续发送了。
+                            btn_send_code.text(_inner_settings.normalText);
+                            btn_send_code.unbind("click").click(function () {
+                                _inner_settings.onClickButton();
+                                if (_inner_settings.beforeSend() == false) {
+                                    return;
+                                }
+                                //if(util.checkEmpty(ipt_mobile.val())){
+                                //    _inner_settings.onValidateError(-1,"请填写电话号码");
+                                //    return;
+                                //}
+                                //if(util.isMobile(ipt_mobile.val())==false){
+                                //    _inner_settings.onValidateError(-2,"电话号码格式错误");
+                                //    return;
+                                //}
+                                if (_sending) {
+                                    return;
+                                }
+                                _sending = true;
+                                setTimeout(function () {
+                                    _sending = false;
+                                }, 2000);
+                                _inner_settings.onSending();
+
+
+                                _parent_this.sendVerifyCodeBySID(function (_data2) {
+                                    _inner_settings.afterSend(_data2);
+                                    if (_data2.code == 0) {
+                                        _count_down();
+                                    }
+                                    else {
+                                        btn_send_code.text(_inner_settings.normalText);
+                                    }
+                                });
+
+
+                            });
+                        }
+
+                        if (_last_send_time <= -1) {
+                            _rebindClickEvent();
+                        }
+                        else if (_last_send_time + _send_limit_time < _server_now) {
+                            _rebindClickEvent();
+                        }
+                        else {
+
+                            _count_down();
+                        }
+
+
+                    });
+                }
+
+            };
+            _i_app.init();
+        }
+        //--显示tips
+        , showTips: function (msg,type,callback) {
+            // var _infoOpts = {
+            //     message: msg,
+            //     //layout : 'bar',
+            //     //effect : 'slidetop',
+            //     type: "info"
+
+            // };
+            // if (type) {
+            //     _infoOpts.type = type;
+            // }
+            // var _notice = new NotificationFx(_infoOpts);
+            // _notice.show();
+            if(type!='success'){
+                var _webUI = new WebUI();
+                var _dialog=_webUI.showTips({
+                    message:msg
+                    ,type:type
+                    ,callback:function(){
+                        if(callback){
+                            callback();
+                        }
+                    }
+                });
+            }
+        }
+        //便力电tips
+        ,bldTips:function(msg,type,callback){
+            var _webUI = new WebUI();
+            var _dialog=_webUI.showTips({
+                message:msg
+                ,callback:function(){
+                    if(callback){
+                        callback();
+                    }
+                }
+            });
+        }
+
+        //--初始化购物车相关数据。
+        // , initCartPanel: function () {
+        //     var _root_ = $('#fix_rgtool');
+        //     var _cart_total_num = _root_.find('[ui="cart-total-count"]');
+        //     var _cart_total_num2 = $('#cart-num');
+        //     var _cart_total_num3 = $('#cart-num3');
+        //     //alert(_cart_total_num3);
+        //     var _cart_select_num = _root_.find('[ui="cart-select-num"]');
+        //     var _cart_list = _root_.find('[ui="cart-list"]');
+        //     var _cart_total_amount = _root_.find('[ui="cart-total-amount"]');
+        //     var _btn_cart = $("#gwc");
+        //     _cart_total_num.hide();
+        //     _cart_total_num2.hide();
+        //     var _tpl = new EJS({url: "/res/template/tpl_small_cart_item.ejs"});
+        //
+        //     var fslide = {};
+        //     ;
+        //     (function (f) {
+        //         f.oFbox = "#rgtool_list";
+        //         f.oGwc = "#gwc";
+        //         f.oGwcbox = "#gwc_tipsbox";
+        //         f.oRetop = ".retop-btn";
+        //         f.oGwcboxTips = "#gwc_tipsbox_succ";
+        //
+        //         f._show = function () {
+        //             if ($(f.oGwcbox).hasClass('on')) {
+        //                 return;
+        //             }
+        //             $(f.oGwcbox).addClass('on');
+        //             $(f.oGwcbox).stop(true, true).animate({right: "65px", opacity: 1});
+        //             f._tipHide();
+        //         };
+        //         f._hide = function () {
+        //             if (!$(f.oGwcbox).hasClass('on')) {
+        //                 return;
+        //             }
+        //             $(f.oGwcbox).removeClass('on');
+        //             $(f.oGwcbox).stop(true, true).animate({right: "-470px", opacity: 0});
+        //         }
+        //         f._tipShow = function () {
+        //             if ($(f.oGwcboxTips).hasClass('on')) {
+        //                 f._tipHide();
+        //             }
+        //             $(f.oGwcboxTips).addClass('on');
+        //             $(f.oGwcboxTips).stop(true, true).animate({right: "65px", opacity: 1});
+        //             f._hide();
+        //         };
+        //         f._tipHide = function () {
+        //             $(f.oGwcboxTips).removeClass('on');
+        //             $(f.oGwcboxTips).stop(true, true).animate({right: "-470px", opacity: 0});
+        //         }
+        //
+        //
+        //         var _opening = false;
+        //         f.bindClickFun = function () {
+        //             $(f.oGwc).click(function (event) {
+        //                 event.stopPropagation();
+        //                 if ($(f.oGwcbox).hasClass('on')) {
+        //                     f._hide();
+        //                 } else {
+        //                     f._show();
+        //                     if (_opening == true) {
+        //
+        //                         return;
+        //                     }
+        //                     _opening = true;
+        //                     setTimeout(function () {
+        //                         _opening = false;
+        //                     }, 1000);
+        //
+        //                     _cart_plugin.refreshList();
+        //
+        //
+        //                 }
+        //             });
+        //             $(f.oGwcbox).on('click', '.close', function (event) {
+        //                 event.stopPropagation();
+        //                 f._hide();
+        //             });
+        //             $(f.oGwcboxTips).on('click', ".tip_close", function (event) {
+        //                 event.stopPropagation();
+        //                 f._tipHide();
+        //             });
+        //             $(f.oRetop).click(function (event) {
+        //                 $('body,html').animate({scrollTop: 0}, 500);
+        //             });
+        //             $(document).click(function (event) {
+        //                 f._hide();
+        //                 f._tipHide();
+        //             });
+        //         };
+        //
+        //
+        //         f.bindHoverFun = function () {
+        //             $(f.oFbox).find("li").hover(function () {
+        //                 $(this).find("dl").stop(true, true).animate({opacity: "1"}, 800)
+        //             }, function () {
+        //                 $(this).find("dl").stop(true, true).animate({opacity: "0.6"}, 800)
+        //             });
+        //         };
+        //
+        //
+        //         f.init = function () {
+        //             f.bindClickFun();
+        //             f.bindHoverFun();
+        //         };
+        //     }(fslide));
+        //
+        //
+        //     var _cart_plugin = {
+        //         init: function () {
+        //             var _child = this;
+        //             _child.refresh();
+        //             _child.initEvents();
+        //             fslide.init();
+        //         }
+        //         , refreshList: function () {
+        //             var _child = this;
+        //             var _opening = false;
+        //             _child.fetchCartListData(function (_sdata) {
+        //                 if (_sdata.total <= 0) {
+        //                     to_count.hide();
+        //                 } else {
+        //                     to_count.show();
+        //                 }
+        //                 _cart_total_num.text(_sdata.total).show();
+        //                 _cart_total_num2.text(_sdata.total).show();
+        //                 _cart_total_num3.text(_sdata.total).show();
+        //                 _cart_select_num.text(_sdata.total);
+        //                 _cart_total_amount.text(_sdata.amount);
+        //                 _child.renderTpl(_sdata);
+        //
+        //             });
+        //         }
+        //         , initEvents: function () {
+        //             var _child = this;
+        //
+        //             return;
+        //             var _opening = false;
+        //             _btn_cart.click(function () {
+        //                 if (_opening) {
+        //
+        //                     return;
+        //                 }
+        //                 setTimeout(function () {
+        //                     _opening = false;
+        //                 }, 1000);
+        //
+        //                 _child.fetchCartListData(function (_sdata) {
+        //                     _cart_total_num.text(_sdata.total).show();
+        //                     _cart_total_num2.text(_sdata.total).show();
+        //                     _cart_total_num3.text(_sdata.total).show();
+        //                     _cart_select_num.text(_sdata.total);
+        //                     _cart_total_amount.text(_sdata.amount ? _sdata.amount.toFixed(2) : 0.00);
+        //
+        //
+        //                     _child.renderTpl(_sdata);
+        //                     if (_sdata.total <= 0) {
+        //                         to_count.hide();
+        //                     } else {
+        //                         to_count.show();
+        //                     }
+        //                 })
+        //
+        //
+        //             });
+        //
+        //         }
+        //         , refresh: function () {
+        //             var _child = this;
+        //             _child.fetchCartListData(function (_data) {
+        //                 _cart_total_num.text(_data.total).show();
+        //                 _cart_total_num2.text(_data.total).show();
+        //                 _cart_total_num3.text(_data.total).show();
+        //                 _cart_select_num.text(_data.total);
+        //                 _cart_total_amount.text(_data.amount);
+        //                 if (_data.total <= 0) {
+        //                     to_count.hide();
+        //                 } else {
+        //                     to_count.show();
+        //                 }
+        //
+        //             });
+        //         }
+        //         , renderTpl: function (_sdata) {
+        //             var _child = this;
+        //             _cart_list.empty();
+        //             var _html2 = _tpl.render({data: _sdata});
+        //             _cart_list.append(_html2);
+        //         }
+        //         , fetchCartListData: function (callback) {
+        //
+        //             OrderCart.getCartList(function (sdata) {
+        //                 if (callback) {
+        //                     callback(sdata);
+        //                 }
+        //             });
+        //         }
+        //     };
+        //
+        //     _cart_plugin.init();
+        // }
+        // //--更新购物车的显示数量。
+        // , refreshCartCount: function () {
+        //     var _root_ = $('#fix_rgtool');
+        //     var _cart_total_num = _root_.find('[ui="cart-total-count"]');
+        //     var _cart_total_num2 = $('#cart-num');
+        //     var _cart_total_num3 = $('#cart-num3');
+        //     //alert(_cart_total_num3);
+        //     var _cart_select_num = _root_.find('[ui="cart-select-num"]');
+        //     var _cart_list = _root_.find('[ui="cart-list"]');
+        //     var _cart_total_amount = _root_.find('[ui="cart-total-amount"]');
+        //     OrderCart.getCartList(function (_sdata) {
+        //         _cart_total_num.text(_sdata.total).show();
+        //         _cart_total_num2.text(_sdata.total).show();
+        //         _cart_total_num3.text(_sdata.total).show();
+        //         _cart_select_num.text(_sdata.total);
+        //         _cart_total_amount.text(_sdata.amount);
+        //         if (_sdata.total <= 0) {
+        //             to_count.hide();
+        //
+        //         } else {
+        //             to_count.show();
+        //         }
+        //     });
+        // }
+
+        //--初始化搜索框及事件。
+        , initSearcher: function () {
+            var btn_search = $('#global-btn-search');
+            var ipt_keyword = $('#global-ipt-keyword');
+            if (btn_search.length <= 0) {
+                return;
+            }
+            if (queryObject["key"]) {
+                ipt_keyword.val(queryObject["key"]);
+            }
+
+            btn_search.click(function () {
+                var _keyword = ipt_keyword.val();
+
+                var _searchclass = $(".chosen-single span").eq(0).text();
+
+                if (_searchclass == "找项目") {
+                    var _url = util.Json2URL("/requestlist", {
+                        key: _keyword
+                    });
+                }
+                else if (_searchclass == "找服务") {
+                    var _url = util.Json2URL("/servicelist", {
+                        key: _keyword
+                    });
+                    ;
+                }
+                else if (_searchclass == "找工程公司") {
+                    var _url = util.Json2URL("/servicePartylist", {
+                        key: _keyword
+                    });
+                    ;
+                }
+
+                location.href = _url;
+
+            });
+        //
+            ipt_keyword.keypress(function (e) {
+                if (e.keyCode == 13) {
+                    btn_search.trigger('click');
+                }
+            })
+
+
+        }
+        //--检查是否需要显示身份验证弹出层。
+
+        // , checkShowIdentifyWindow: function (callback) {
+        //     if (location.href.indexOf("/user/safety_identify") != -1) {
+        //
+        //         return;
+        //     }
+        //     if (location.href.indexOf("/user") == -1) {
+        //         return;
+        //     }
+        //
+        //     $.ajax({
+        //         url: "/user/getUserInfo"
+        //         , data: {}
+        //         , success: function (serverdata) {
+        //             if (serverdata.state == "relogin") {
+        //                 return;
+        //             }
+        //             var userData = serverdata.rows.customer;
+        //             //userData.isupgrade=1;
+        //             //userData.namecheck=0;
+        //             if (serverdata.state == "success") {
+        //             }
+        //             else {
+        //                 return;
+        //             }
+        //
+        //             if (userData.namecheck == 1) {
+        //                 return;
+        //             }
+        //
+        //             //--好了，假如有等级列表且等级列表不为空，那么就判断是否可以升级。
+        //             var gradesList = serverdata.rows.grades;
+        //             if (gradesList == undefined || gradesList.length <= 0) {
+        //                 return;
+        //             }
+        //             gradesList = gradesList.sort(function (a, b) {
+        //                 return a.gradeval - b.gradeval;
+        //             });
+        //             console.log(gradesList);
+        //             //--好了，判断最小的大于等级1的级别。
+        //             var lvInfo = null;
+        //             for (var i = 0; i < gradesList.length; i++) {
+        //                 var tmpLV = gradesList[i];
+        //                 if (tmpLV.gradeval > 1) {
+        //                     lvInfo = tmpLV;
+        //                     break;
+        //                 }
+        //             }
+        //             if (lvInfo == null) {
+        //                 return;
+        //             }
+        //             if (userData.buyamount > lvInfo.updatemoney) {
+        //                 //--应该提示了。
+        //                 //--可以升级。
+        //                 var _dialog = dialog({
+        //                     content: "您现在的等级可以升级了，请先进行身份证的验证。"
+        //                     , okValue: "好的"
+        //                     , ok: function () {
+        //                         location.href = "/user/safety_identify";
+        //                     }
+        //                     , cancelValue: "暂时不"
+        //                     , cancel: function () {
+        //                         return true;
+        //                     }
+        //                 });
+        //                 _dialog.showModal();
+        //                 return;
+        //             }
+        //
+        //             return;
+        //
+        //             if (userData.isupgrade == 1) {
+        //                 //--可以升级。
+        //                 var _dialog = dialog({
+        //                     content: "您现在的等级可以升级了，请先进行身份证的验证。"
+        //                     , okValue: "好的"
+        //                     , ok: function () {
+        //                         location.href = "/user/safety_identify";
+        //                     }
+        //                 });
+        //                 _dialog.showModal();
+        //             }
+        //             else {
+        //                 return;
+        //             }
+        //
+        //         }
+        //         , error: function () {
+        //
+        //         }
+        //     });
+        // }
+
+        // , bindApplyService: function () {
+        //     var _webUI = new WebUI();
+        //     //绑定申请工程公司提示弹窗
+        //     $(function () {
+        //         $('.js_apply_service').click(function () {
+        //
+        //             if(__hasLogin){
+        //                 if(__isAuthService){
+        //                     var _dialog = _webUI.showError({
+        //                         title: "提示"
+        //                         , smallMessage: "您的认证申请正在审核中，请耐心等待。"
+        //                         , confirmText: "查看申请结果"
+        //                         , cancelText: "取消"
+        //                         , onConfirm: function () {
+        //                             location.href = "/user/applyService";
+        //                         }
+        //                         , onCancel: function () {
+        //                             _dialog.close();
+        //                         }
+        //                     });
+        //                     return false;
+        //                 }
+        //                 $.ajax({
+        //                     url: "/user/changeRole?ajax=1&roleId=25"
+        //                     , data: {}
+        //                     , method: "get"
+        //                     , dataType: "json"
+        //                     , success: function (sdata) {
+        //                         if (sdata.code == 0) {
+        //                             //切换成功
+        //                             location.href = "/user";
+        //                         } else {
+        //                             //切换失败
+        //                             var _dialog = _webUI.showError({
+        //                                 title: "提示"
+        //                                 , smallMessage: "您现在还不是工程公司，要申请成为工程公司后才使用该功能。"
+        //                                 , confirmText: "申请成为工程公司"
+        //                                 , cancelText: "暂不申请"
+        //                                 , onConfirm: function () {
+        //                                     location.href = "/user/applyService";
+        //                                 }
+        //                                 , onCancel: function () {
+        //                                     _dialog.close();
+        //                                 }
+        //                             });
+        //                         }
+        //                     }
+        //                     , error: function () {
+        //
+        //                     }
+        //                 });
+        //             }
+        //
+        //         });
+        //     });
+        // }
+
+        // ,bindChangeRoleTips:function(nowRole){
+        //     var _webUI = new WebUI();
+        //     //绑定切换角色提示
+        //     $(function () {
+        //         $('body').on('click','[ui-needRole="20"],[ui-needRole="25"]',function () {
+        //
+        //             if(!__hasLogin){
+        //                 var _dialog = _webUI.showError({
+        //                     title: "提示"
+        //                     , smallMessage: "您还没有登录，登录才能使用该功能。"
+        //                     , confirmText: "立即登录"
+        //                     , cancelText: "暂不登录"
+        //                     , onConfirm: function () {
+        //                         var _url=util.Json2URL("/login",{from:location.href});
+        //                         location.href=_url;
+        //                     }
+        //                     , onCancel: function () {
+        //                         _dialog.close();
+        //                     }
+        //                 });
+        //                 return false;
+        //             }
+        //
+        //             var needRole=$(this).attr('ui-needRole');
+        //
+        //             if(__isAuthService&&needRole==25){
+        //                 var _dialog = _webUI.showError({
+        //                     title: "提示"
+        //                     , smallMessage: "您的工程公司申请真正审核中，请耐心等待"
+        //                     , confirmText: "查看申请结果"
+        //                     , cancelText: "取消"
+        //                     , onConfirm: function () {
+        //                         location.href = "/user/applyService";
+        //                     }
+        //                     , onCancel: function () {
+        //                         _dialog.close();
+        //                     }
+        //                 });
+        //                 return false;
+        //             }
+        //             if(!__isService&&needRole==25){
+        //                 var _dialog = _webUI.showError({
+        //                     title: "提示"
+        //                     , smallMessage: "您现在的身份是企业，只有申请为工程公司才能用该功能。"
+        //                     , confirmText: "立即申请"
+        //                     , cancelText: "暂不申请"
+        //                     , onConfirm: function () {
+        //                         location.href='/user/applyService';
+        //                     }
+        //                     , onCancel: function () {
+        //                         _dialog.close();
+        //                     }
+        //                 });
+        //                 return false;
+        //             }
+        //
+        //             if(nowRole!=needRole){
+        //                 var href = $(this).attr('href');
+        //                 var needRoleVal='';
+        //                 if(needRole==20){
+        //                     needRoleVal='企业'
+        //                 }else{
+        //                     needRoleVal='工程公司'
+        //                 }
+        //
+        //                 var _dialog = _webUI.showError({
+        //                     title: "提示"
+        //                     , smallMessage: "您现在还不是"+needRoleVal+"，需要切换成为"+needRoleVal+"后才使用该功能。"
+        //                     , confirmText: "确定"
+        //                     , cancelText: "取消"
+        //                     , onConfirm: function () {
+        //                         //切换角色
+        //                         $.ajax({
+        //                             url: "/user/changeRole?ajax=1&roleId="+needRole
+        //                             , data: {}
+        //                             , method: "get"
+        //                             , dataType: "json"
+        //                             , success: function (sdata) {
+        //                                 if (sdata.code == 0) {
+        //                                     //切换成功
+        //                                     location.href = href;
+        //                                 } else {
+        //                                     //切换失败
+        //                                     app.showTips(sdata.msg,"error");
+        //                                 }
+        //                             }
+        //                             , error: function () {
+        //
+        //                             }
+        //                         });
+        //                     }
+        //                     , onCancel: function () {
+        //                         _dialog.close();
+        //                     }
+        //                 });
+        //                 return false;
+        //             }
+        //
+        //         });
+        //     });
+        // }
+
+        ,userTips:function(msg,type,from){
+            var option={
+                type:type
+                ,msg:msg
+                ,from:location.href
+            }
+            if(from!=undefined){
+                option.from=from;
+            }
+            var href='/user/tips';
+            href=util.Json2URL(href,option);
+            location.href=href;
+        }
+
+        ,initRegion:function(){
+
+            if($.cookie('region')==null){
+                $.cookie('region',"东莞市",_cookieOption);
+            }
+            if($.cookie('region_id')==null){
+                $.cookie('region_id',"1656",_cookieOption);
+            }
+            var re_txt=$("#region_name").text()
+            if($.cookie('region')!=re_txt){
+                $("#region_name").text($.cookie('region'))
+            }
+            $('.top_div .area').delegate("#region_list a","click",function(){
+                var region_id=$(this).attr("id")
+                var region_txt=$(this).text();
+                $.ajax({
+                    url:"/setregionlist"
+                    ,data:{
+                        region_id:region_id
+                    }
+                    ,method:"get"
+                    ,success:function(sdata){
+                        if(sdata.code==0){
+                            app.showTips("切换地区成功","success");
+                            setTimeout(function(){
+                                $.cookie('region',region_txt,_cookieOption);
+                                $.cookie('region_id',region_id,_cookieOption);
+                                window.location.reload();
+                            })
+                        }
+                        else{
+                            app.showTips(sdata.msg,"error");
+                        }
+
+                    }
+                    ,error:function(){
+
+                    }
+                });
+            })
+
+        }
+
+    }
+
+    module.exports=app;
+
+});

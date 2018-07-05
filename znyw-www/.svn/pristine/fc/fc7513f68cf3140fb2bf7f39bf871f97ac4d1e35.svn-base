@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>智能代维</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="" rel="stylesheet">
+
+    <script type="text/javascript" src="./AdminLTE-2.4.1/bower_components/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="./AdminLTE-2.4.1/dist/js/adminlte.min.js"></script>
+    <script type="text/javascript" src="./AdminLTE-2.4.1/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+
+    <link rel="stylesheet" type="text/css" href="./AdminLTE-2.4.1/dist/css/AdminLTE.css">
+    <link rel="stylesheet" type="text/css" href="./AdminLTE-2.4.1/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="./AdminLTE-2.4.1/bower_components/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="./AdminLTE-2.4.1/bower_components/Ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" type="text/css" href="./AdminLTE-2.4.1/dist/css/skins/skin-blue.css">
+    <style>
+        body,a{
+            text-decoration : none
+        }
+        .fo-electricity{
+            background: url("/res/images/imgv6/ydgl_n_icon.png")no-repeat;height: 20px;background-size: 100%;margin: 0 27px 0 0;
+        }
+        .active_nav_img{
+            margin-right: 27px;
+        }
+
+        .dropdown-menu-settings{
+            width: 100%;height: 30px;font-size: 14px;color: #000000;line-height: 30px;text-align: center;
+        }
+        .dropdown-bottom{
+            -webkit-transform: rotate(-90deg);
+            -ms-transform: rotate(-90deg);
+            -o-transform: rotate(-90deg);
+             transform: rotate(-90deg);margin-top: 3px;
+        }
+
+    </style>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+
+    <header class="main-header">
+
+        <!-- Logo -->
+        <div  class="logo" >
+            <!-- mini logo for sidebar mini 50x50 pixels -->
+            <span class="logo-mini"><img src="/res/images/imgv6/logo_white68X76.png" width="25" height="25"  alt=""></span>
+            <!-- logo for regular state and mobile devices -->
+            <span class="logo-lg">
+                <img src="/res/images/imgv6/logo_white68X76.png" width="25" height="25" style="margin-right: 10px;"  alt="">
+                <b>智能运维监控中心</b>
+            </span>
+        </div>
+
+        <!-- Header Navbar -->
+        <nav class="navbar navbar-static-top" role="navigation">
+            <!-- Sidebar toggle button-->
+            <div  class="sidebar-toggle" data-toggle="push-menu" role="button">
+                <!--<span class="sr-only">Toggle navigation</span>-->
+            </div>
+            <div class="sidebar-company">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown user user-menu notifications-menu">
+                        <!-- Menu Toggle Button -->
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <!-- The user image in the navbar-->
+                            <!--<img src="dist/img/user2-160x160.jpg" class="user-image" alt="User Image">-->
+                            <!-- hidden-xs hides the username on small devices so only the image appears. -->
+                            <span class="">东莞职业技术学院</span>
+                            <!--下拉标签-->
+                            <!--<i class="fa fa-angle-left pull-right dropdown-bottom"></i>-->
+                            <!--<ul class="dropdown-menu">-->
+                            <!--<li class="dropdown-menu-settings"><a href="#" style="color: #000;">东莞职业技术学院1号</a></li>-->
+                            <!--<li class="dropdown-menu-settings"><a href="#" style="color: #000;">东莞职业技术学院2号</a></li>-->
+                            <!--</ul>-->
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- Navbar Right Menu -->
+            <div class="navbar-custom-menu">
+                <ul class="nav navbar-nav">
+
+                    <!-- Notifications Menu -->
+                    <li class="dropdown notifications-menu">
+                        <!-- Menu toggle button -->
+                        <a href="/Intelligent/Intelligent_warning" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-bell-o"></i>
+
+                        </a>
+                    </li>
+                    <!-- Tasks Menu -->
+                    <!-- User Account Menu -->
+                    <li class="dropdown user user-menu notifications-menu">
+                        <!-- Menu Toggle Button -->
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <!-- The user image in the navbar-->
+                            <!--<img src="dist/img/user2-160x160.jpg" class="user-image" alt="User Image">-->
+                            <!-- hidden-xs hides the username on small devices so only the image appears. -->
+                            <span class="">182006866871</span>
+                            <!--下拉标签-->
+                            <i class="fa fa-angle-left pull-right dropdown-bottom"></i>
+
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-menu-settings"><a href="/Intelligent/Intelligent_Account" style="color: #000;">账号设置</a></li>
+                            <li class="dropdown-menu-settings"><a href="#" style="color: #000;">退出</a></li>
+                        </ul>
+                    </li>
+
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <!--侧边栏-->
+    <aside class="main-sidebar">
+
+        <!-- sidebar: style can be found in sidebar.less -->
+        <section class="sidebar">
+
+            <!-- Sidebar Menu -->
+            <ul class="sidebar-menu" data-widget="tree">
+                <!-- Optionally, you can add icons to the links -->
+                <li  class="active treeview" >
+                    <a href="#"  class="current" style="pointer-events: none;">
+                        <img src="/res/images/imgv6/ydgl_n_icon.png" class="active_nav_img" width="20" height="20" alt="">
+                        <span >用电概况</span>
+                        <!--下拉标签-->
+                        <!--<span class="pull-right-container">-->
+                        <!--<i class="fa fa-angle-left pull-right"></i>-->
+                        <!--</span>-->
+                    </a>
+                    <ul class="treeview-menu">
+                        <!--<li class="active"><a href="index.html"><img src="/res/images/imgv6/2nd.png" style="margin:0  13px 0 20px;" width="27" height="37" alt="">用电概况</a></li>-->
+                        <li  ><a href="/Intelligent/Intelligent_energy"><img src="/res/images/imgv6/2nd.png" style="margin:0  13px 0 20px;" width="27" height="37" alt="">能耗分析</a></li>
+                        <li ><a href="/Intelligent/Intelligent_load"><img src="/res/images/imgv6/2nd.png" style="margin:0  13px 0 20px;" width="27" height="37" alt="">负荷分析</a></li>
+                        <li ><a href="/Intelligent/Intelligent_analysis"><img src="/res/images/imgv6/2nd.png" style="margin:0  13px 0 20px;" width="27" height="37" alt="">实时分析</a></li>
+                        <li ><a href="/Intelligent/Intelligent_warning"><img src="/res/images/imgv6/4th.png" style="margin:0  13px 0 20px;" width="27" height="37" alt="">告警信息</a></li>
+                    </ul>
+                </li>
+                <li class="active treeview" >
+                    <a href="#"  style="pointer-events: none;">
+                        <img src="/res/images/imgv6/xthj_m_icon.png" class="active_nav_img" width="20" height="20" alt="">
+                        <span>系统环境</span>
+                        <!--<span class="pull-right-container">-->
+                        <!--<i class="fa fa-angle-left pull-right"></i>-->
+                        <!--</span>-->
+                    </a>
+                    <ul class="treeview-menu">
+                        <li ><a href="/Intelligent/Intelligent_environment"><img src="/res/images/imgv6/2nd.png" style="margin:0  13px 0 20px;" width="27" height="37" alt="">环境</a></li>
+                        <!--<li><a href="/"><img src="/res/images/imgv6/2nd.png" style="margin:0  13px 0 20px;" width="27" height="37" alt=""> 系统图</a></li>-->
+                        <li ><a href="/Intelligent/Intelligent_system"><img src="/res/images/imgv6/4th.png" style="margin:0  13px 0 20px;" width="27" height="37" alt="">系统图</a></li>
+                    </ul>
+                </li>
+                <li  class="active treeview"><a onclick="window.location.href='/Intelligent/Intelligent_experts' " id="experts" href="/Intelligent/Intelligent_experts">
+                        <img src="/res/images/imgv6/ywzj_m_icon.png" class="active_nav_img" width="20" height="20" alt="">
+                        <span>运维专家</span></a></li>
+                <li  class="active treeview" ><a onclick="window.location.href='/Intelligent/Intelligent_Account' " id="Account"  href="/Intelligent/Intelligent_Account" style=" border-bottom: 1px solid #294355;"><img src="/res/images/imgv6/zhsz_m_icon.png" class="active_nav_img" width="20" height="20" alt=""> <span>账号设置</span></a></li>
+            </ul>
+            <!-- /.sidebar-menu -->
+        </section>
+        <!-- /.sidebar -->
+    </aside>
+
+    <!--主体-->
+    <div class="content-wrapper">
+
+
+        <!-- /.content -->
+    </div>
+    <!--底部-->
+    <footer class="main-footer">
+
+        <div class="pull-right hidden-xs">
+            Anything you want
+        </div>
+        <!-- Default to the left -->
+        <strong>Copyright &copy; 2016 <a href="#">Company</a>.</strong> All rights reserved.
+    </footer>
+
+    <!--点击打开right的侧边栏-->
+    <!--<div class="control-sidebar-bg"></div>-->
+</div>
+
+</body>
+</html>

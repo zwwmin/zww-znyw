@@ -1,0 +1,25 @@
+
+<%
+for (var i=0;i< data.allItems.length;i++){
+    var res=data.allItems[i];
+if(i ==0){
+%>
+<label>
+    <input  type="radio" name="r3" value="<%=res.key%>" class="flat-red" checked>
+    <%=res.name%>
+</label>
+<%}else {%>
+<label>
+    <input  type="radio" name="r3" value="<%=res.key%>" class="flat-red" >
+    <%=res.name%>
+</label>
+<%} }%>
+
+<link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/iCheck/all.css">
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/iCheck/icheck.js"></script>
+<script>
+    $('input[type="radio"].flat-red').iCheck({
+        checkboxClass: 'icheckbox_flat-green',
+        radioClass   : 'iradio_flat-green'
+    })
+</script>

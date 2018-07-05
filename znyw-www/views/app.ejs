@@ -1,0 +1,127 @@
+var express = require('express');
+var path = require('path');
+var favicon = require('serve-favicon');
+var logger = require('morgan');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var favicons = require('connect-favicons');
+
+//--自己的类库。
+var util=require("./util/util.js");
+
+var routes = require('./routes/index');
+
+var users = require('./routes/users');
+
+
+var ServerConf=require("./ServerConf");
+
+
+//--cookie管理系统。
+var CookieMgrSYSTEM=require("./util/CookieMgrSystem");
+
+
+
+var app = express();
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+//--添加partials的引用。
+var partials = require('express-partials');
+app.use(partials());
+
+//--设定session
+var session = require('express-session');
+
+//--fav icon
+
+app.use(favicons(__dirname + '/public/res'));
+
+app.use(require('express-domain-middleware')); //配置错误处理。
+
+
+app.use(session({
+resave: false,
+saveUninitialized: true,
+cookie: {},
+secret: 'node_server_un'
+}));
+
+/*
+var sess = {
+secret: 'keyboard cat',
+cookie: {
+
+}
+}
+if (app.get('env') === 'production') {
+app.set('trust proxy', 1) // trust first proxy
+sess.cookie.secure = true // serve secure cookies
+}
+app.use(session(sess))
+*/
+
+
+process.env.PORT=ServerConf.ServicePort;//设置端口号，不要占用了。
+
+// uncomment after placing your favicon in /public
+//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+// app.use(express.static(path.join(__dirname, 'lmz')));
+//--moment等第三方类库配置。
+var  moment = require('moment');
+
+app.locals.moment = moment;
+app.locals.util=util;
+
+app.use('/', routes);
+app.use('/user', users);
+
+
+
+app.use(session({
+
+resave: false,
+saveUninitialized: true,
+cookie: {},
+secret: 'node_server_un'
+}));
+
+var GlobalService=require("./service/GlobalService.js");
+
+
+// 其他 router ...
+// 404
+
+app.get('*', function(req, res){
+
+GlobalService.getCommonPageData(req,function(commonData){
+res.render('404', commonData);
+});
+});
+
+////---错误处理。---一般错误处理。
+app.use(function(err,req, res, next) {
+console.log('error normal');
+res.status(err.status || 500);
+res.render('error', {
+message: err.message,
+error: err
+});
+return;
+});
+
+
+CookieMgrSYSTEM.init({
+siteSessionKeys:ServerConf.siteSessionKeys
+});
+CookieMgrSYSTEM.runScheduleTask();
+
+
+module.exports = app;

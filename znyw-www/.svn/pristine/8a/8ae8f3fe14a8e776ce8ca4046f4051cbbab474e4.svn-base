@@ -1,0 +1,35 @@
+/**
+ * 注册页面逻辑。
+ */
+define("p.all",function(require,exports,module){
+
+    var queryObject=util.getQueryObject();
+    var to_count=$('a.go_btn1');
+
+    var app= {
+        //定时器任务
+        timer:function () {
+            console.log('=====================我是定时器任务===================');
+            function ajx() {
+                $.ajax({
+                    url: "/user/v5_SmartFindCurrentAlarm"
+                    , data: {}
+                    , method: "post"
+                    , success: function (res) {
+                        console.log(res)
+                    }
+                    , error: function () {
+
+                    }
+                })
+            }
+            // setInterval(ajx(),300);
+        }
+        ,SiteChoice:function () {
+            
+        }
+    };
+
+    module.exports=app;
+
+});

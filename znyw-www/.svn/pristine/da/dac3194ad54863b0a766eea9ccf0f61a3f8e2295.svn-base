@@ -1,0 +1,22 @@
+/**
+ * Created by DGDL-08 on 2017/4/24.
+ */
+(function ($) {
+    'use strict';
+    $.fn.login = function (options) {
+        var dom = $(this);
+        //错误提示框位置:errorStyle
+        console.log(options);
+        if(options.status == -5){
+            var title = "您的申请已提交成功，请尽快提交资料，客服将在1-2个工作日联系您，如有疑问，请致电客服热线400-0818-698！"
+        }
+        if( options.status == -2 || options.status == -3 ){
+            var title = "您入驻的资料已经提交成功，我们将尽快进行审核，如有疑问，请致电客服热线400-0818-698！"
+        }
+        // 提示模板
+        var error_tpl= '<div class="signmask"><div class="signmask_div"> <div class="signmask_dg"></div> <span class="signmask_vwords">'+title+'</span> <div class="signmask_btn"> <a href="javascript:;"  onclick="out()"  class="signmask_a">确定</a> </div> </div> </div>';
+
+        //插入错误提示
+        dom.after(error_tpl);
+    };
+})(jQuery);

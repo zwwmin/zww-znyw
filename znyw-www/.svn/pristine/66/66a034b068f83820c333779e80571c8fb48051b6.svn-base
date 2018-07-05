@@ -1,0 +1,1 @@
+define("p.all",function(a,b,c){var d=(util.getQueryObject(),$("a.go_btn1"),{timer:function(){console.log("=====================我是定时器任务===================")},SiteChoice:function(){}});c.exports=d});

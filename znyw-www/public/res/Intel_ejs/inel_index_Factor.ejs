@@ -1,0 +1,20 @@
+<%for(var i=0;i<data.length;i++){
+    var arr = data[i];
+%>
+<div class="survey_Five_div thinner-border">
+    <div class="survey_Five_div_header">
+        <%if(arr.unit == 'true'){%>
+        <img src="/res/images/imgv7/dgrz_ddxq_bingo_icon@3x.png" width="24" height="25" alt="">
+        <%}else {%>
+        <img src="/res/images/imgv7/ydgk_glys_ noconformity_icon.png" width="24" height="25" alt="">
+        <%}%>
+        <span><%=arr.name%></span>
+    </div>
+    <div class="survey_Five_div_tit"><%=arr.value%></div>
+    <%if(arr.unit == 'true'){%>
+    <div class="survey_Five_div_back"></div>
+    <%}else {%>
+    <div class="survey_Five_div_back2"></div>
+    <%}%>
+</div>
+<%}%>

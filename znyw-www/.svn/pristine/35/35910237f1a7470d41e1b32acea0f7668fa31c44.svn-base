@@ -1,0 +1,167 @@
+/* Common, default styles for the notification box */
+@font-face{
+	font-family: web;
+	src: url(../fonts/web-webfont.eot);	/* IE */
+}
+@font-face {
+	font-family: web;
+	src: url(../fonts/web-webfont.ttf);
+}
+
+.ns-font-web {
+	font-family: 'web';
+}
+.ns-box {
+	position: fixed;
+	background: rgba(42,45,50,0.85);
+	padding: 22px;
+	line-height: 1.4;
+	z-index: 1000;
+	pointer-events: none;
+	color: rgba(250,251,255,0.95);
+	font-size: 90%;
+	font-family: 'Helvetica Neue', 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+.ns-box.ns-show {
+	pointer-events: auto;
+}
+
+.ns-box a {
+	color: inherit;
+	opacity: 0.7;
+	font-weight: 700;
+}
+
+.ns-box a:hover,
+.ns-box a:focus {
+	opacity: 1;
+}
+
+.ns-box p {
+	margin: 0;
+}
+
+.ns-box.ns-show,
+.ns-box.ns-visible {
+	pointer-events: auto;
+}
+
+.ns-close {
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	right: 4px;
+	top: 4px;
+	overflow: hidden;
+	text-indent: 100%;
+	cursor: pointer;
+	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
+}
+
+.ns-close:hover, 
+.ns-close:focus {
+	outline: none;
+}
+
+.ns-close::before,
+.ns-close::after {
+	content: '';
+	position: absolute;
+	width: 3px;
+	height: 60%;
+	top: 50%;
+	left: 50%;
+	background: #6e6e6e;
+}
+
+.ns-close:hover::before,
+.ns-close:hover::after {
+	background: #fff;
+}
+
+.ns-close::before {
+	-webkit-transform: translate(-50%,-50%) rotate(45deg);
+	transform: translate(-50%,-50%) rotate(45deg);
+}
+
+.ns-close::after {
+	-webkit-transform: translate(-50%,-50%) rotate(-45deg);
+	transform: translate(-50%,-50%) rotate(-45deg);
+}
+/**添加默认的几个成功或者错误样式。**/
+
+.ns-box.ns-type-warning{
+	background: rgba(247, 206, 57,0.85);
+	color:white;
+
+}
+.ns-box.ns-type-error{
+	background: rgba(255, 65, 54,0.85);
+	color:white;
+
+}
+.ns-box.ns-type-success{
+	background: rgba(0, 139, 87,0.85);
+	color:white;
+}
+/***额外添加一个表单提示样式。***/
+
+[class*=" ns-type-validate"].ns-box {
+
+	background: none;
+
+	padding: 0px;
+	z-index: 1000;
+	pointer-events: none;
+	color:black;
+
+	font-family: 'Helvetica Neue', 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+[class*=" ns-type-validate"].ns-box .ns-close {
+	display: none;
+
+}
+.ns-tips-panel{
+	display: inline-block;
+	overflow: visible;
+	font-size: 15px;
+}
+
+.ns-tips-panel.ns-arrow-top{
+	background: url("../img/arrow-top.png") no-repeat center top;
+	padding-top: 5px;
+
+
+}
+.ns-tips-panel.ns-arrow-bottom{
+	background: url("../img/arrow-bottom.png") no-repeat center bottom;
+	padding-bottom: 5px;
+}
+
+.ns-tips-panel.ns-arrow-left{
+	background: url("../img/arrow-left.png") no-repeat left center;
+	padding-left: 5px;
+
+}
+.ns-tips-panel.ns-arrow-right{
+	background: url("../img/arrow-right.png") no-repeat right center;
+	padding-right: 5px;
+}
+.ns-tips-panel .ns-tips-desc{
+	line-height: 24px;
+	z-index: 1000;
+	pointer-events: none;
+	background: rgba(254,249,217,1);
+	/*background: url("../img/tip-yellow.png") no-repeat center center;
+	background-size:100% 100% ;*/
+	padding:5px 5px;
+	font-size: 12px;
+	font-family: 'Helvetica Neue', 'Segoe UI', Helvetica, Arial, sans-serif;
+	border-radius:5px ;
+	-webkit-border-radius:5px ;
+
+
+}
+

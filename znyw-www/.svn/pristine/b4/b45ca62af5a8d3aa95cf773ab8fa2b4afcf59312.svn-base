@@ -1,0 +1,13 @@
+@charset "utf-8";
+.kad_opbox{width:432px; position:absolute; left:-43px; z-index:11; top:25px; background-color:#fff;}
+.kad_opbox .top{background:url(img/kimg34.png) no-repeat 0 0; height:4px; overflow:hidden;}
+.kad_opbox .con{background:url(img/kimg35.png) repeat-y; overflow:hidden; padding:8px 10px;}
+.kad_opbox .bot{background:url(img/kimg34.png) no-repeat 0 -7px; height:5px; overflow:hidden;}
+.kad_opbox .close{display:block;cursor:pointer; width:18px; z-index:12; height:18px; position:absolute; right:-7px; top:-7px;}
+.kad_opbox .close i{ background:url(img/kht3.png) no-repeat -299px -29px; display:block; width:18px; height:18px; overflow:hidden; text-indent:-99999px;}
+.kad_opt{background:url(img/k_link20.gif) repeat-x left bottom; height:29px; line-height:29px; overflow:hidden;}
+.kad_opt p{float:left; display:inline;}
+.kad_opt p span{float:left; display:inline; width:73px; text-align:center; color:#999; cursor:pointer;}
+.kad_opt p span:hover,.kad_opt p span.hover{border-bottom:2px solid #94c849; height:27px; overflow:hidden;}
+.kad_opc{line-height:28px;  padding:13px 0 5px 16px;}
+.kad_opc p a{float:left; display:inline;color:#999; width:66px; height:28px; overflow:hidden;}

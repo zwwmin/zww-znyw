@@ -1,0 +1,104 @@
+/**
+ * Created by DGDL-08 on 2017/3/22.
+ */
+//发送验证码时添加cookie
+function addCookie(name, value, expiresHours) {
+    //判断是否设置过期时间,0代表关闭浏览器时失效
+    if(expiresHours > 0) {
+        var date = new Date();
+        date.setTime(date.getTime() + expiresHours * 1000);
+        $.cookie(name, escape(value), { expires: date });
+    } else {
+        $.cookie(name, escape(value));
+    }
+}
+//修改cookie的值
+function editCookie(name, value, expiresHours) {
+    if(expiresHours > 0) {
+        var date = new Date();
+        date.setTime(date.getTime() + expiresHours * 1000); //单位是毫秒
+        $.cookie(name, escape(value), { expires: date });
+    } else {
+        $.cookie(name, escape(value));
+    }
+}
+//根据名字获取cookie的值
+function getCookieValue(name) {
+    return $.cookie(name);
+}
+$(function() {
+    $("#second").click(function() {
+        sendCode($("#second"));
+    });
+    v = getCookieValue("secondsremained"); //获取cookie值
+    if(v > 0) {
+        settime($("#second")); //开始倒计时
+    }
+})
+//发送验证码
+function sendCode(obj) {
+    var phonenum = $("#phonenum").val();
+    var result = isPhoneNum();
+    if(result) {
+        // doPostBack('${base}/login/getCode.htm',backFunc1,{"phonenum":phonenum});
+        addCookie("secondsremained", 60, 60); //添加cookie记录,有效时间60s
+        settime(obj); //开始倒计时
+    }
+}
+//校验手机号是否合法
+function isPhoneNum() {
+    var phonenum = $("#phonenum").val();
+    var img_code = $("#img_codes").val();
+    var type = $("#type").val();
+    var myreg = /^1[34578]\d{9}$/;
+    if(!myreg.test(phonenum)) {
+        alert('请输入有效的手机号码！');
+        return false;
+    } else {
+        if(!img_code == ""){
+            $.ajax({
+                cache: true,
+                type: "post",
+                url: "/user/vuittonsendVerifyCode",
+                data: {
+                    mobile: phonenum
+                    ,img_code:img_code
+                    ,type:type
+                },
+                error: function() {
+                    alert("信息错误请刷新页面");
+                },
+                success: function(data){
+                    if(data.code == 0){
+                        return true;
+                    }else {
+                        var ss = data.msg;
+                        var prompt =ss.split('<br/>');
+                        if(prompt =="图形验证码不匹配！"){
+                            delCookie("secondsremained");
+                            $("#img_codes").val(" ");
+                            $("#smsauthele").val(" ");
+                            refreshimg();
+                            // alert("图形验证码错误，请重新输入。");
+                        }else {
+                            refreshimg();
+                            // alert("图形验证码错误，请重新输入。");
+                            $("#img_codes").val(" ");
+                            $("#smsauthele").val(" ")
+                        }
+                    }
+                }
+            });
+            return true;
+        }
+    }
+}
+function delCookie(name){//为了删除指定名称的cookie，可以将其过期时间设定为一个过去的时间
+    var date = new Date();
+    date.setTime(date.getTime() - 10000);
+    document.cookie = name + "=a; expires=" + date.toGMTString();
+}
+function refreshimg() {
+    document.getElementById('ImgCodeLabelID').src='/identify';
+    return false;
+}

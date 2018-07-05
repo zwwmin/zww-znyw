@@ -1,0 +1,50 @@
+/**
+ * Created by DGDL-08 on 2018/1/18.
+ */
+
+
+var workerCommon ={
+
+    json2:[],
+
+    json1:[],
+
+//        areaList:[],//选择接单区域存放json
+//        workTypeList:[],//选择从业工种存放json
+    forTopHtml:function(opt){
+        var html="",idlist="";
+        for(var i=0;i<opt.List.length;i++)
+        {
+            html = i == (opt.List.length-1) ? html + opt.List[i]['name'] : html + opt.List[i]['name'] + "/";
+            idlist = i == (opt.List.length-1) ? idlist + opt.List[i]['id'] : idlist + opt.List[i]['id'] + ",";
+        }
+        $(opt.inputid).val(idlist);
+        console.log(html)
+        return html;
+    },
+    select_AerList:function(boxId,List){
+        $(boxId + " ul").on("click","li a",function(){
+            var $this = $(this);
+            var $index = $(boxId + " ul").find("a").index($this);
+            if($this.hasClass("active")){
+                $this.removeClass("active");
+                for(var i=0;i<List.length;i++){
+                    if(List[i]["id"]==$this.data("value"))
+                        List.splice(i,1);
+                }
+            }
+            else{
+                $this.addClass("active");
+                console.log($this.data("value"));
+                List.push({"id":$this.data("value"),"name":$this.html()});
+            }
+
+        })
+    }
+}
+$(function(){
+//工种弹窗后选择
+    workerCommon.select_AerList("#select_AerList_2_Box",workerCommon.json2);
+    workerCommon.select_AerList("#select_AerList_1_Box",workerCommon.json1);
+
+})

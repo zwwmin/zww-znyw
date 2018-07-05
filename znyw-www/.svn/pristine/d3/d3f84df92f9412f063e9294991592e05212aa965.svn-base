@@ -1,0 +1,113 @@
+
+function Project_global_add_comment(ProjectId,title,ProjectOpType,saveUrl){
+    global_add_project_history(title,function(now_desc,now_time,now_images){
+        var shade_1 = layer.load(0, {shade: 0.5});//0代表加载的风格，支持0-2
+        $.ajax({
+            url:saveUrl
+            ,data:{
+                "id":ProjectId
+                ,"title":title
+                ,"description":now_desc
+                ,"images":now_images
+                ,"project_op_type":ProjectOpType
+            }
+            ,success:function(nowdata){
+                layer.close(shade_1);
+                if(!nowdata.state){
+
+                    var _notice=new NotificationFx({
+                        message:nowdata.message
+                        ,type:"error"
+                    });
+                    _notice.show();
+                }
+                else{
+                    //layer.closeAll();
+                    var _notice=new NotificationFx({
+                        message:nowdata.message
+                        ,type:"success"
+                    });
+                    _notice.show();
+                }
+
+
+
+            }
+            ,error:function(){
+                layer.close(shade_1);
+                var _notice=new NotificationFx({
+                    type:"error"
+                    ,message:"服务端错误"
+                });
+                _notice.show();
+            }
+        });
+
+    });
+}
+
+/**
+ * 到达现场
+ */
+function Project_Add_Arrive(ProjectId){
+    Project_global_add_comment(ProjectId,"到达现场",201,"/admin/virtual-service/addComment");
+}
+
+/**
+ * 报价方案
+ */
+function Project_Add_Price_Quote(ProjectId){
+    Project_global_add_comment(ProjectId,"报价方案",210,"/admin/virtual-service/addComment");
+}
+/**
+ * 报价方案
+ */
+function Project_Add_Construction_Pictures(ProjectId){
+    Project_global_add_comment(ProjectId,"施工现场",240,"/admin/virtual-service/addSchedule");
+}
+
+/**
+ * 用户反馈
+ */
+function Project_User_Add_Comment(ProjectId){
+    Project_global_add_comment(ProjectId,"用户反馈",220,"/admin/virtual-user/addFeedBack");
+}
+
+
+function Project_Show_Comment_list(Project_id){
+    $.ajax({
+        url:"/admin/project/getLogPostList"
+        ,data:{
+            "project_id":Project_id
+            ,"project_op_type":220
+    }
+    ,success:function(theData){
+        global_show_log_list("用户反馈",theData.data);
+    }
+});
+}
+
+function Project_Show_Construction_Picture_list(Project_id){
+    $.ajax({
+        url:"/admin/project/getLogPostList"
+        ,data:{
+            "project_id":Project_id
+            ,"project_op_type":240
+
+        }
+        ,success:function(theData){
+            global_show_log_list("施工现场",theData.data);
+        }
+    });
+}
+function Project_Show_Post(PostId){
+    $.ajax({
+        url:"/admin/project/getLogPostDetail"
+        ,data:{
+            "id":PostId
+        }
+        ,success:function(theData){
+            global_show_log_list("日志详情",theData.data);
+        }
+    });
+}

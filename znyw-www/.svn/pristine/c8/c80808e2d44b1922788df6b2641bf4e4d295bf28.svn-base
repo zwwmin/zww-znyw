@@ -1,0 +1,31 @@
+
+
+<table class="layui-table" lay-even lay-skin="nob">
+    <!--无边框表格（内部结构参见右侧目录“常规用法”）-->
+    <thead>
+    <tr>
+        <th>编号</th>
+        <th>站点名称</th>
+        <th>告警内容</th>
+        <th>等级</th>
+        <th>告警时间</th>
+        <th>结束时间</th>
+    </tr>
+    </thead>
+    <tbody>
+    <%
+    for(var i=0;i< data.length;i++){
+        var item=data[i];
+        var s = i+1;
+    %>
+    <tr>
+        <td><%= s%></td>
+        <td><%= item.s_name%></td>
+        <td><%= item.alarminfo%></td>
+        <td><%= item.level%></td>
+        <td><%= item.stime%></td>
+        <td><%= item.etime%></td>
+    </tr>
+    <%}%>
+    </tbody>
+</table>

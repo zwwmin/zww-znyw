@@ -1,0 +1,528 @@
+
+function createCKEditor(textarea_id){
+    var content = CKEDITOR.replace(textarea_id,
+        {"defaultLanguage":"zh-cn","language":"zh-cn","disableObjectResizing":"true",
+            "filebrowserUploadUrl":"\/common\/file\/file\/type\/editor",
+            "filebrowserImageUploadUrl":"/admin/editor/uploadImage",
+            "height":"400px"});
+
+    return content;
+}
+
+
+
+function global_createUploader(containerID,fileInputID,inputFiledElement,limitImageAmount){
+    var defaultImgArr=[];
+    if(util.isEmpty(inputFiledElement.val())==false){
+        defaultImgArr=inputFiledElement.val().split(',');
+    }
+    function reset_image_str(){
+        var _strs=[];
+        $(containerID).find('[ui="upload-item"]').each(function(){
+            var _str=$(this).attr("url");
+            if(util.checkEmpty(_str)){
+
+            }
+            else{
+                _strs.push(_str);
+            }
+
+        });
+
+        inputFiledElement.val(_strs.join(','));
+    }
+    var _Uploader=new Html5ImageUploader({
+        container:$(containerID)
+        ,fileInput:$(fileInputID)
+        ,uploadURL:'/api/common2/upload'
+        ,limit:limitImageAmount
+        ,uploadKey:"image"
+        ,onInit:function(){
+
+        }
+
+        ,onWarning:function(ErrorCode,data){
+            var _errorStr="";
+            if(ErrorCode==image_upload_warning_code.NoPhoto){
+                _errorStr="请选择图片";
+            }
+            else if(ErrorCode==image_upload_warning_code.NotAllowFormat){
+                _errorStr="文件类型必须是JPG、JPEG、PNG或GIF!";
+            }
+            else if(ErrorCode==image_upload_warning_code.OverAmount){
+                _errorStr="最多只能上传"+limitImageAmount+"张图片。";
+            }
+            else if(ErrorCode==image_upload_warning_code.OverSize){
+                _errorStr="文件不能超过5M，请使用更小的照片。";
+            }
+            var _notice=new NotificationFx({
+                type:"error"
+                ,message:_errorStr
+            });
+//                    alert(_errorStr);
+            _notice.show();
+        }
+        ,beforeUpload:function(imgFile,paras){
+
+        } //上传前的处理。
+        ,onUploadComplete:function(itemElement,server_data,itemObject){
+            if(typeof (server_data)=="string"){
+                server_data=JSON.parse(server_data);
+            }
+            if(server_data.state==true){
+                //itemElement.find('.hmlu-bottom-bar').hide();
+                itemElement.attr('url',server_data.data);
+                reset_image_str();
+
+                return true;
+            }
+            else{
+                var _notice=new NotificationFx({
+                    type:"error"
+                    ,message:server_data.message
+                });
+                _notice.show();
+                return false;
+            }
+
+            return true;
+        } //上传结束后的处理。
+        ,onDelete:function(itemRoot){
+            var _pic_url=$(itemRoot).attr("url");
+            if(_pic_url==undefined){
+                _pic_url=$(itemRoot).find('[ui="preview-image"]').attr("src");
+            }
+            itemRoot.remove();
+            reset_image_str();
+            return;
+        }
+        ,defaultImages:defaultImgArr
+
+    } );
+}
+
+function global_ui_avatar(InputFileBtn,CutWinWidth,CutWinHeight,imgCutWidth,imgCutHeight,imgShowWidth,imgShowHeight,onCallBack){
+
+function create_cutter(cb_success,cb_cancel){
+    //--获取窗口高度及宽度，尽量别超出窗口。
+    var _e_width = $(window).width() - 200;
+    var _e_height = $(window).height() - 200;
+    if (_e_width > 1000) {
+        _e_width = 1000;
+    }
+    else if (_e_width <600) {
+        _e_width = 600;
+    }
+    _e_height=CutWinHeight;
+    _e_width=CutWinWidth;
+
+    var ImageEditorElement=$("#global_image_editor");
+    //--这是控件的课配置参数。
+    var opts = {
+        cutWidth: imgCutWidth //裁剪框的宽度。
+        , cutHeight: imgCutHeight //裁剪框的高度
+        , containerWidth: _e_width //容器宽度
+        , containerHeight: _e_height //容器高度
+        , imageShowWidth: imgShowWidth //图片默认显示的宽度【会按照要求的宽度及高度等比缩放】
+        , imageShowHeight: imgShowHeight //图片默认显示的高度【会按照要求的宽度及高度等比缩放】
+        ,imageEditorElement:ImageEditorElement
+        ,onSave:function(imgData){
+            var shade_2 = layer.load(0, {shade: 0.5});//0代表加载的风格，支持0-2
+            $.ajax({
+                url:"/api/common2/uploadBase64Image"
+                ,data:{
+                    image:imgData
+                }
+                ,method:"post"
+                ,dataType:"json"
+                ,success:function(sdata){
+                    layer.close(shade_2);
+                    //_imageHandler.hideEditor();
+                    if(sdata.state==true){
+//                                        $("#usercenter_avatar").attr("src",imgData);
+//                                        $("#preview-image").attr("src",sdata.url);
+//                        $(PreviewImage).attr("src",sdata.data);
+//                        $(InputField).val(sdata.data);
+
+
+                        cb_success(sdata);
+//                                        var _notice=new NotificationFx({
+//                                            type:"success"
+//                                            ,message:"成功修改头像"
+//                                        });
+//                                        _notice.show();
+                    }
+                    else{
+                        var _notice=new NotificationFx({
+                            type:"error"
+                            ,message:sdata.message
+                        });
+                        _notice.show();
+                    }
+                }
+                ,error:function(){
+                    layer.close(shade_2);
+                    var _notice=new NotificationFx({
+                        type:"error"
+                        ,message:"服务端异常"
+                    });
+                    _notice.show();
+                    //_imageHandler.hideEditor();
+                    //$(PanelContainer).show();
+                }
+
+            });
+        }//当用户点击保存按钮要保存图片数据时候的回调函数。
+        ,onBtnResetClick:function(){
+            //if(_imageHandler){
+            //    _imageHandler.hideEditor();
+            //}
+            //$(PanelContainer).show();
+            cb_cancel();
+        }//reset按钮点击以后。
+
+    };
+
+    var _imageHandler=ImageEditorHandler(opts);
+
+    return _imageHandler;
+}
+
+            //--逻辑方法定义
+            $(InputFileBtn).change(function(){
+
+                if ($(this)[0].files.length === 0) {
+                    alert("请选择图片！");
+                    return; }
+                var oFile = $(this)[0].files[0];
+                //if (!rFilter.test(oFile.type)) { alert("You must select a valid image file!"); return; }
+
+                /*  if(oFile.size>5*1024*1024){
+                 message(myCache.par.lang,{cn:"照片上传：文件不能超过5MB!请使用容量更小的照片。",en:"证书上传：文件不能超过100K!"})
+                 changePanel("result");
+                 return;
+                 }*/
+                if(!new RegExp("(jpg|jpeg|gif|png)+","gi").test(oFile.type)){
+                    alert("照片上传：文件类型必须是JPG、JPEG、PNG或GIF!");
+                    return;
+                }
+
+                var shade_3 = layer.load(0, {shade: 0.5});//0代表加载的风格，支持0-2
+                var reader = new FileReader();
+
+                reader.onload =function(e){
+                    var _img_str=e.target.result;
+                    layer.close(shade_3);
+                    $(window).scrollTop(0);
+                    var _dialog_=layer.open({
+                        type: 1,
+                        title: false,
+                        closeBtn: 1,
+                        area: [(CutWinWidth+28)+'px', (CutWinHeight+40)+'px'],
+                        shadeClose: false,
+                        scrollbar:false,
+                        skin: 'yourclass',
+                        content: '<div style="padding-top: 10px; width:'+(CutWinWidth+28)+'px;height:'+CutWinHeight+' px;"><div  id="global_image_editor" style="display: none;"></div></div>'
+                    });
+
+                    var imageEditor=create_cutter(function(sdata){
+                        if(sdata.state){
+                            layer.close(_dialog_);
+                        }
+                        onCallBack(sdata);
+                    },function(){
+                        layer.close(_dialog_);
+                    });
+                    imageEditor.init(_img_str,oFile);
+                    setTimeout(function(){
+                        $("#global_image_editor").show();
+                    },500);
+
+
+
+                    // img 元素
+                    //$(PanelContainer).hide();
+                    //_imageHandler.init(_img_str,oFile);
+                    //setTimeout(function(){
+                    //    layer.close(shade_3);
+                    //},500);
+
+                };
+                reader.readAsDataURL(oFile);
+                return;
+            });
+
+}
+function global_single_upload(container,inputField){
+    var _now_image_url=$(inputField).val();
+    var no_img="/statics/images/no_picture.gif";
+    if(!_now_image_url){
+        _now_image_url=no_img;
+    }
+    var _single_uploader=UiUtil.SingleImageUploader({
+        defaultImage:_now_image_url//默认图片。假如没有就用这个值。
+        ,container:container //默认容器。。。必须指定渲染这个部件的容器。
+        ,uploadURL:"/api/common2/upload" //这是后台接收图片的url地址。
+        ,uploadKey:"image" //上传时候该文件的表单里面的name。默认为image。
+        ,onErrorImage:no_img
+        ,beforeUpload:function(file,_paras){
+
+        }//--上传之前可以改变一些参数的。譬如添加其他额外参数。
+        ,uploadProgress:function(currentPercent){
+
+        }
+        ,uploadComplete:function(httpStateCode,responseText){
+            var resData=responseText;
+            if(util.isString(responseText)){
+                resData=JSON.parse(responseText);
+            }
+            else{
+                resData=responseText;
+            }
+            if(resData.state==true){
+                $(inputField).val(resData.data);
+                _single_uploader.setDone();
+                var _notice=new NotificationFx({
+                    type:"success"
+                    ,message:"上传成功"
+                });
+                _notice.show();
+            }
+            else{
+                _single_uploader.setNoDone();
+                var _notice=new NotificationFx({
+                    type:"error"
+                    ,message:resData.message
+                });
+                _notice.show();
+
+
+            }
+
+
+        }//上传结束时候，接受到服务端返回来的statecode和输出字符串。
+        ,onWarning:function(errorCode,errorMsg){
+            if(errorCode=="detect error"){
+                alert(errorMsg);
+                return;
+            }
+            if(errorCode=="no file"){
+                alert("请需要上传的图片");
+                return;
+            }
+
+        }
+        ,fileDetect:function(oFile){
+            if(!new RegExp("(jpg|jpeg|gif|png)+","gi").test(oFile.type)){
+                return {
+                    state:false
+                    ,message:"图片类型必须是JPG、JPEG、PNG或GIF!"
+                };
+            }
+            if(oFile.filesize>100){
+                return {
+                    state:false
+                    ,message:"图片请小于100bit"
+                };
+            }
+            return {
+                state:true
+                ,message:""
+            };
+        } //这是检查选择的图片格式是否正确的逻辑，用来扩展。默认就检查后缀名。
+
+    });
+    //_single_upload=_single_uploader;
+}
+
+function global_choose_date(title,callback){
+    var _tpl_html=[];
+    _tpl_html.push("                        <div  style='padding: 10px;' > </div>");
+    _tpl_html.push("                        <div class='form-group' >");
+    _tpl_html.push("                            <label class='col-sm-2 control-label'>时间</label>");
+    _tpl_html.push("                            <label ui='valid-error-tip' for='update_time' class='error'></label>");
+    _tpl_html.push("                            <div class=\'col-sm-6\'>");
+    _tpl_html.push("                                <input id='global-choose-date-text' type='text' class='form-control' onclick='laydate({istime: true,istoday: true, format: \"YYYY-MM-DD hh:mm:ss\"})' name='update_time' value=''> <span class='help-block m-b-none'></span>");
+    _tpl_html.push("                            </div>");
+    _tpl_html.push("                        </div>");
+
+    _tpl_html.push("                        <div class=\'form-group\'>");
+    _tpl_html.push("                            <div class=\'col-sm-4 col-sm-offset-2\'>");
+    _tpl_html.push("                                <a class=\'btn btn-primary\' type=\'button\' id=\'global-btn-choose-date\'>确定</a>");
+    _tpl_html.push("                            </div>");
+    _tpl_html.push("                        </div>");    
+    var _dialog_date=layer.open({
+        type: 1,
+        title:title,
+        closeBtn: 0,
+        area: ['600px', '150px'],
+        shadeClose: false,
+        skin: 'yourclass',
+        success:function(){
+            $('#global-choose-date-text').val(laydate.now(0, 'YYYY-MM-DD hh:mm:ss'));
+            $('#global-btn-choose-date').click(function(){
+                layer.close(_dialog_date);
+                if(callback){
+                    var now_time=$('#global-choose-date-text').val();
+                    callback(now_time);
+                }
+            });
+        },
+
+        content: _tpl_html.join("")
+    });
+
+
+
+}
+
+
+
+function global_add_project_history(title,callback){
+    var _tpl_html=[];
+
+
+    _tpl_html.push("                                        <div>");
+
+    _tpl_html.push("                        <div  style='padding-top: 10px;' > </div>");
+
+
+    _tpl_html.push("                                        <form  class='form-horizontal'>");
+
+    _tpl_html.push("                        <div class='form-group' >");
+    _tpl_html.push("                            <label class='col-sm-2 control-label'>描述</label>");
+    _tpl_html.push("                            <label ui='valid-error-tip' for='update_time' class='error'></label>");
+    _tpl_html.push("                            <div class='col-sm-6'>");
+    _tpl_html.push("                                <input id='global-description-text' type='text' class='form-control' value=''> <span class='help-block m-b-none'></span>");
+    _tpl_html.push("                            </div>");
+    _tpl_html.push("                        </div>");
+
+    _tpl_html.push("                                        <div class='form-group'>");
+    _tpl_html.push("                                            <label class='col-sm-2 control-label'>图片</label>");
+    _tpl_html.push("                            <div class='col-sm-6'>");
+    _tpl_html.push("                                            <div class='hmlu '>");
+    _tpl_html.push("                                                <div id='global-image-list-uploader' name='upload-list'>");
+    _tpl_html.push("                                                    <a href='javascript:void(0);' class='hmlu-upload-button'><input type='file' id='global-image-input-file\' multiple class='hmlu-input-file'></a>");
+    _tpl_html.push("                                                </div>");
+    _tpl_html.push("                                            </div>");
+    _tpl_html.push("                                            <div style='display: none;'>");
+    _tpl_html.push("                                                <input type='text' class='form-control' name='global-image-arr' id='global-image-arr-text' value=''> <span class='help-block m-b-none' ></span>");
+    _tpl_html.push("                                            </div>");
+    _tpl_html.push("                            </div>");
+    _tpl_html.push("                                        </div>");
+
+    _tpl_html.push("                        <div  style='' > </div>");
+
+    _tpl_html.push("                        <div class='form-group' >");
+    _tpl_html.push("                            <label class='col-sm-2 control-label'>时间</label>");
+    _tpl_html.push("                            <label ui='valid-error-tip' for='update_time' class='error'></label>");
+    _tpl_html.push("                            <div class='col-sm-6'>");
+    _tpl_html.push("                                <input id='global-choose-date-text' type='text' class='form-control' onclick='laydate({istime: true,istoday: true, format: \"YYYY-MM-DD hh:mm:ss\"})' name='update_time' value=''> <span class='help-block m-b-none'></span>");
+    _tpl_html.push("                            </div>");
+    _tpl_html.push("                        </div>");
+
+
+
+
+    _tpl_html.push("                        <div class='form-group'>");
+    _tpl_html.push("                            <div class='col-sm-4 col-sm-offset-2'>");
+    _tpl_html.push("                                <a class='btn btn-primary' type='button' id='global-btn-choose-date'>确定</a>");
+    _tpl_html.push("                            </div>");
+    _tpl_html.push("                        </div>");
+    _tpl_html.push("                                        </form>");
+
+    _tpl_html.push("                                        </div>");
+    var _dialog_date=layer.open({
+        type: 1,
+        title:title,
+        closeBtn: 1,
+        area: ['600px', '400px'],
+        shadeClose: false,
+        skin: 'yourclass',
+        success:function(){
+            $('#global-choose-date-text').val(laydate.now(0, 'YYYY-MM-DD hh:mm:ss'));
+            //--初始化uploader
+            global_createUploader("#global-image-list-uploader","#global-image-input-file",$("#global-image-arr-text"),4);
+            $('#global-btn-choose-date').click(function(){
+                layer.close(_dialog_date);
+                if(callback){
+                    var now_time=$('#global-choose-date-text').val();
+                    var now_desc=$('#global-description-text').val();
+                    var now_images=$("#global-image-arr-text").val();
+                    callback(now_desc,now_time,now_images);
+                }
+            });
+        },
+
+        content: _tpl_html.join("")
+    });
+
+
+
+}
+
+function global_show_log_list(title,dataList){
+    var _tpl_html=[];
+
+
+    _tpl_html.push("        <table class='table table-striped'>");
+    _tpl_html.push("            <thead>");
+    _tpl_html.push("            <tr>");
+    _tpl_html.push("                <th>id</th>");
+    _tpl_html.push("                <th>日期</th>");
+    _tpl_html.push("                <th>描述</th>");
+    _tpl_html.push("                <th>图片</th>");
+    _tpl_html.push("            </tr>");
+    _tpl_html.push("            </thead>");
+    _tpl_html.push("            <tbody>");
+    _tpl_html.push("");
+    _tpl_html.push("            <%#");
+    _tpl_html.push("            for(var i=0;i< d.length;i++){");
+    _tpl_html.push("            var item=d[i];");
+    _tpl_html.push("            var img_arr=[];");
+    _tpl_html.push("            if(item.images){");
+    _tpl_html.push("            img_arr=item.images.split(',');");
+    _tpl_html.push("            }");
+    _tpl_html.push("");
+    _tpl_html.push("");
+    _tpl_html.push("");
+    _tpl_html.push("            %>");
+    _tpl_html.push("            <tr>");
+    _tpl_html.push("                <td><%=item.id%></td>");
+    _tpl_html.push("                <td><%=moment(new Date(parseInt(item.create_time)*1000)).format('YYYY-MM-DD HH:mm:ss')%></td>");
+    _tpl_html.push("                <td><%=item.description%></td>");
+    _tpl_html.push("                <td>");
+    _tpl_html.push("                    <%#");
+    _tpl_html.push("                    for(var jj=0;jj< img_arr.length;jj++){");
+    _tpl_html.push("                    %>");
+    _tpl_html.push("                    <img src='<%=img_arr[jj]%>' style='max-width: 100px;max-height: 100px;'/>");
+    _tpl_html.push("                    <%#");
+    _tpl_html.push("                    }");
+    _tpl_html.push("                    %>");
+    _tpl_html.push("                </td>");
+    _tpl_html.push("            </tr>");
+    _tpl_html.push("            <%#");
+    _tpl_html.push("            }");
+    _tpl_html.push("            %>");
+    _tpl_html.push("");
+    _tpl_html.push("            </tbody>");
+    _tpl_html.push("        </table>");
+    var _tpl_form=laytpl(_tpl_html.join('\n'));
+    var _html=_tpl_form.render(dataList);
+    var _dialog_date=layer.open({
+        type: 1,
+        title:title,
+        closeBtn: 1,
+        area: ['600px', '400px'],
+        shadeClose: false,
+        skin: 'yourclass',
+        success:function(){
+
+        },
+
+        content: _html
+    });
+
+
+
+}

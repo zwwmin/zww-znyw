@@ -1,0 +1,112 @@
+/**
+ * 注册页面逻辑。
+ */
+define("p.all",function(require,exports,module){
+
+    var queryObject=util.getQueryObject();
+    var to_count=$('a.go_btn1');
+
+    var app= {
+        //定时器任务
+        timer:function () {
+            var me = this;
+            console.log('=====================我是定时器任务===================');
+            function ajx() {
+                $.ajax({
+                    url: "/user/v5_SmartFindCurrentAlarm"
+                    , data: {}
+                    , method: "post"
+                    , success: function (res) {
+                        console.log(res)
+                        if(res.data.length > 0){
+                            me.SiteChoice(res);
+                        }
+                    }
+                    , error: function () {
+
+                    }
+                })
+            }
+            setInterval(ajx,60000);
+        }
+        ,SiteChoice:function (sdata) {
+            var popNotice = function () {
+                //判断是否有权限发送通知，其中granted表示用户允许通知，denied表示用户嫌弃你，default表示用户目前还没有管你
+                //创建一个通知对象
+//                    var notification = new  Notification("Hi，帅哥：", {
+//                        body: '可以加你为好友吗？',
+//                        icon: 'img/mm1.jpg',
+//                        renotify: true  //如果是true，则表示替换以前的通知，如果false，则会叠高楼（默认是true）
+//                        //还有其他参数，见：http://www.zhangxinxu.com/wordpress/2016/07/know-html5-web-notification/
+//                    });
+                for (var i= 0;i<sdata.data.length;i++) {
+                    var arr = sdata.data[i];
+                    if(arr.level == '普通'){
+                        Notification.requestPermission(function (status) {
+                            console.log(status);
+                            if (Notification.permission == "granted") {
+                                var notice_ = new Notification(arr.level, {
+                                    icon:'/res/images/imgv7/green_warming.png',
+                                    body: arr.alarminfo,
+                                    renotify: false  //如果是true，则表示替换以前的通知，如果false，则会叠高楼（默认是true）
+                                });
+                                notice_.onclick = function () {//单击消息提示框，进入浏览器页面
+//                            window.focus();
+//                            notice_.close();
+                                    console.log("11111")
+                                    location.href = '/user/Intelligent_warning';
+                                }
+                            }
+                        });
+                    }else if(arr.level == '预警'){
+                        Notification.requestPermission(function (status) {
+                            console.log(status);
+                            if (Notification.permission == "granted") {
+                                var notice_ = new Notification(arr.level, {
+                                    icon:'/res/images/imgv7/yellow_warming.png',
+                                    body: arr.alarminfo,
+                                    renotify: false  //如果是true，则表示替换以前的通知，如果false，则会叠高楼（默认是true）
+                                });
+                                notice_.onclick = function () {//单击消息提示框，进入浏览器页面
+//                            window.focus();
+//                            notice_.close();
+                                    console.log("11111")
+                                    location.href = '/user/Intelligent_warning';
+                                }
+                            }
+                        });
+                    }else  if(arr.level == '严重'){
+                        Notification.requestPermission(function (status) {
+                            console.log(status);
+                            if (Notification.permission == "granted") {
+                                var notice_ = new Notification(arr.level, {
+                                    icon:'/res/images/imgv7/red_warming.png',
+                                    body: arr.alarminfo,
+                                    renotify: false  //如果是true，则表示替换以前的通知，如果false，则会叠高楼（默认是true）
+                                });
+                                notice_.onclick = function () {//单击消息提示框，进入浏览器页面
+//                            window.focus();
+//                            notice_.close();
+                                    console.log("11111")
+                                    location.href = '/user/Intelligent_warning';
+                                }
+                            }
+                        });
+                    }
+
+                }
+            };
+            if (Notification.permission == "granted") {//如果有权限发送通知
+                popNotice();//调用上面定义的发送通知的函数
+            } else if (Notification.permission != "denied") {//如果不允许发送通知
+                //向用户发送获取通知权限请求
+                Notification.requestPermission(function (permission) {
+                    popNotice();//如果用户允许通知权限，调用上面定义的发送通知的函数
+                });
+            }
+        }
+    };
+
+    module.exports=app;
+
+});

@@ -1,0 +1,70 @@
+<%
+//--通用分页控件--模板一，分页是必然要用到浏览器事件的，不单单是服务端渲染出相关html，所以这个是没有服务器组件可言。
+%>
+<ul>
+    <%
+    var _currentPage=data.currentPage;
+    var _totalPages=data.totalPages;
+    var _beginNum=data.beginNum;
+    var _endNum=data.endNum;
+    var _middleNum=data.middleNum;
+    var _showDots=data.showDots;
+    var _maxShowNum=data.maxShowNum;
+
+
+    if(_currentPage<=1){
+    %>
+    <li class="disable"><a><i class="sprite previous"></i><i class="txt">上一页</i></a></li>
+    <%
+    }
+    else{
+    %>
+    <li><a href="javascript:void(0);" ui="pager-item" pageIndex="<%=_currentPage-1%>"><i class="sprite previous"></i><i class="txt">上一页</i></a></li>
+    <%
+    }
+    %>
+
+<!--     <%if(_currentPage>_maxShowNum){%>
+    <li><a href="javascript:void(0);" ui="pager-item" pageIndex="1">1</a></li>
+    <li><a>...</a></li>
+    <%}%> -->
+
+    <%
+    for(var i=_beginNum;i<=_middleNum;i++){
+
+    if(i==_currentPage){
+    %>
+    <li class="on"><a><%=i%></a></li>
+    <%
+    }
+    else{
+    %>
+    <li><a href="javascript:void(0);" ui="pager-item" pageIndex="<%=i%>"><%=i%></a></li>
+    <%
+    }
+    }
+    %>
+
+    <%
+    if(_showDots){
+    %>
+    <li><a>...</a></li>
+    <!-- <li><a href="javascript:void(0);" ui="pager-item" pageIndex="<%=_endNum%>"><%=_endNum%></a></li> -->
+    <%
+    }
+    %>
+
+    <%
+    if(_currentPage>=_totalPages){
+    %>
+    <li class="disable"><a><i class="txt">下一页</i><i class="sprite next"></i></a></li>
+    <%
+    }
+    else{
+    %>
+    <li><a href="javascript:void(0);" ui="pager-item" pageIndex="<%=_currentPage+1%>"><i class="txt">下一页</i><i class="sprite next"></i></a></li>
+    <%
+    }
+    %>
+
+</ul>

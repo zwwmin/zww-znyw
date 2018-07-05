@@ -1,0 +1,13 @@
+<div class="loading-wrap" style="margin: auto;">
+    <div class="loading-outer"></div>
+    <div class="loading-inner">
+        <div class="loading-spiner"></div>
+        <div class="loading-filler"></div>
+        <div class="loading-masker"></div>
+    </div>
+    <div class="loading-inner2">
+        <div class="loading-spiner"></div>
+        <div class="loading-filler"></div>
+        <div class="loading-masker"></div>
+    </div>
+</div>

@@ -1,0 +1,39 @@
+;(function(){
+if(window.__seajs_modules==undefined){
+window.__seajs_modules=[];
+}
+var __js_suffix=".min.js";
+var __js_m_folder="min";
+if(window.__js_debug==true){
+__js_m_folder="src";
+__js_suffix=".js";
+}
+if(window.ContextPath==undefined){
+	window.ContextPath="";
+}
+//
+window.__seajs_modules.push({
+	"p.all":window.ContextPath+"/res/module/"+__js_m_folder+"/p.all"+__js_suffix+"?v=201805071630"
+});
+window.__seajs_modules.push({
+	"p.informationlist":window.ContextPath+"/res/module/"+__js_m_folder+"/p.informationlist"+__js_suffix+"?v=201805071630"
+});
+window.__seajs_modules.push({
+	"p.Intelligent_analysis":window.ContextPath+"/res/module/"+__js_m_folder+"/p.Intelligent_analysis"+__js_suffix+"?v=201805071630"
+});
+window.__seajs_modules.push({
+	"p.Intelligent_energy":window.ContextPath+"/res/module/"+__js_m_folder+"/p.Intelligent_energy"+__js_suffix+"?v=201805071630"
+});
+window.__seajs_modules.push({
+	"p.Intelligent_load":window.ContextPath+"/res/module/"+__js_m_folder+"/p.Intelligent_load"+__js_suffix+"?v=201805071630"
+});
+window.__seajs_modules.push({
+	"p.Intelligent_login":window.ContextPath+"/res/module/"+__js_m_folder+"/p.Intelligent_login"+__js_suffix+"?v=201805071630"
+});
+window.__seajs_modules.push({
+	"p.Intelligent_warning":window.ContextPath+"/res/module/"+__js_m_folder+"/p.Intelligent_warning"+__js_suffix+"?v=201805071630"
+});
+window.__seajs_modules.push({
+	"p.login":window.ContextPath+"/res/module/"+__js_m_folder+"/p.login"+__js_suffix+"?v=201805071630"
+});
+})();

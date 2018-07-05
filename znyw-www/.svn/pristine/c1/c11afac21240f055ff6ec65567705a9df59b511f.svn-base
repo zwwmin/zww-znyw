@@ -1,0 +1,279 @@
+@charset "UTF-8";
+._extend_top_nav_font, .wrap.wrap768 .wrap_menu_item {
+  color: #9b9b9b;
+  font-size: 10px; }
+
+.table_cell_of_3columns {
+  float: left;
+  width: 33%; }
+
+.table_cell_of_4columns {
+  float: left;
+  width: 25%; }
+
+.v2NavBar {
+  padding-top: 20px;
+  z-index: 2; }
+
+.wrap.wrap768 {
+  width: 768px;
+  height: 30px;
+  color: #9b9b9b; }
+  .wrap.wrap768 .bld_logo {
+    background: url("../images/img2/logo.png") no-repeat center center;
+    width: 60px;
+    height: 30px;
+    float: left;
+    margin-left: 40px; }
+  .wrap.wrap768 .wrap_menu_item {
+    text-align: center;
+    float: left;
+    display: inline-block;
+    line-height: 30px;
+    height: 30px;
+    font-size: 14px;
+    margin-left: 30px; }
+  .wrap.wrap768 .area_text {
+    color: #FFF;
+    text-align: center;
+    display: inline-block;
+    padding: 0 5px;
+    height: 30px;
+    line-height: 30px;
+    float: left;
+    margin-left: 5px;
+    padding-right: 8px;
+    font-size: 12px !important;
+    background: url("../images/img2/arrow.png") no-repeat right 15px; }
+
+/**首页的banner广告**/
+.v2Banner {
+  margin: 0 auto;
+  background: url("../images/img2/bg.jpg") repeat-x center center;
+  width: 100%;
+  height: 575px;
+  margin-top: -50px;
+  position: relative;
+  z-index: -1; }
+  .v2Banner .bannerSlogan {
+    background: url("../images/img2/selogan.png") no-repeat center center;
+    width: 326px;
+    height: 43px;
+    margin: 0 auto 0 auto; }
+  .v2Banner .bannerSubTitle {
+    font-size: 18px;
+    color: #EDEDED;
+    letter-spacing: 1px;
+    text-align: center;
+    padding-top: 20px; }
+  .v2Banner .bannerButtons {
+    width: 369px;
+    height: 30px;
+    margin: 0 auto; }
+    .v2Banner .bannerButtons .bannerButtonWrp {
+      float: left;
+      width: 33%;
+      text-align: center; }
+    .v2Banner .bannerButtons .bannerButton.on {
+      background: #1FBCEC;
+      border: 1px solid #1FBCEC;
+      -webkit-border-radius: 23px;
+      -moz-border-radius: 23px;
+      border-radius: 23px;
+      -ms-border-radius: 23px; }
+    .v2Banner .bannerButtons .bannerButton {
+      display: inline-block;
+      height: 28px;
+      line-height: 30px;
+      color: #FFFFFF;
+      font-size: 14px;
+      background: transparent;
+      padding: 0 10px;
+      width: 78px;
+      border: 1px solid #FFF;
+      -webkit-border-radius: 23px;
+      -moz-border-radius: 23px;
+      border-radius: 23px;
+      -ms-border-radius: 23px; }
+      .v2Banner .bannerButtons .bannerButton:_hover {
+        background: #1FBCEC;
+        border: 1px solid #1FBCEC;
+        -webkit-border-radius: 23px;
+        -moz-border-radius: 23px;
+        border-radius: 23px;
+        -ms-border-radius: 23px; }
+  .v2Banner .bannerBottom {
+    background: url("../images/img2/Path.png") no-repeat center top;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 25px; }
+    .v2Banner .bannerBottom .leftBBottom {
+      position: absolute;
+      left: 0;
+      width: 42%;
+      background: #FFF;
+      height: 25px;
+      bottom: 0; }
+    .v2Banner .bannerBottom .rightBBottom {
+      position: absolute;
+      right: 0;
+      width: 42%;
+      background: #FFF;
+      height: 25px;
+      bottom: 0; }
+
+.v2index {
+  width: 768px;
+  margin: 0 auto; }
+  .v2index .v2BlockTitle {
+    font-size: 18px;
+    color: #525160;
+    line-height: 24px;
+    text-align: center; }
+  .v2index .blockArea {
+    text-align: center;
+    height: 100px; }
+  .v2index .unitWrp {
+    width: 225px;
+    overflow: hidden;
+    text-align: center;
+    display: inline-block; }
+  .v2index .unitSequence {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    -ms-border-radius: 50%;
+    color: #1FBCEC;
+    border: 1px solid #1FBCEC;
+    text-align: center;
+    display: inline-block;
+    width: 27px;
+    height: 27px;
+    font-size: 14px;
+    line-height: 27px; }
+  .v2index .unitTitle {
+    font-size: 14px;
+    text-align: center;
+    line-height: 40px;
+    color: #525160;
+    font-weight: bold; }
+  .v2index .unitDesc {
+    font-size: 12px;
+    text-align: center;
+    line-height: 18px;
+    color: #525160; }
+  .v2index .cBlockArea {
+    height: 180px;
+    display: inline-block;
+    text-align: center; }
+  .v2index .cUnitWrp {
+    width: 130px;
+    display: inline-block;
+    text-align: center; }
+  .v2index .cUnitLogo {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    -ms-border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: inline-block;
+    text-align: center; }
+    .v2index .cUnitLogo img {
+      width: 100%;
+      height: 100%;
+      -webkit-border-radius: 50%;
+      -moz-border-radius: 50%;
+      border-radius: 50%;
+      -ms-border-radius: 50%; }
+  .v2index .cUnitTitle {
+    font-size: 13px;
+    line-height: 21px; }
+  .v2index .cLoc {
+    height: 18px;
+    line-height: 18px;
+    font-size: 12px;
+    background: url("../images/img2/location@2x.png") no-repeat left center;
+    padding-left: 10px;
+    background-size: 9px 11px;
+    display: inline-block;
+    text-align: center; }
+  .v2index .cDesc {
+    height: 18px;
+    line-height: 18px;
+    font-size: 12px;
+    display: inline-block;
+    text-align: center; }
+  .v2index .cBtnDetail {
+    width: 110px;
+    height: 25px;
+    background: white;
+    display: inline-block;
+    text-align: center;
+    font-size: 13px;
+    line-height: 25px;
+    -moz-box-shadow: 2px 2px 5px #969696;
+    -webkit-box-shadow: 2px 2px 5px #969696;
+    box-shadow: 2px 2px 5px #969696;
+    filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2px, OffY=2px, Color='#969696');
+    /* IE6,IE7 */
+    -ms-filter: "progid:DXImageTransform.Microsoft.dropshadow(OffX=2px, OffY=2px, Color='#969696')";
+    /* IE8 */ }
+    .v2index .cBtnDetail:hover {
+      -moz-box-shadow: 2px 2px 8px #969696;
+      -webkit-box-shadow: 2px 2px 8px #969696;
+      box-shadow: 2px 2px 8px #969696;
+      filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2px, OffY=2px, Color='#969696');
+      /* IE6,IE7 */
+      -ms-filter: "progid:DXImageTransform.Microsoft.dropshadow(OffX=2px, OffY=2px, Color='#969696')";
+      /* IE8 */ }
+  .v2index .numbersWrp {
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    letter-spacing: 0; }
+  .v2index .numberUnit {
+    background: url("../images/img2/triangle@2x.png") no-repeat center center;
+    width: 20px;
+    height: 33px;
+    padding: 0 3px;
+    display: inline-block;
+    text-align: center;
+    line-height: 33px;
+    background-size: 20px 33px;
+    font-size: 20px;
+    color: white; }
+  .v2index .numberTitle {
+    font-size: 18px;
+    text-align: center; }
+  .v2index .numberDataBottom {
+    background: url("../images/img2/people@2x.png") repeat-x left center;
+    height: 29px;
+    width: 100%;
+    position: relative;
+    bottom: 0; }
+
+.bloc_bg_2 {
+  background: #f8f9fb; }
+
+.bloc_bg_3 {
+  background: #DAE9F0; }
+
+/**按钮**/
+.tBtn_style1 {
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  -ms-border-radius: 10px;
+  color: #1FBCEC;
+  font-size: 16px;
+  height: 28px;
+  line-height: 30px;
+  text-align: center;
+  display: inline-block;
+  padding: 0px 10px;
+  border: 1px solid #1FBCEC; }
+
+/*# sourceMappingURL=ver2.css.map */

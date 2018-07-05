@@ -1,0 +1,56 @@
+/*尾部*/
+.dis{display: none}
+.footerv4{ width: 100%;height: 537px;float: left;background:#000000;}
+.footerv4_center{width: 1200px;margin: 0 auto;height: 100%;}
+.footerv_center_top{width: 100%;float: left; position: relative; }
+.center_top_lg{background:url("../images/imgv4/logo@2x.png") no-repeat center center;background-size: 100%; width: 80px;height: 26px;margin:90px 235px 41px  49px}
+.center_comapp{width: 148px;height: 48px;background: #FFFFFF;font-size: 18px; color: #000000;text-align: center;line-height: 44px;}
+.center_service{width:144px;height: 44px;border: 2px solid #fff;font-size: 18px;color: #fff;text-align: center;line-height: 44px; }
+.center-fengex{border: 1px solid #5a5a5a;float: left;width: 100%;}
+.footer_center_nav{width: 100%;height: 252px;margin-top: 37px;  float: left;}
+.footer_center_nav ul{margin: 0;padding: 0;}
+.footer_center_nav li{float: left;}
+.footer_center_nav li a{font-size: 16px;color: #FFFFFF;margin-bottom: 23px;display: block}
+.magleft74{margin-left:60px ;}
+.magright245{margin-left:244px ;}
+.magright225{margin-left:235px ;}
+.footer_center_nav_wechatimg{width: 87px;height: 87px;background:url("../images/imgv4/wechat@2x.jpg") no-repeat center center;background-size: 100%; }
+.footer_center_nav_telimg{width: 180px;height: 19px;margin-top:33px;background:url("../images/imgv4/tel_icon@2x.png") no-repeat center center;background-size: 100%;}
+.footerv4_center_hyperlink{margin: 25px 0 0 50px;float: left;}
+.footerv4_center_hyperlink a{font-size: 14px;color: #fff;margin-left: 20px;}
+.footerv4_center_hyperlink2{width: 100%;text-align: center;height: 20px;float: left}
+.footerv4_center_hyperlink2 a{display: inline-block;;float: left;font-size: 14px;color: #fff;text-align: center;}
+.magleft200{margin-left: 310px;margin-right: 15px;}
+.distance_comapp{position: absolute;z-index: 2;top: 75px;left: 362px;}
+.distance_service{position: absolute;z-index: 2;top: 75px;left: 727px;}
+.comapp_download{background:url("../images/imgv4/dg_qrcode.png") no-repeat center center; width: 150px;height: 160px;position:absolute;top: -100px;left: 362px;background-size: 100%;z-index: 1;}
+.fws_download{background:url("../images/imgv4/fws_qrcode.png") no-repeat center center; width: 150px;height: 160px;position:absolute;top: -100px;left: 727px;background-size: 100%;z-index: 1;}
+#comapp,
+#service{cursor:pointer;}
+.download_xia{
+    animation: comdownload 1s;
+    -moz-animation: comdownload 1s;
+    animation-fill-mode:forwards;
+    -webkit-animation-fill-mode:forwards;
+}
+@-moz-keyframes comdownload {
+    0%{
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    100%{
+        transform: translateY(0px);
+        opacity: 1;
+    }
+}
+@keyframes comdownload {
+    0%{
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    100%{
+        transform: translateY(0px);
+        opacity: 1;
+    }
+}
+span{display: block;}

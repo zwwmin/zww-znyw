@@ -1,0 +1,49 @@
+<%
+/**confirm box 模板。**/
+%>
+<div class="popup pngfix">
+    <div class="refundBox">
+        <div class="refundCon">
+            <%
+            if(data.showClose){
+            %>
+            <p id="close" class="close"  ui="btn-close">x</p>
+            <%
+            }
+            %>
+            <div class="con_3">
+                <%
+                if(util.checkEmpty(data.message)==false){
+                %>
+                <p class="title"><%=data.message%></p>
+                <%
+                }
+                %>
+
+                <%
+                if(util.checkEmpty(data.smallMessage)==false){
+                %>
+                <p class="msg"><%=data.smallMessage%></p>
+                <%
+                }
+                %>
+            </div>
+            <p>
+            <%
+            if(data.showConfirm){
+            %>
+                <a class="com_btn com_btn_orange"  ui="btn-confirm"><%=data.confirmText%></a>
+            <%
+            }
+            %>
+            <%
+            if(data.showCancel){
+            %>
+                <a class="com_btn com_btn_gray2"  ui="btn-cancel"><%=data.cancelText%></a>
+            <%
+            }
+            %>
+           </p>
+        </div>
+    </div>
+</div>

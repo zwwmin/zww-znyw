@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>智能运维</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/AdminLTE.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/Admintxt.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/bootstrap/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/Ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/skins/skin-blue.css">
+    <!--layui-->
+    <link rel="stylesheet" type="text/css" href="../layui/css/layui.css">
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+
+<div class="wrapper">
+
+    <%-partial("layout/Intelligent.ejs",{data:{TotalMenu:"usage",CurrentMenu:"load",memberInfo:memberInfo,BaseInfo:BaseInfo,currentData:current}})%>
+    <!--主体-->
+    <div class="content-wrapper">
+        <section class="content">
+            <form class="layui-form" action="">
+                <div class="content-site">
+                    <label class="layui-form-label">监控点:</label>
+                    <div class="select ">
+                        <select name="test" id="site"  lay-filter="test">
+                            <% for (var i = 0;i < ChoiceLoads.data.length;i++){
+                                var arr = ChoiceLoads.data[i];
+                            %>
+                            <option value="<%= arr.load_factor_item %>"><%= arr.name %></option>
+                            <% } %>
+                        </select>
+                    </div>
+                </div>
+
+            </form>
+
+
+            <div class=" row content-all-wrapper-menu " style="margin-top: 20px;">
+                <div class="col-xs-12 content-all-wrapper-menu-top " style="margin: 0;">
+                    <div class="conter-warning-header">
+                        <img src="/res/images/imgv6/green_left.png" alt="" class="conter-warning-top-img2" >
+                        <span style="font-weight: 900;">负荷概况</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="" style="margin:0 15px; ">
+                    <div class="col-sm-4  " style="background: white"  >
+                        <div id="main" style="width: 100%;height: 200px;"  >
+
+                        </div>
+                        <span class="load_pie_span1" id="real_time">0</span>
+                        <span class="load_pie_span2">当前负荷(kW)</span>
+                    </div>
+                    <div class="col-sm-4" style="background: white" >
+                        <div id="main2" style="width: 100%;height: 200px;"  >
+
+                        </div>
+
+                        <span class="load_pie_span1" id="day">0</span>
+                        <span class="load_pie_span2">本日最大负荷(kW)</span>
+                    </div>
+                    <div class="col-sm-4" style="background: white" >
+                        <div id="main3" style="width: 100%;height: 200px;" >
+
+                        </div>
+
+                        <span class="load_pie_span1" id="month">0</span>
+                        <span class="load_pie_span2">本月最大负荷(kW)</span>
+                    </div>
+                </div>
+
+            </div>
+            <div class=" row content-all-wrapper-menu " style="margin-top: 20px;">
+                <div class="col-xs-12 content-all-wrapper-menu-top " style="margin: 0;">
+                    <div class="conter-warning-header">
+                        <img src="/res/images/imgv6/green_left.png" alt="" class="conter-warning-top-img2" >
+                        <span style="font-weight: 900;">有功功率</span>
+                        <div class="title_time">
+                            <div class=" title_time_group">
+                                <p>查看历史数据：</p>
+                               <input   class="title_time_group_input" id="reservation" readonly placeholder="开始时间"></input>
+                               <p style="margin:0 5px ">至</p>
+                               <input   class="title_time_group_input" id="reser" readonly placeholder="结束时间"></input>
+                            </div>
+                            <div  id="submit_btn" class="title_time_btn " >查询</div>
+                        </div>
+                    </div>
+                    <div id="" style="width: 100%;height: 400px;background: white" >
+                        <div id="assd" style="width: 100%;height: 400px;background: white" >
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <input type="hidden" name="begin" id="stimes" value="">
+    <input type="hidden" name="end" id="etimes" value="">
+
+</div>
+<!--ECharts-->
+<script type="text/javascript" src="../dist/echarts.common.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/dist/js/adminlte.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!--layui-->
+<script type="text/javascript" src="../layui/layui.all.js"></script>
+
+
+
+<% include layout/inc_js.ejs%>
+
+<script>
+
+    var pageOptions={};
+    seajs.use("p.Intelligent_load",function(page){
+        page.init(pageOptions);
+    });
+</script>
+</body>
+
+</html>

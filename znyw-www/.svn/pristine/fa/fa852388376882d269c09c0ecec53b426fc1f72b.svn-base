@@ -1,0 +1,38 @@
+<thead>
+<tr>
+    <th width="5%">
+        编号
+    </th>
+    <th width="15%">
+        站点名称
+    </th>
+    <th width="45%">
+        告警内容
+    </th>
+    <th width="5%">
+        等级
+    </th>
+    <th width="15%">
+        告警时间
+    </th>
+    <th width="15%">
+        结束时间
+    </th>
+</tr>
+</thead>
+<tbody id="warningBody">
+<%
+for(var i=0;i< data.length;i++){
+    var item=data[i];
+   var s = i+1;
+%>
+<tr>
+    <td><%= s%></td>
+    <td><%= item.s_name%></td>
+    <td><%= item.alarminfo%></td>
+    <td><%= item.level%></td>
+    <td><%= item.stime%></td>
+    <td><%= item.etime%></td>
+</tr>
+<%}%>
+</tbody>

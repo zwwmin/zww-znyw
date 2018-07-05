@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>智能代维</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/AdminLTE.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/Admintxt.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/bootstrap-daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/Ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/skins/skin-blue.css">
+
+
+    <style>
+
+        /*通用分页*/
+        .pageBox{margin: 20px 0;}
+        .pageBox ul{text-align: center;}
+        .pageBox ul li{margin-left: -5px;display: inline-block;*display:inline;*zoom:1;vertical-align: top;overflow: hidden;height: 37px;}
+        .pageBox ul li a{display: inline-block;line-height: 35px;height:35px;padding:0 15px;border: 1px solid #eee;font-size: 14px;background: #fff;}
+        .pageBox ul li a .sprite{width: 4px;height:8px;float: left;display: inline-block;}
+        .pageBox ul li a .sprite.next{background-position: -373px -20px;margin:14px 0 6px 5px;}
+        .pageBox ul li a .sprite.previous{background-position: -391px -20px;margin:14px 5px 6px 0;}
+        .pageBox ul li a .txt{font-style: normal;float: left;}
+
+        .pageBox ul li.disable a{color: #bbb;}
+        .pageBox ul li.disable a .sprite.next{background-position: -379px -20px;}
+        .pageBox ul li.disable a .sprite.previous{background-position: -397px -20px;}
+        .pageBox ul li.disable a:hover{background: #fff;color: #bbb;border: 1px solid #eee;line-height: 35px;height:35px;}
+        .pageBox ul li.disable a:hover .sprite.next{background-position: -379px -20px;}
+        .pageBox ul li.disable a:hover .sprite.previous{background-position: -397px -20px;}
+
+        .pageBox ul li a:hover,
+        .pageBox ul li.on a{line-height: 37px;height:37px;background: #1FBCEC;color: #fff;border: 0;border-left: 1px solid #ccc;border-right: 1px solid #ccc;}
+        .pageBox ul li a:hover .sprite.next,
+        .pageBox ul li.on a .sprite.next{background-position: -385px -20px;}
+        .pageBox ul li a:hover .sprite.previous,
+        .pageBox ul li.on a .sprite.previous{background-position: -403px -20px;}
+
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+
+    <%-partial("layout/Intelligent.ejs",{data:{TotalMenu:"usage",CurrentMenu:"warning",memberInfo:memberInfo,BaseInfo:BaseInfo}})%>
+    <!--主体-->
+    <div class="content-wrapper">
+        <section class="content">
+
+            <div class="row ">
+                <div style="height: 375px;" class=" col-lg-6 col-md-12 col-sm-12  conter-warning-statistical">
+                    <div class="conter-warning-nav">
+                        <div class="conter-warning-header">
+                            <img src="/res/images/imgv6/green_left.png" alt="" class="conter-warning-top-img2" >
+                            <span style="font-weight: 900;">报警统计</span>
+                        </div>
+                        <div style="width: 100%;height: 335px;">
+                            <div id="main" style="width: 100%;height:100%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div style="height: 375px;"  class=" col-lg-6 col-md-12 col-sm-12 conter-warning-statistical" >
+                    <div class="conter-warning-nav">
+                        <div class="conter-warning-header">
+                            <img src="/res/images/imgv6/top_icon.png" alt="" class="conter-warning-top-img" >
+                            <span style="font-weight: 900;">报警排行</span>
+                        </div>
+                        <div class="conter-warning-footer" id="warning-footer">
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!--所有报警信息-->
+                <div class="col-md-12  content-all-wrapper-menu">
+                    <div  style="background: white;padding: 0 15px;">
+                        <div class="row content-all-wrapper-menu-top"  >
+                            <ul class="col-md-6" id="warning_choose" >
+                                <li class="acs" ><a data-value="" href="#">全部</a></li>
+                                <li><a href="#"  data-value="1"> 普通</a></li>
+                                <li><a href="#" data-value="2">严重</a></li>
+                                <li><a href="#" data-value="3">预警</a></li>
+                            </ul>
+                            <div class="col-md-6" style="height: 40px;">
+                                <div class="input-group" style="width: 80%;float: left">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" style="height: 40px;" class="form-control pull-right" id="reservationtime">
+                                </div>
+                                <button type="submit" class="btn btn-info " id="submit_btn" style="float: right;margin:4px 15px 0 0; ">查询</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box">
+                        <table class="table table-striped table-bordered" id="warning_total">
+
+                        </table>
+                        <div class="row">
+                            <div class="col-sm-5">
+
+                            </div>
+                            <div class="col-sm-7" >
+                                <p class="pageBox" id="pager">
+
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
+    </div>
+    <!--底部-->
+    <!--<footer class="main-footer">-->
+
+        <!--<div class="pull-right hidden-xs">-->
+            <!--Anything you want-->
+        <!--</div>-->
+        <!--&lt;!&ndash; Default to the left &ndash;&gt;-->
+        <!--<strong>Copyright &copy; 2016 <a href="#">Company</a>.</strong> All rights reserved.-->
+    <!--</footer>-->
+
+    <!--点击打开right的侧边栏-->
+    <!--<div class="control-sidebar-bg"></div>-->
+    <input type="hidden" name="begin" id="stimes" value="">
+    <input type="hidden" name="end" id="etimes" value="">
+
+</div>
+
+<!--ECharts-->
+<script type="text/javascript" src="../dist/echarts.common.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/dist/js/adminlte.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/moment/min/moment.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
+
+<script>
+
+        $('#reservationtime').daterangepicker({
+            "locale": {
+                "direction": "ltr",
+                "format": "YYYY/MM/DD",
+                "separator": " - ",
+                "applyLabel": "Apply",
+                "cancelLabel": "Cancel",
+                "fromLabel": "From",
+                "toLabel": "To",
+                "customRangeLabel": "Custom",
+                "daysOfWeek": [
+                    "Su",
+                    "Mo",
+                    "Tu",
+                    "We",
+                    "Th",
+                    "Fr",
+                    "Sa"
+                ],
+                "monthNames": [
+                    "01月",
+                    "02月",
+                    "03月",
+                    "04月",
+                    "05月",
+                    "06月",
+                    "07月",
+                    "08月",
+                    "09月",
+                    "10月",
+                    "11月",
+                    "12月"
+                ],
+                "firstDay": 1
+            },
+            autoclose: true
+        }, function (start, end, label) {
+            var etime = end.format('YYYY/MM/DD');
+            var stime = start.format('YYYY/MM/DD');
+
+            $('#stimes').val(Date.parse(stime))
+            $('#etimes').val(Date.parse(etime))
+        });
+        var arr = [];
+        arr = <%- JSON.stringify(data.data) %>
+            console.log(arr)
+        var myChart = echarts.init(document.getElementById('main'));
+
+        // 指定图表的配置项和数据
+        var option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            color: ['#f5a623', '#66cc99', '#1fbcec'],
+            series: [
+                {
+                    name: '报警',
+                    type: 'pie',
+                    label: {
+                        normal: {
+                            show: true,
+                            formatter: '{b}: {c}({d}%)'
+                        }
+                    },
+                    radius: '55%',
+                    center: ['50%', '60%'],
+                    data: arr
+                }
+            ]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+        window.addEventListener('resize',function(){
+            myChart.resize();
+        });
+
+
+</script>
+<% include layout/inc_js.ejs%>
+<script>
+    var pageOptions={};
+    seajs.use("p.Intelligent_warning",function(page){
+        page.init(pageOptions);
+    });
+</script>
+</body>
+</html>

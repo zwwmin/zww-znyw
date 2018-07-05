@@ -1,0 +1,335 @@
+@charset "utf-8";
+@import "mixin";
+$TopNavHeight : 30px;
+$AppWidth2 : 768px;
+$topNavFontColor:#9b9b9b;
+$Color_1FBCEC: #1FBCEC;
+$Color_525160: #525160;
+$Color_f8f9fb:#f8f9fb;
+$Color_DAE9F0:#DAE9F0;
+
+
+._extend_top_nav_font{ color:$topNavFontColor; font-size:10px;  }
+
+
+.table_cell_of_3columns{
+  float:left;
+  width: 33%;
+}
+.table_cell_of_4columns{
+  float:left;
+  width: 25%;
+}
+.v2NavBar{
+  padding-top:20px;
+  z-index: 2;
+}
+.wrap.wrap768{
+  width:$AppWidth2;
+  height:$TopNavHeight;
+
+  color:$topNavFontColor;
+  .bld_logo{
+    background:url("../images/img2/logo.png") no-repeat center center;
+    width: 60px;
+    height: $TopNavHeight;
+    float:left;
+    margin-left: 40px;
+  }
+  .wrap_menu_item{
+    @extend ._extend_top_nav_font;
+    text-align: center;
+    float:left;
+    display: inline-block;
+
+
+
+    line-height: $TopNavHeight;
+    height:$TopNavHeight;
+    font-size:14px;
+    margin-left: 30px;
+  }
+
+  .area_text{
+    color:#FFF;
+    text-align: center;
+    display: inline-block;
+    padding:0 5px;
+    height: $TopNavHeight;
+    line-height: $TopNavHeight;
+    float:left;
+    margin-left:5px;
+    padding-right:8px;
+
+    font-size: 12px !important;
+    background: url("../images/img2/arrow.png") no-repeat right (($TopNavHeight/2));
+  }
+
+
+}
+
+
+/**首页的banner广告**/
+.v2Banner{
+  margin:0 auto;
+  background: url("../images/img2/bg.jpg") repeat-x center center;
+  width: 100%;
+  height: 575px;
+  margin-top:-50px;
+  position: relative;
+  z-index: -1;
+
+
+  .bannerSlogan{
+    background: url("../images/img2/selogan.png") no-repeat center center;
+    width: 326px;
+    height: 43px;
+    margin:0 auto 0 auto;
+
+  }
+
+  .bannerSubTitle{
+    font-size:18px;
+    color:#EDEDED;
+    letter-spacing: 1px;
+    text-align: center;
+    padding-top:20px;
+
+  }
+  .bannerButtons{
+    width:369px;
+    height:30px;
+    margin:0 auto;
+    .bannerButtonWrp{
+      float:left;
+      width: 33%;
+      text-align: center;
+
+    }
+    .bannerButton.on{
+
+        background: $Color_1FBCEC;
+        border:1px solid $Color_1FBCEC;
+        @include radius(1234,23px);
+
+    }
+    .bannerButton{
+      display:inline-block;
+      height: 28px;
+      line-height: 30px;
+      color:#FFFFFF;
+      font-size:14px;
+      background: transparent;
+      padding:0 10px;
+      width: 78px;
+      border:1px solid #FFF;
+      @include radius(1234,23px);
+
+      &:_hover{
+
+        background: $Color_1FBCEC;
+
+        border:1px solid $Color_1FBCEC;
+        @include radius(1234,23px);
+      }
+
+    }
+
+
+  }
+
+  .bannerBottom{
+    background: url("../images/img2/Path.png") no-repeat center top;
+    width: 100%;
+    position: absolute;
+    bottom:0;
+    left:0;
+    height: 25px;
+
+    .leftBBottom{
+      position: absolute;
+      left:0;
+      width: 42%;
+      background: #FFF;
+      height: 25px;
+      bottom:0;
+    }
+    .rightBBottom{
+      position: absolute;
+      right:0;
+      width: 42%;
+      background: #FFF;
+      height: 25px;
+      bottom:0;
+    }
+  }
+
+}
+
+.v2index{
+  width: $AppWidth2;
+  margin:0 auto;
+
+  .v2BlockTitle{
+    font-size:18px;
+    color:$Color_525160;
+    line-height: 24px;
+    text-align: center;
+  }
+  .blockArea{
+    text-align: center;
+    height: 100px;
+  }
+
+  .unitWrp{
+    width: 225px;
+    overflow: hidden;
+    text-align: center;
+    display: inline-block;
+  }
+  .unitSequence{
+    @include radius(1234,50%);
+    color:$Color_1FBCEC;
+    border:1px solid $Color_1FBCEC;
+    text-align: center;
+    display: inline-block;
+    width: 27px;
+    height: 27px;
+    font-size:14px;
+    line-height: 27px;
+  }
+
+  .unitTitle{
+    font-size:14px;
+    text-align: center;
+    line-height: 40px;
+    color:$Color_525160;
+    font-weight: bold;
+  }
+
+  .unitDesc{
+    font-size:12px;
+    text-align: center;
+    line-height: 18px;
+    color:$Color_525160;
+  }
+
+  .cBlockArea{
+    height: 180px;
+
+    display: inline-block;
+    text-align: center;
+
+  }
+  .cUnitWrp{
+    width: 130px;
+    display: inline-block;
+    text-align: center;
+
+  }
+  .cUnitLogo{
+    @include radius(1234,50%);
+    width: 50px;
+    height: 50px;
+    display: inline-block;
+    text-align: center;
+    img{
+      width: 100%;
+      height: 100%;
+      @include radius(1234,50%);
+
+    }
+  }
+  .cUnitTitle{
+    font-size:13px;
+    line-height: 21px;
+  }
+  .cLoc{
+    height: 18px;
+    line-height: 18px;
+    font-size:12px;
+    background: url("../images/img2/location@2x.png") no-repeat left center;
+    padding-left:10px;
+    background-size: 9px 11px;
+    display: inline-block;
+    text-align: center;
+
+  }
+  .cDesc{
+    height: 18px;
+    line-height: 18px;
+    font-size:12px;
+    display: inline-block;
+    text-align: center;
+  }
+  .cBtnDetail{
+    width: 110px;
+    height: 25px;
+    background: white;
+    display: inline-block;
+    text-align: center;
+    font-size:13px;
+    line-height: 25px;
+    @include shadow(2px,2px,5px,#969696);
+    //-moz-box-shadow:2px 2px 5px #969696;/*firefox*/
+    //-webkit-box-shadow:2px 2px 5px #969696;/*webkit*/
+    //box-shadow:2px 2px 5px #969696;/*opera或ie9*/
+    &:hover{
+      @include shadow(2px,2px,8px,#969696);
+    }
+  }
+
+  .numbersWrp{
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    letter-spacing: 0;
+  }
+  .numberUnit{
+    background: url("../images/img2/triangle@2x.png") no-repeat center center;
+    width: 20px;
+    height: 33px;
+    padding:0 3px;
+    display: inline-block;
+    text-align: center;
+    line-height: 33px;
+    background-size: 20px 33px;
+    font-size:20px;
+    color:white;
+
+  }
+  .numberTitle{
+    font-size:18px;
+    text-align: center;
+  }
+  .numberDataBottom{
+    background: url("../images/img2/people@2x.png") repeat-x left center;
+    height: 29px;
+    width: 100%;
+    position: relative;
+    bottom: 0;
+  }
+}
+.bloc_bg_2{
+  background: $Color_f8f9fb;
+
+}
+.bloc_bg_3{
+  background: $Color_DAE9F0;
+
+}
+/**按钮**/
+.tBtn_style1{
+  @include radius(1234,10px);
+  color:#1FBCEC;
+  font-size:16px;
+  height: (($TopNavHeight)-2);
+  line-height: $TopNavHeight;
+  text-align: center;
+  display: inline-block;
+  padding:0px 10px;
+  border:1px solid #1FBCEC;
+}
+
+
+

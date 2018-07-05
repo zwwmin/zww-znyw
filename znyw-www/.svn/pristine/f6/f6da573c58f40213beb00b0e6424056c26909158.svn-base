@@ -1,0 +1,1316 @@
+/**
+ * 图片裁剪组件，必须跟jquery exif ImageOrientationFix.js 等一起用。
+ */
+
+function ImgCut(opts){
+    var settings={
+        cutWidth:150 //裁剪框的宽度。
+        ,cutHeight:200 //裁剪框的高度
+        ,containerWidth:800 //容器宽度
+        ,containerHeight:600 //容器高度
+        ,imageShowWidth:400 //图片默认显示的宽度【会按照要求的宽度及高度等比缩放】
+        ,imageShowHeight:500 //图片默认显示的高度【会按照要求的宽度及高度等比缩放】
+        ,containerElement:"" //容器的默认元素，jquery元素或者原生dom元素。
+        ,showCutterInFirst:true //是否第一时间显示裁剪框---注意，true意味着即使用户没有选择图片，背景层没有显示图片裁剪框也显示。
+        ,saveMode:"ratio" //裁剪图片的模式有两种，一种是 ratio即，在原图片上面按照比例裁剪图片，尺寸不一定固定，一种是 size，严格按照裁剪框的尺寸来保存图片。
+
+    };
+    $.extend(settings,opts);
+    function _debug(str){
+
+        return;
+
+        var _div=$("<div></div>");
+        _div.text(str);
+        $("#debug").append(_div);
+    };
+
+    function _clearDebug(){
+        $("#debug").empty();
+    }
+    var __me=this;
+
+    //--定义必须用到的dom元素的句柄。
+    var containerElement=$(settings.containerElement);//整个容器对象，
+    var panel=containerElement.find('[ui="image-editor-panel"]');//这是包装几个画布的面板。
+    var canvas_bg=containerElement.find('[ui="background-layout"]')[0];//原生画布对象，这是背景画布，用于绘制图片及缩放，转向等操作。
+    var canvas_cutter=containerElement.find("[ui='cutter-layout']")[0];//原生画布对象，这是裁剪框对象。用于绘制遮罩层及裁剪框。
+    var canvas_operation=containerElement.find("[ui='operation-layout']")[0];//原生画布对象，这是操作层对象，用于接受用户的鼠标及手势，然后触发各种事件。
+
+    var context_cutter=canvas_cutter.getContext("2d");
+    var context_bg=canvas_bg.getContext("2d");
+
+    var data_origin_image="";//原始图片数据，原始是指经过了ios bug修复剂orientation方向修复以后的base64格式的数据。注意，必要时，假如图片太大，可以先压缩到某个尺寸。
+    var image_background=new Image();//新建一个背景图的元素用于处理图片旋转等操作。
+    //--下面预先将背景图片的三个方向都先计算出来。
+    var canvas_angle_0=document.createElement("canvas");//containerElement.find('[ui="canvas-angle-0"]')[0];//document.createElement("canvas");
+    var context_angle_0=canvas_angle_0.getContext("2d");
+    var canvas_angle_90=document.createElement("canvas");//containerElement.find('[ui="canvas-angle-90"]')[0];//document.createElement("canvas");
+    var context_angle_90=canvas_angle_90.getContext("2d");
+    var canvas_angle_180=document.createElement("canvas");//containerElement.find('[ui="canvas-angle-180"]')[0];//document.createElement("canvas");
+    var context_angle_180=canvas_angle_180.getContext("2d");
+    var canvas_angle_270=document.createElement("canvas");//containerElement.find('[ui="canvas-angle-270"]')[0];//document.createElement("canvas");
+    var context_angle_270=canvas_angle_270.getContext("2d");
+    //window.image_backgroud=image_background;
+
+    //--新建几个快照形式的画布。
+
+
+
+    //--内部运行时数据
+    var data_cutter={
+        location:{
+            x:0
+            ,y:0
+        }
+        ,size:{
+            w:0
+            ,h:0
+        }
+        ,ratio:1
+    };//裁剪框数据
+    var data_bg={
+        angle:0
+        ,img_bg_0:null//0度图片。
+        ,img_bg_90:null//90度图片
+        ,img_bg_180:null//180度旋转图片
+        ,img_bg_270:null//270度旋转图片
+        ,location:{
+            x:0
+            ,y:0
+        }
+        ,size:{
+            w:0
+            ,h:0
+        }
+        ,originSize:{
+            w:0
+            ,h:0
+        }
+        ,zoom:1
+    };//背景层数据-这个作为原始备份，告诉系统应该如何转换数据。
+
+    var data_bg_trans={
+        angle:0
+        ,location:{
+            x:0
+            ,y:0
+        }
+        ,size:{
+            w:0
+            ,h:0
+        }
+        ,originSize:{
+            w:0
+            ,h:0
+        }
+        ,zoom:1
+    };//在非正常情况下的位置的数据等，例如，转换成为90,180，270,0等的数据，
+
+
+    var data_container={
+        size:{
+            w:0
+            ,h:0
+        }
+
+    };//容器数据
+
+    var data_op={
+        panelInfo:{
+            absoluteTop:0,
+            absoluteLeft:0,
+            offsetWidth:0,
+            offsetHeight:0
+        }
+        ,isInDrag:false
+        ,beginPoint:{
+            x:0
+            ,y:0
+        }
+        ,point1:{
+            x:0
+            ,y:0
+        }
+        ,point2:{
+            x:0
+            ,y:0
+        }
+        //判断是否在裁剪框里面。
+        ,isInCut:false
+    };//操控层数据。
+    var appData={
+        panelSize:{
+            w:0
+            ,h:0
+        }
+        ,hasImage:false //是否已经选择了图片，容器里面有没有图片。
+        ,imageFile:""
+        ,minScale:0 //当前最小的缩放比例。
+        //--当前是否在处理移动事件中。
+        ,handlingMovement:false
+        //--对移动事件处理的间隔。
+        ,timeSepOnHandling:25
+        ,movementInterval:null //处理移动的定时器。
+    };//app内部数据
+
+    var innerTools={
+        browser:{
+            versions:function(){
+                var u = navigator.userAgent, app = navigator.appVersion;
+                return {         //移动终端浏览器版本信息
+                    trident: u.indexOf('Trident') > -1, //IE内核
+                    presto: u.indexOf('Presto') > -1, //opera内核
+                    webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+                    gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+                    mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+                    ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+                    android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或uc浏览器
+                    iPhone: u.indexOf('iPhone') > -1 , //是否为iPhone或者QQHD浏览器
+                    iPad: u.indexOf('iPad') > -1, //是否iPad
+                    webApp: u.indexOf('Safari') == -1 //是否web应该程序，没有头部与底部
+                };
+            }(),
+            language:(navigator.browserLanguage || navigator.language).toLowerCase()
+        }
+        ,GetAbsoluteLocationEx:function(element){
+            if(arguments.length!=1||element==null)
+            {
+                return null;
+            }
+            var elmt=element;
+            var offsetTop=elmt.offsetTop;
+            var offsetLeft=elmt.offsetLeft;
+            var offsetWidth=elmt.offsetWidth;
+            var offsetHeight=elmt.offsetHeight;
+            while(elmt=elmt.offsetParent)
+            {
+                // add this judge
+                if(elmt.style.position=='absolute'||elmt.style.position=='relative'
+                    ||(elmt.style.overflow!='visible'&&elmt.style.overflow!=''))
+                {
+                    break;
+                }
+                offsetTop+=elmt.offsetTop;
+                offsetLeft+=elmt.offsetLeft;
+            }
+            var _info={absoluteTop:offsetTop,absoluteLeft:offsetLeft,
+                offsetWidth:offsetWidth,offsetHeight:offsetHeight};
+
+            return _info;
+        }
+        //--iosbug修正。
+        //--修正ios下面canvas图片压缩的情况。
+        /**
+         * Detecting vertical squash in loaded image.
+         * Fixes a bug which squash image vertically while drawing into canvas for some images.
+         * This is a bug in iOS6 devices. This function from https://github.com/stomita/ios-imagefile-megapixel
+         *
+         */
+
+
+        /**
+         * A replacement for context.drawImage
+         * (args are for source and destination).
+         */
+        ,drawImageIOSFix:function(ctx, img, sx, sy, sw, sh, dx, dy, dw, dh) {
+            function detectVerticalSquash(img) {
+                var iw = img.naturalWidth, ih = img.naturalHeight;
+                var canvas = document.createElement('canvas');
+                canvas.width = 1;
+                canvas.height = ih;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                var data = ctx.getImageData(0, 0, 1, ih).data;
+                // search image edge pixel position in case it is squashed vertically.
+                var sy = 0;
+                var ey = ih;
+                var py = ih;
+                while (py > sy) {
+                    var alpha = data[(py - 1) * 4 + 3];
+                    if (alpha === 0) {
+                        ey = py;
+                    } else {
+                        sy = py;
+                    }
+                    py = (ey + sy) >> 1;
+                }
+                var ratio = (py / ih);
+                return (ratio===0)?1:ratio;
+            };
+            var vertSquashRatio =detectVerticalSquash(img);
+            // Works only if whole image is displayed:
+            // ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh / vertSquashRatio);
+            // The following works correct also when only a part of the image is displayed:
+            ctx.drawImage(img, sx * vertSquashRatio, sy * vertSquashRatio,
+                sw * vertSquashRatio, sh * vertSquashRatio,
+                dx, dy, dw, dh );
+        }
+    };
+
+
+
+    var app={
+        init:function(){
+            var _child=this;
+            appData.panelSize.w=settings.containerWidth;
+            appData.panelSize.h=settings.containerHeight;
+            if(innerTools.browser.versions.ios==true){
+                _debug("当前使用ios系统，将做特别bug修复。");
+            }
+
+
+            _child.render_ui();
+            _child.init_cutter();
+            _child.initOperationLayout();
+        }
+        //--设定容器及其他相关dom的样式。
+        ,render_ui:function(){
+            containerElement.css({"width":settings.containerWidth+"px","height":settings.containerHeight+"px"}).css("height","auto");
+            panel.css("height",settings.containerHeight+"px");
+            canvas_bg.width=settings.containerWidth;
+            canvas_bg.height=settings.containerHeight;
+
+            canvas_cutter.width=settings.containerWidth;
+            canvas_cutter.height=settings.containerHeight;
+
+            canvas_operation.width=settings.containerWidth;
+            canvas_operation.height=settings.containerHeight;
+
+        }
+        //--计算相关数据--初始化裁剪框。
+        ,init_cutter:function(){
+            var _child=this;
+            data_cutter.size.w=settings.cutWidth;
+            data_cutter.size.h=settings.cutHeight;
+            data_cutter.ratio=settings.cutWidth/settings.cutHeight;
+
+            //--计算中间点。
+            var middle_x=appData.panelSize.w/2;
+            var middle_y=appData.panelSize.h/2;
+            var _x=middle_x-data_cutter.size.w/2;
+            var _y=middle_y-data_cutter.size.h/2;
+            data_cutter.location.x=_x;
+            data_cutter.location.y=_y;
+            if(settings.showCutterInFirst){
+                _child.updateCutter();
+            }
+
+        }
+        //--根据cutter的数据更新裁剪框层。
+        ,updateCutter:function(){
+            var _child=this;
+
+            _child.__clear_cutter_canvas();
+            _child.__draw_mask();
+            _child.__draw_cutter();
+
+        }
+        //--清空cutter画布的内容。
+        ,__clear_cutter_canvas:function(){
+            context_cutter.clearRect(0,0,canvas_cutter.width,canvas_cutter.height);
+        }
+        //--渲染cutter
+        ,__draw_cutter:function(){
+            //
+            context_cutter.strokeStyle = '#ffffff';
+            context_cutter.lineWidth = 2;
+            context_cutter.strokeRect(data_cutter.location.x,data_cutter.location.y,data_cutter.size.w,data_cutter.size.h);
+            context_cutter.clearRect(data_cutter.location.x,data_cutter.location.y,data_cutter.size.w,data_cutter.size.h);
+            //context_cutter.clearRect(0,0,canvas_cutter.width,canvas_cutter.height);
+        }
+        //--渲染遮罩层
+        ,__draw_mask:function(){
+            context_cutter.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            context_cutter.fillRect(0, 0, canvas_cutter.width,canvas_cutter.height);
+        }
+
+        //--对外接口，拖动裁剪框。
+        ,MoveCutter:function(pos_x,pos_y){
+            var _child=this;
+            data_cutter.location.x=pos_x;
+            data_cutter.location.y=pos_y;
+            _child.updateCutter();
+        }
+        //--移动裁剪框。
+        ,MoveCutterByDelta:function(delta_x,delta_y){
+            var _child=this;
+            var _new_x= data_cutter.location.x+delta_x;
+            var _new_y=data_cutter.location.y+delta_y;
+            _new_x=parseInt(_new_x);
+            _new_y=parseInt(_new_y);
+            //--判断边界。
+            if(_new_x<0){
+                _new_x=0;
+            }
+            if(_new_y<0){
+                _new_y=0;
+            }
+            if(_new_x>(appData.panelSize.w-data_cutter.size.w)){
+                _new_x=appData.panelSize.w-data_cutter.size.w;
+            }
+            if(_new_y>(appData.panelSize.h-data_cutter.size.h)){
+                _new_y=appData.panelSize.h-data_cutter.size.h;
+            }
+
+            _child.MoveCutter(_new_x,_new_y);
+        }
+
+        //--初始化背景层。背景层需要获得图片的base64字符串先。
+        ,init_background:function(base_64_image,imageFile){
+            var _child=this;
+            appData.imageFile=imageFile;
+            _child.init_bg_data(base_64_image,function(finalBase64Image){
+                _debug("初始化背景时候更新背景图片。");
+                _child.updateBackground();
+
+            });
+        }
+        //--背景图片等图片处理。数据处理等。
+        ,init_bg_data:function(originBase64,callback){
+            //--不处理方向。
+            var _me=this;
+
+            //_handle(originBase64);处理其他各个cavnas。
+            function _handle_data_and_other_canvas(_real_width,_real_height){
+                appData.hasImage=true;
+                //--获取相关数据及计算。
+                data_bg.originSize.w=parseInt(_real_width);
+                data_bg.originSize.h=parseInt(_real_height);
+                data_bg.angle=0;
+                data_bg.location.x=0;
+                data_bg.location.y=0;
+                data_bg.zoom=1;
+                data_bg.size.w=data_bg.originSize.w;
+                data_bg.size.h=data_bg.originSize.h;
+                //--按照当前显示区域，尽量显示全部图片，计算显示尺寸。
+                if(data_bg.originSize.w>appData.panelSize.w||data_bg.originSize.h>appData.panelSize.h){
+                    var _max_scale= Math.max(data_bg.originSize.w/appData.panelSize.w,data_bg.originSize.h/appData.panelSize.h);
+                    var _current_w=parseInt(data_bg.originSize.w/_max_scale);
+                    var _current_h=parseInt(data_bg.originSize.h/_max_scale);
+                    data_bg.zoom=1/_max_scale;
+                    data_bg.size.w=_current_w;
+                    data_bg.size.h=_current_h;
+
+                }
+                //--计算背景层应该显示的位置，尽量放到中间。
+                data_bg.location.x=parseInt((appData.panelSize.w-data_bg.size.w)/2);
+
+
+                //--计算各个状体的图片。
+
+                data_bg.location.y=parseInt((appData.panelSize.h-data_bg.size.h)/2);
+
+                //--trans 背景数据。
+                data_bg_trans.angle=data_bg.angle;
+
+                data_bg_trans.location.x=data_bg.location.x;
+                data_bg_trans.location.y=data_bg.location.y;
+
+                data_bg_trans.size.w=data_bg.size.w;
+                data_bg_trans.size.h=data_bg.size.h;
+
+                data_bg_trans.originSize.w=data_bg.originSize.w;
+                data_bg_trans.originSize.h=data_bg.originSize.h;
+                data_bg_trans.zoom=data_bg.zoom;
+
+                //--各个角度的canvas。
+                //--angle=0已经处理了，这里不需要处理。
+
+
+                canvas_angle_90.width=data_bg.originSize.h;
+                canvas_angle_90.height=data_bg.originSize.w;
+                canvas_angle_180.width=data_bg.originSize.w;
+                canvas_angle_180.height=data_bg.originSize.h;
+                canvas_angle_270.width=data_bg.originSize.h;
+                canvas_angle_270.height=data_bg.originSize.w;
+
+
+                context_angle_90.clearRect(0,0,canvas_angle_90.width,canvas_angle_90.height);
+                canvas_angle_90.width=data_bg.originSize.h;
+                canvas_angle_90.height=data_bg.originSize.w;
+                context_angle_90.save();
+                context_angle_90.rotate(Math.PI/2);
+                context_angle_90.drawImage(canvas_angle_0,0,0-data_bg.originSize.h);
+                context_angle_90.restore();
+                // $(document.body).append(canvas_angle_90);
+                //--angle=180
+                context_angle_180.clearRect(0,0,canvas_angle_180.width,canvas_angle_180.height);
+                canvas_angle_180.width=data_bg.originSize.w;
+                canvas_angle_180.height=data_bg.originSize.h;
+                context_angle_180.save();
+                context_angle_180.rotate(Math.PI);
+                context_angle_180.drawImage(canvas_angle_0,0-data_bg.originSize.w,0-data_bg.originSize.h);
+                context_angle_180.restore();
+
+                //--angle=270
+                context_angle_270.clearRect(0,0,canvas_angle_270.width,canvas_angle_270.height);
+                canvas_angle_270.width=data_bg.originSize.h;
+                canvas_angle_270.height=data_bg.originSize.w;
+                context_angle_270.save();
+                context_angle_270.rotate(Math.PI*1.5);
+                context_angle_270.drawImage(canvas_angle_0,0-data_bg.originSize.w,0);
+                context_angle_270.restore();
+                appData.minScale=Math.max(data_cutter.size.w/data_bg_trans.originSize.w,data_cutter.size.h/data_bg_trans.originSize.h);
+                if(callback){
+                    callback();
+                }
+
+            };
+            if(innerTools.browser.versions.ios==true){
+                _me._setOriginCanvasInIOS(originBase64,function(_real_width,_real_height){
+                    _handle_data_and_other_canvas(_real_width,_real_height);
+                });
+            }
+            else{
+                _me._setOriginCanvasInOther(originBase64,function(_real_width,_real_height){
+                    _handle_data_and_other_canvas(_real_width,_real_height);
+                });
+            }
+        }
+        //--注意，这个地方是分别采用不同方式来计算之前图片的画布的。
+        //--ios中设置原始画布。
+        ,_setOriginCanvasInIOS:function(base64_str,callback){
+            var _img2=new Image();
+            var mpImg = new MegaPixImage(appData.imageFile);
+            _img2.onload=function(){
+                var iw = _img2.naturalWidth, ih = _img2.naturalHeight;
+                //3264,2448
+                //--获取满一百形式的尺寸。
+                var _max_width=iw- iw%100;
+                var _max_height=ih-ih%100;
+                if(_max_width<=0){
+                    _max_width=100;
+                }
+                if(_max_height<=0){
+                    _max_height=100;
+                }
+                if(_max_width>1400){
+                    _max_width=1400;
+                }
+                if(_max_height>1400){
+                    _max_height=1400;
+                }
+
+                _debug("ios: 当前最大尺寸获取为[满一百]"+_max_width+"：x "+_max_height+" 真实尺寸为："+iw+" x  "+ih);
+                //--计算缩放后尺寸。
+                //--按照当前显示区域，尽量显示全部图片，计算显示尺寸。
+                var _real_width=iw;
+                var _real_height=ih;
+                if(iw>_max_width||ih>_max_height){
+                    var _max_scale= Math.max(iw/_max_width,ih/_max_height);
+                    var _current_w=iw/_max_scale;
+                    var _current_h=ih/_max_scale;
+                    _current_w=parseInt(_current_w);
+                    _current_h=parseInt(_current_h);
+                    _real_width=_current_w;
+                    _real_height=_current_h;
+                }
+                _debug("ios: 等比例缩放尺寸为："+_real_width+" x  "+_real_height);
+
+                _img2.onload=function(){};
+                var _render_opts={ maxWidth: _max_width, maxHeight: _max_height };
+                mpImg.render(canvas_angle_0, _render_opts, function () {
+                    if(callback){
+                        callback(_real_width,_real_height,canvas_angle_0);
+                    }
+                });
+
+            };
+            _img2.src=base64_str;
+        }
+        //--其他地方设置原始画布。
+        ,_setOriginCanvasInOther:function(base64_str,callback){
+            data_origin_image=base64_str;
+            var _tmp=new Image();
+            _tmp.onload=function(){
+
+                var _real_width=_tmp.naturalWidth;
+                var _real_height=_tmp.naturalHeight;
+
+                //--各个角度的canvas。
+                //--angle=0
+                context_angle_0.clearRect(0,0,canvas_angle_0.width,canvas_angle_0.height);
+                canvas_angle_0.width=_real_width;
+                canvas_angle_0.height=_real_height;
+                context_angle_0.drawImage(_tmp,0,0);
+                if(callback){
+                    callback(_real_width,_real_height,canvas_angle_0);
+                }
+
+            };
+
+            _tmp.src=base64_str;
+        }
+
+        //--清空背景。
+        ,clear_background:function(){
+            context_bg.clearRect(0,0,canvas_bg.width,canvas_bg.height);
+        }
+        //--根据相关数据更新背景层图像。
+        ,updateBackground:function(){
+            var _child=this;
+
+            _child.clear_background();
+            //--注意，下面要优化图片绘制，换成getImagedata和putImagedata
+            //-坐标计算。
+
+            var cut_info={
+                get_x:0
+                ,get_y:0
+                ,get_w:0
+                ,get_h:0
+                ,put_x:0
+                ,put_y:0
+                ,put_w:0
+                ,put_h:0
+            };
+            var _imageData="";
+            if(data_bg_trans.location.x<0){
+                cut_info.get_x=Math.abs(data_bg_trans.location.x);
+            }
+            if(data_bg_trans.location.y<0){
+                cut_info.get_y=Math.abs(data_bg_trans.location.y);
+            }
+
+
+            cut_info.get_w=data_bg_trans.size.w>appData.panelSize.w?appData.panelSize.w:data_bg_trans.size.w;
+            cut_info.get_h=data_bg_trans.size.h>appData.panelSize.h?appData.panelSize.h:data_bg_trans.size.h;
+            if(cut_info.get_x+data_bg_trans.size.w>appData.panelSize.w){
+                cut_info.get_w=appData.panelSize.w-cut_info.get_x;
+            }
+            if(cut_info.get_y+data_bg_trans.size.h>appData.panelSize.h){
+                cut_info.get_h=appData.panelSize.h-cut_info.get_y;
+            }
+            if(data_bg_trans.location.x>0){
+                cut_info.put_x=data_bg_trans.location.x;
+            }
+            if(data_bg_trans.location.y>0){
+                cut_info.put_y=data_bg_trans.location.y;
+            }
+            cut_info.put_w=cut_info.get_w;
+            cut_info.put_h=cut_info.get_h;
+            //--注意，cut info 的getw geth最终要换成实际尺寸。
+            cut_info.get_x=parseInt(cut_info.get_x/data_bg_trans.zoom);
+            cut_info.get_y=parseInt(cut_info.get_y/data_bg_trans.zoom);
+            cut_info.get_w=parseInt(cut_info.get_w/data_bg_trans.zoom);
+            cut_info.get_h=parseInt(cut_info.get_h/data_bg_trans.zoom);
+            if(cut_info.get_w>data_bg_trans.originSize.w){
+                cut_info.get_w=data_bg_trans.originSize.w;
+            }
+            if(cut_info.get_h>data_bg_trans.originSize.h){
+                cut_info.get_h=data_bg_trans.originSize.h;
+            }
+
+            var _now_context="";
+            var _now_canvas="";
+
+            if(data_bg_trans.angle==0||data_bg_trans.angle==360){
+                //context.drawImage(img,0,0,img.width,img.height,imgX,imgY,img.width*imgScale,img.height*imgScale);
+//                context_bg.drawImage(image_background,data_bg.location.x,data_bg.location.y,data_bg.originSize.w,data_bg.originSize.h,0,0,data_bg.size.w,data_bg.size.h);
+                //context_bg.drawImage(canvas_angle_0,0,0,data_bg_trans.originSize.w,data_bg_trans.originSize.h,data_bg_trans.location.x,data_bg_trans.location.y,data_bg_trans.size.w,data_bg_trans.size.h);
+                //_imageData=context_angle_0.getImageData(cut_info.get_x,cut_info.get_y,cut_info.get_w,cut_info.get_h);
+                _now_context=context_angle_0;
+                _now_canvas=canvas_angle_0;
+                //_imageData=context_angle_0.getImageData(data_bg_trans.location.x,data_bg_trans.location.y,data_bg_trans.size.w,data_bg_trans.size.h);
+            }
+            else if(data_bg_trans.angle==90){
+
+                //context_bg.drawImage(canvas_angle_90,0,0,data_bg_trans.originSize.w,data_bg_trans.originSize.h,data_bg_trans.location.x,data_bg_trans.location.y,data_bg_trans.size.w,data_bg_trans.size.h);
+                //_imageData=context_angle_90.getImageData(cut_info.get_x,cut_info.get_y,cut_info.get_w,cut_info.get_h);
+                //_imageData=context_angle_90.getImageData(data_bg_trans.location.x,data_bg_trans.location.y,data_bg_trans.size.w,data_bg_trans.size.h);
+                _now_context=context_angle_90;
+                _now_canvas=canvas_angle_90;
+            }
+            else if(data_bg_trans.angle==180){
+
+                //context_bg.drawImage(canvas_angle_180,0,0,data_bg_trans.originSize.w,data_bg_trans.originSize.h,data_bg_trans.location.x,data_bg_trans.location.y,data_bg_trans.size.w,data_bg_trans.size.h);
+                //_imageData=context_angle_180.getImageData(cut_info.get_x,cut_info.get_y,cut_info.get_w,cut_info.get_h);
+                //_imageData=context_angle_180.getImageData(data_bg_trans.location.x,data_bg_trans.location.y,data_bg_trans.size.w,data_bg_trans.size.h);
+                _now_context=context_angle_180;
+                _now_canvas=canvas_angle_180;
+            }
+            else if(data_bg_trans.angle==270){
+
+                //context_bg.drawImage(canvas_angle_270,0,0,data_bg_trans.originSize.w,data_bg_trans.originSize.h,data_bg_trans.location.x,data_bg_trans.location.y,data_bg_trans.size.w,data_bg_trans.size.h);
+                //_imageData=context_angle_270.getImageData(cut_info.get_x,cut_info.get_y,cut_info.get_w,cut_info.get_h);
+                //_imageData=context_angle_270.getImageData(data_bg_trans.location.x,data_bg_trans.location.y,data_bg_trans.size.w,data_bg_trans.size.h);
+                _now_context=context_angle_270;
+                _now_canvas=canvas_angle_270;
+            }
+            window.now_context=_now_context;
+            window.context_bg=context_bg;
+            window.cut_info=cut_info;
+            context_bg.drawImage(_now_canvas,0,0,data_bg_trans.originSize.w,data_bg_trans.originSize.h,data_bg_trans.location.x,data_bg_trans.location.y,data_bg_trans.size.w,data_bg_trans.size.h);
+            //context_bg.drawImage(_now_canvas,cut_info.get_x,cut_info.get_y,cut_info.get_w,cut_info.get_h,cut_info.put_x,cut_info.put_y,cut_info.put_w,cut_info.put_h);
+            return;
+            _imageData=_now_context.getImageData(cut_info.get_x,cut_info.get_y,cut_info.get_w,cut_info.get_h);
+            //_imageData=_now_context.getImageData(0,0,_now_canvas.width,_now_canvas.height);
+            context_bg.save();
+            context_bg.scale(data_bg_trans.zoom,data_bg_trans.zoom);
+            context_bg.putImageData(_imageData,0,0,cut_info.put_x,cut_info.put_y,cut_info.put_w,cut_info.put_h);
+            context_bg.restore();
+        }
+        //--底层api，根据位置移动图片。
+        ,MoveBackground:function(pos_x,pos_y){
+            data_bg_trans.location.x=pos_x;
+            data_bg_trans.location.y=pos_y;
+            var _child=this;
+
+            _child.updateBackground();
+        }
+        //--通过偏移量来移动图片。
+        ,MoveBackgroundByDelta:function(delta_x,delta_y){
+            var _child=this;
+            var _new_x=data_bg_trans.location.x+delta_x;
+            var _new_y=data_bg_trans.location.y+delta_y;
+            _new_x=parseInt(_new_x);
+            _new_y=parseInt(_new_y);
+            var _min_x=0;
+            var _max_x=0;
+            //--宽度边界判断。
+            //--假如图片宽度竟然比裁剪框要小，那么宽度最小值是0，
+            if(data_bg_trans.size.w<=data_cutter.size.w){
+                _min_x=0;
+                _max_x=appData.panelSize.w-data_bg_trans.size.w;
+            }
+            //--假如现在的图片宽度比整个容器宽度要小或者要大，那么就有：
+            //else if(data_bg_trans.size.w<=appData.panelSize.w){
+            //计算得出这时候的x最大值最小值。
+            //var __min_x=
+
+
+
+            //}
+            //--假如现在的图片宽度比整个容器宽度要小或者要大，那么就有：
+            else{
+                _min_x=data_cutter.size.w-data_bg_trans.size.w;
+                _max_x=appData.panelSize.w-data_cutter.size.w;
+            }
+
+            //--高度边界判断。
+            var _min_y=0;
+            var _max_y=0;
+            if(data_bg_trans.size.h<=data_cutter.size.h){
+                _min_y=0;
+                _max_y=appData.panelSize.h-data_bg_trans.size.h;
+            }
+            else{
+                _min_y=data_cutter.size.h-data_bg_trans.size.h;
+                _max_y=appData.panelSize.h-data_cutter.size.h;
+            }
+            if(_new_x<_min_x){
+                _new_x=_min_x;
+            }
+            else if(_new_x>_max_x){
+                _new_x=_max_x;
+            }
+            if(_new_y<_min_y){
+                _new_y=_min_y;
+            }
+            else if(_new_y>_max_y){
+                _new_y=_max_y;
+            }
+            //_child.MoveCutter(_new_x,_new_y);
+            //--确定
+            _debug("当前需要移动的x 和 y是："+_new_x+" x "+_new_y);
+            _child.MoveBackground(_new_x,_new_y);
+        }
+        //--底层api，缩放图片。
+        ,ScaleBackground:function(_scale){
+            //--在缩放前首先计算得到图片的中心点。
+            var _middle_x=0;
+            var _middle_y=0;
+
+            //--正常状体下面。
+            _middle_x=data_bg_trans.location.x+data_bg_trans.size.w/2;
+            _middle_y=data_bg_trans.location.y+data_bg_trans.size.h/2;
+
+            data_bg_trans.zoom=_scale;
+            data_bg_trans.size.w=parseInt(data_bg_trans.originSize.w*_scale);
+            data_bg_trans.size.h=parseInt(data_bg_trans.originSize.h*_scale);
+
+            var __x=parseInt(_middle_x-(data_bg_trans.size.w)/2);
+            var __y=parseInt(_middle_y-(data_bg_trans.size.h)/2);
+
+            data_bg_trans.location.x=__x;
+            data_bg_trans.location.y=__y;
+
+
+            var _child=this;
+
+            _child.updateBackground();
+        }
+        //--旋转。
+        ,RotateImage:function(angle){
+            var me=this;
+            if(angle!=0&&angle!=90&&angle!=180&&angle!=270&&angle!=360){
+
+                return;
+            }
+            var preAngle=data_bg_trans.angle;
+            //--计算原本的中心点。
+            var _middle_x=0;
+            var _middle_y=0;
+
+            //--正常状体下面。
+            _middle_x=data_bg_trans.location.x+data_bg_trans.size.w/2;
+            _middle_y=data_bg_trans.location.y+data_bg_trans.size.h/2;
+
+            //--那么一旦改变了角度，需要将各个坐标系都转换过来。
+            if(angle==0||angle==360){
+                data_bg_trans.angle=0;
+                data_bg_trans.originSize.w=data_bg.originSize.w;
+                data_bg_trans.originSize.h=data_bg.originSize.h;
+
+            }
+            else if(angle==90){
+
+                data_bg_trans.angle=90;
+                data_bg_trans.originSize.w=data_bg.originSize.h;
+                data_bg_trans.originSize.h=data_bg.originSize.w;
+
+            }
+            else if(angle==180){
+
+                data_bg_trans.angle=180;
+                data_bg_trans.originSize.w=data_bg.originSize.w;
+                data_bg_trans.originSize.h=data_bg.originSize.h;
+            }
+            else if(angle==270){
+
+                data_bg_trans.angle=270;
+                data_bg_trans.originSize.w=data_bg.originSize.h;
+                data_bg_trans.originSize.h=data_bg.originSize.w;
+            }
+
+            data_bg_trans.size.w=parseInt(data_bg_trans.originSize.w*data_bg_trans.zoom);
+            data_bg_trans.size.h=parseInt(data_bg_trans.originSize.h*data_bg_trans.zoom);
+            data_bg_trans.location.x=parseInt(_middle_x-(data_bg_trans.size.w)/2);
+            data_bg_trans.location.y=parseInt(_middle_y-(data_bg_trans.size.h)/2);
+
+
+            data_bg_trans.angle=angle;
+            var _child=this;
+
+            _child.updateBackground();
+        }
+        //--初始化操控层。
+        ,initOperationLayout:function(){
+            var _child=this;
+            data_op.panelInfo=innerTools.GetAbsoluteLocationEx(canvas_operation);
+
+            if(innerTools.browser.versions.mobile==true||innerTools.browser.versions.mobile==true||innerTools.browser.versions.android||innerTools.browser.versions.iPhone){
+                _child._init_mobile_operations();
+            }
+            else{
+                _child._init_pc_operations();
+            }
+
+        }
+        //--pc上面的控制事件。
+        ,_init_pc_operations:function(){
+            //o是移动对象
+            var _child=this;
+            $(canvas_operation).mousedown(function(event){
+                if(appData.hasImage==false){
+                    return;
+                }
+                data_op.isInDrag=true;
+
+                data_op.panelInfo=innerTools.GetAbsoluteLocationEx(canvas_operation);
+                if(data_op.panelInfo.absoluteLeft==0&&data_op.panelInfo.absoluteTop==0&&data_op.panelInfo.offsetHeight==0&&data_op.panelInfo.offsetWidth==0){
+
+                }
+                //params.flag = true;
+                if (!event) {
+                    event = window.event;
+                    //防止IE文字选中
+                    canvas_operation.onselectstart = function () {
+                        return false;
+                    }
+                }
+                var e = event;
+                var params_currentX = e.clientX;
+                var params_currentY = e.clientY;
+                data_op.beginPoint.x=params_currentX;
+                data_op.beginPoint.y=params_currentY;
+                var realX=params_currentX-data_op.panelInfo.absoluteLeft;
+                var realY=params_currentY-data_op.panelInfo.absoluteTop;
+
+                //注意，上面没有考虑到有滚动条的状态，现在添加对滚动条的处理。
+                //--notice，假如页面有滚动条，每次都滚到不同位置的话，那么这个定位可能会有问题，于是我们需要进行处理。
+                var _scrollTop=$(document).scrollTop();
+                if(_scrollTop>0){
+                    realY=realY+_scrollTop;
+                }
+                var _scrollLeft=$(document).scrollLeft();
+                if(_scrollLeft>0){
+                    realX=realX+_scrollLeft;
+                }
+                data_op.point1.x=params_currentX;
+                data_op.point1.y=params_currentY;
+                data_op.isInCut=_child.isPointInCutter(realX,realY);
+
+
+
+            });
+            $(document).mouseup(function(){
+                if(appData.hasImage==false){
+                    return;
+                }
+                data_op.isInDrag=false;
+
+            });
+            $(document).mousemove(function (event) {
+                if(appData.hasImage==false){
+                    return;
+                }
+                if(data_op.isInDrag==false){
+                    return;
+                }
+                var e = event ? event : window.event;
+                var nowX = e.clientX, nowY = e.clientY;
+
+                // var disX = nowX - params.currentX, disY = nowY - params.currentY;
+                //target.style.left = parseInt(params.left) + disX + "px";
+                //target.style.top = parseInt(params.top) + disY + "px";
+                //--计算位移量。
+                data_op.point2.x=nowX;
+                data_op.point2.y=nowY;
+
+                var delta_x=data_op.point2.x-data_op.point1.x;
+                var delta_y=data_op.point2.y-data_op.point1.y;
+                data_op.point1.x=nowX;
+                data_op.point1.y=nowY;
+                if(data_op.isInCut==true){
+                    //--已经
+
+
+                    _child.MoveCutterByDelta(delta_x,delta_y);
+                }
+                else{
+                    _child.MoveBackgroundByDelta(delta_x,delta_y);
+                }
+
+            });
+        }
+        //--手机端移动端的事件。
+        ,_init_mobile_operations:function(){
+            var _child=this;
+            canvas_operation.addEventListener("touchstart",function(event){
+                if(appData.hasImage==false){
+                    return;
+                }
+                if(appData.movementInterval!=null){
+                    clearInterval(appData.movementInterval);
+                }
+                if(appData.handlingMovement==true){
+                    return;
+                }
+                var beginX=event.changedTouches[0].pageX;
+                var beginY=event.changedTouches[0].pageY;
+
+                data_op.isInDrag=true;
+
+
+                data_op.panelInfo=innerTools.GetAbsoluteLocationEx(canvas_operation);
+                if(data_op.panelInfo.absoluteLeft==0&&data_op.panelInfo.absoluteTop==0&&data_op.panelInfo.offsetHeight==0&&data_op.panelInfo.offsetWidth==0){
+                    // data_op.panelInfo=innerTools.GetAbsoluteLocationEx(canvas_operation);
+                }
+
+                var e = event;
+                var params_currentX = beginX;
+                var params_currentY = beginY;
+                data_op.beginPoint.x=params_currentX;
+                data_op.beginPoint.y=params_currentY;
+                var realX=params_currentX-data_op.panelInfo.absoluteLeft;
+                var realY=params_currentY-data_op.panelInfo.absoluteTop;
+
+
+                //注意，上面没有考虑到有滚动条的状态，现在添加对滚动条的处理。
+                //--notice，假如页面有滚动条，每次都滚到不同位置的话，那么这个定位可能会有问题，于是我们需要进行处理。
+                var _scrollTop=$(document).scrollTop();
+                if(_scrollTop>0){
+                    //realY=realY+_scrollTop; 移动端不用管，似乎得到的是正确的。
+                }
+                var _scrollLeft=$(document).scrollLeft();
+                if(_scrollLeft>0){
+                    // realX=realX+_scrollLeft; 移动端不用管，似乎得到的是正确的。
+                }
+
+
+
+                data_op.point1.x=params_currentX;
+                data_op.point1.y=params_currentY;
+                data_op.isInCut=_child.isPointInCutter(realX,realY);
+
+                event.preventDefault();
+                event.stopPropagation();
+            },false);
+
+            canvas_operation.addEventListener("touchmove",function(event){
+                if(appData.hasImage==false){
+                    return;
+                }
+                if(data_op.isInDrag==false){
+                    return;
+                }
+                if(appData.handlingMovement==true){
+                    return;
+                }
+                appData.handlingMovement=true;
+                event.preventDefault();
+                event.stopPropagation();
+                var e = event ? event : window.event;
+                var beginX=event.changedTouches[0].pageX;
+                var beginY=event.changedTouches[0].pageY;
+                var nowX = beginX, nowY = beginY;
+
+                // var disX = nowX - params.currentX, disY = nowY - params.currentY;
+                //target.style.left = parseInt(params.left) + disX + "px";
+                //target.style.top = parseInt(params.top) + disY + "px";
+                //--计算位移量。
+                data_op.point2.x=nowX;
+                data_op.point2.y=nowY;
+
+                var delta_x=data_op.point2.x-data_op.point1.x;
+                var delta_y=data_op.point2.y-data_op.point1.y;
+                data_op.point1.x=nowX;
+                data_op.point1.y=nowY;
+                if(data_op.isInCut==true){
+                    //--已经
+                    _child.MoveCutterByDelta(delta_x,delta_y);
+                }
+                else{
+                    _child.MoveBackgroundByDelta(delta_x,delta_y);
+                }
+                setTimeout(function(){
+                    appData.handlingMovement=false;
+                },appData.timeSepOnHandling );
+
+            },false);
+
+
+            canvas_operation.addEventListener("touchend",function(event){
+                if(appData.hasImage==false){
+                    return;
+                }
+                appData.handlingMovement=false;
+                appData.movementInterval=null;
+                data_op.isInDrag=false;
+                event.preventDefault();
+                event.stopPropagation();
+            },false);
+        }
+        //--判断某个点是否在裁剪框里面。
+        ,isPointInCutter:function(point_x,point_y){
+            var min_x=data_cutter.location.x;
+            var min_y=data_cutter.location.y;
+            var max_x=min_x+data_cutter.size.w;
+            var max_y=min_y+data_cutter.size.h;
+
+            if(point_x<min_x||point_x>max_x||point_y<min_y||point_y>max_y){
+                return false;
+            }
+            else{
+                return true;
+            }
+        }
+        ,_cut_by_sizing:function(callback){
+            var __canvas = document.createElement("canvas");
+            var __context = __canvas.getContext("2d");
+            __canvas.width = data_cutter.size.w;
+            __canvas.height = data_cutter.size.h;
+            var _image=new Image();
+            _image.onload=function(){
+                __context.drawImage(_image,data_cutter.location.x,data_cutter.location.y,data_cutter.size.w,data_cutter.size.h,0,0,data_cutter.size.w,data_cutter.size.h);
+                if(callback){
+                    var _base64=__canvas.toDataURL("image/jpeg");
+                    callback(_base64);
+                }
+            };
+            _image.src=canvas_bg.toDataURL("image/jpeg");
+        }
+        //--根据比例，计算当前裁剪图片在原始图片上的真实尺寸。
+        ,_caculateSizeInfo:function(){
+            //--根据当前操作界面上的数据，换算成为图片上真实尺寸。
+            var _real_x_in_img=data_cutter.location.x-data_bg_trans.location.x;
+            var _real_y_in_img=data_cutter.location.y-data_bg_trans.location.y;
+            _real_x_in_img=Math.round(_real_x_in_img);
+            _real_y_in_img=Math.round(_real_y_in_img);
+            _real_x_in_img=_real_x_in_img/data_bg_trans.zoom;
+            _real_y_in_img=_real_y_in_img/data_bg_trans.zoom;
+            _real_x_in_img=Math.round(_real_x_in_img);
+            _real_y_in_img=Math.round(_real_y_in_img);
+
+            var _real_w=data_cutter.size.w/data_bg_trans.zoom;
+            var _real_h=data_cutter.size.h/data_bg_trans.zoom;
+
+            var real_w=Math.round(_real_w);
+            var real_h=Math.round(_real_h);
+
+            //--请注意，由于取了整数，所以裁剪之后的数据都可能出现问题，就是说，需要取最接近比例的宽度及高度。
+            var _c_w=0;
+            var _c_h=0;
+            var _neareast_ratio=0;
+            var _delta_ratio=0;
+            function _get_ratio(_now_w,_now_h){
+
+
+                var res= {
+                    w:_now_w
+                    ,h:_now_h
+                    ,ratio:_now_w/_now_h
+                };
+
+
+                return res;
+            }
+
+
+            var _tmp_ratio=real_w/real_h;
+            _neareast_ratio=_tmp_ratio;
+
+
+
+            _get_ratio(real_w-1,real_h);
+            _get_ratio(real_w-2,real_h);
+            _get_ratio(real_w+1,real_h);
+            _get_ratio(real_w+2,real_h);
+            _get_ratio(real_w,real_h-1);
+            _get_ratio(real_w,real_h-2);
+            _get_ratio(real_w,real_h+1);
+            _get_ratio(real_w,real_h+2);
+            var _delta_w=0;
+            var _delta_h=0;
+            _tmp_ratio=(real_w+_delta_w)/(real_h+_delta_h);
+
+
+
+            _delta_ratio=Math.abs(data_cutter.ratio-_tmp_ratio);
+            _c_w=(real_w+_delta_w);
+            _c_h=(real_h+_delta_h);
+
+            var _delta_w=-1;
+            var _delta_h=0;
+            _tmp_ratio=(real_w+_delta_w)/(real_h+_delta_h);
+
+            if(Math.abs(data_cutter.ratio-_tmp_ratio)<=_delta_ratio){
+                _delta_ratio=Math.abs(data_cutter.ratio-_tmp_ratio);
+                _c_w=(real_w+_delta_w);
+                _c_h=(real_h+_delta_h);
+            }
+
+
+            var _delta_w=1;
+            var _delta_h=0;
+            _tmp_ratio=(real_w+_delta_w)/(real_h+_delta_h);
+
+            if(Math.abs(data_cutter.ratio-_tmp_ratio)<=_delta_ratio){
+                _delta_ratio=Math.abs(data_cutter.ratio-_tmp_ratio);
+                _c_w=(real_w+_delta_w);
+                _c_h=(real_h+_delta_h);
+            }
+
+            var _delta_w=0;
+            var _delta_h=-1;
+            _tmp_ratio=(real_w+_delta_w)/(real_h+_delta_h);
+
+            if(Math.abs(data_cutter.ratio-_tmp_ratio)<=_delta_ratio){
+                _delta_ratio=Math.abs(data_cutter.ratio-_tmp_ratio);
+                _c_w=(real_w+_delta_w);
+                _c_h=(real_h+_delta_h);
+            }
+
+            var _delta_w=0;
+            var _delta_h=1;
+            _tmp_ratio=(real_w+_delta_w)/(real_h+_delta_h);
+
+            if(Math.abs(data_cutter.ratio-_tmp_ratio)<=_delta_ratio){
+                _delta_ratio=Math.abs(data_cutter.ratio-_tmp_ratio);
+                _c_w=(real_w+_delta_w);
+                _c_h=(real_h+_delta_h);
+            }
+
+
+            real_w=_c_w;
+            real_h=_c_h;
+
+            return {
+                x:_real_x_in_img
+                ,y:_real_y_in_img
+                ,w:real_w
+                ,h:real_h
+            };
+        }
+        ,_cut_by_ratio:function(callback){
+            var _me=this;
+            //--根据当前操作界面上的数据，换算成为图片上真实尺寸。
+            var _realSizeInfo=_me._caculateSizeInfo();
+
+            var __canvas = document.createElement("canvas");
+            var __context = __canvas.getContext("2d");
+            __canvas.width = _realSizeInfo.w;
+            __canvas.height = _realSizeInfo.h;
+            var __context_real=null;
+            var _image;
+            if(data_bg_trans.angle==0||data_bg_trans.angle==360){
+                _image=canvas_angle_0;
+                __context_real=context_angle_0;
+            }
+            else if(data_bg_trans.angle==90){
+                _image=canvas_angle_90;
+                __context_real=context_angle_90;
+            }
+            else if(data_bg_trans.angle==180){
+                _image=canvas_angle_180;
+                __context_real=context_angle_180;
+            }
+            else if(data_bg_trans.angle==270){
+                _image=canvas_angle_270;
+                __context_real=context_angle_270;
+            }
+            _debug("当前角度："+data_bg_trans.angle+" 当前图片尺寸： "+_image.width+" x "+_image.height);
+            /*
+
+             var idata=__context_real.getImageData(_realSizeInfo.x,_realSizeInfo.y,_realSizeInfo.w,_realSizeInfo.h);
+             //__context.drawImage(_image,_real_x_in_img,_real_y_in_img,_real_w,_real_h,0,0,_real_w,_real_h);
+             __context.putImageData(idata,0,0);
+
+             var _base64=__canvas.toDataURL("image/jpeg");
+             callback(_base64);
+             */
+            //--这里需要修正小于0的坐标的问题，对于ios或者其他机器可能出现问题的。
+
+            var _cut_data={
+                get_x:_realSizeInfo.x
+                ,get_y:_realSizeInfo.y
+                ,get_w:_realSizeInfo.w
+                ,get_h:_realSizeInfo.h
+                ,put_x:0
+                ,put_y:0
+            };
+
+            if(_cut_data.get_x<0){
+                //--这是负数啊。。
+                _cut_data.get_w=_cut_data.get_w+_cut_data.get_x;
+                _cut_data.put_x=Math.abs(_cut_data.get_x);
+                _cut_data.get_x=0;
+            }
+            if(_cut_data.get_w+_cut_data.get_x>_image.width){
+                _cut_data.get_w=(_image.width-_cut_data.get_x);
+            }
+            if(_cut_data.get_w<0){
+                _cut_data.get_w=1;
+            }
+            if(_cut_data.get_y<0){
+                _cut_data.get_h=_cut_data.get_h+_cut_data.get_y;
+                _cut_data.put_y=Math.abs(_cut_data.get_y);
+                _cut_data.get_y=0;
+            }
+            if(_cut_data.get_y+_cut_data.get_h>_image.height){
+                _cut_data.get_h=(_image.height-_cut_data.get_y);
+            }
+            if(_cut_data.get_h<0){
+                _cut_data.get_h=1;
+            }
+
+            _debug("裁剪信息如下：");
+            _debug(JSON.stringify(_cut_data));
+            var idata=__context_real.getImageData(_cut_data.get_x,_cut_data.get_y,_cut_data.get_w,_cut_data.get_h);
+
+            if(_cut_data.put_x<=__canvas.width&&_cut_data.put_y<__canvas.height){
+                __context.putImageData(idata,_cut_data.put_x,_cut_data.put_y);
+            }
+            else{
+                _debug("没有执行。");
+            }
+
+            var _base64=__canvas.toDataURL("image/jpeg");
+            callback(_base64);
+
+        }
+        //--裁剪图像，
+        ,cut:function(callback){
+            var _child=this;
+            if(settings.saveMode=="ratio"){
+                _child._cut_by_ratio(callback);
+            }
+            else{
+                _child._cut_by_sizing(callback);
+            }
+        }
+
+
+
+    };
+
+    app.init();
+
+
+
+
+    //初始化控件。
+    this.init=function(base64_image_str,imageFile){
+
+        app.init_background(base64_image_str,imageFile);
+        app.updateCutter();
+    };
+    //--对外接口，移动裁剪框。
+    this.MoveCutter=function(pos_x,pos_y){
+        //--这里至少需要进行边界碰撞的判断。
+        app.MoveCutter(pos_x,pos_y);
+    };
+    //--对外接口，移动图片。
+    this.MoveImage=function(pos_x,pos_y){
+        //--这里至少需要进行边界碰撞的判断。
+        app.MoveBackground(pos_x,pos_y);
+    };
+    //--对外接口，缩放图片、
+    this.ScaleImage=function(_scale){
+        app.ScaleBackground(_scale);
+    };
+    this.RotateImage=function(angle){
+        app.RotateImage(angle);
+    };
+    //--是否已经有图片了。
+    this.hasImage=function(){
+        return appData.hasImage;
+    };
+    this.show_data_cutter=function(){
+
+    };
+    //--获取目前的角度。
+    this.getImageAngle=function(){
+        return data_bg_trans.angle;
+    };
+    //--获取图片的缩放倍率。
+    this.getImageRotation=function(){
+        return data_bg_trans.angle;
+    };
+    //--获取缩放倍率。
+    this.getImageZoom=function(){
+        return data_bg_trans.zoom;
+    };
+    this.cutImg=function(callback){
+        app.cut(callback);
+    };
+    //--获取最小的适合缩放的比例。
+    this.getMinimizeScale=function(){
+        var _scale=appData.minScale;
+        //Math.min(data_cutter.size.w/data_bg_trans.originSize.w,data_cutter.size.h/data_bg_trans.originSize.h);
+
+        return _scale;
+    };
+    this.getCutInfo=function(){
+        return app._caculateSizeInfo();
+    };
+    this.getImageOriginSize=function(){
+        return {
+            w:data_bg_trans.originSize.w,
+            h:data_bg_trans.originSize.h
+        };
+    };
+
+}

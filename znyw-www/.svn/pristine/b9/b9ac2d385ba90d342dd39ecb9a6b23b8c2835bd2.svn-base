@@ -1,0 +1,16 @@
+<%
+/**bld_tips 模板。**/
+if(data.type=='success_show'){
+	data.type='success';
+}
+%>
+<div class="popup pngfix bld_tips">
+    <div class="refundBox">
+        <div class="refundCon">
+            <div class="con_3">
+        		<i class="icon_tips_<%=data.type%>"></i>
+                <p class="mt20" <%if(data.message.length>25){%>style="font-size:16px;"<%}%> ><%=data.message%></p>
+            </div>
+        </div>
+    </div>
+</div>

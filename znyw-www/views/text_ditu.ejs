@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=AKVZHbd090K288gmMjN4IztFBeleu4kQ"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/library/AreaRestriction/1.2/src/AreaRestriction_min.js"></script>
+
+    <style type="text/css">
+        html {
+            height: 100%;
+        }
+        /*去除百度地图左下方的logo*/
+        .anchorBL{display:none;}
+        body {
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #container {
+            width: 800px;
+            height: 600px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+<div id="container"></div>
+<script type='text/javascript'>
+    //当浏览器窗口大小改变时，设置显示内容的高度
+    function changeDivHeight() {
+        var w = document.documentElement.clientWidth;//获取页面可见宽度
+        var h = (w - 650) * 0.75
+        document.getElementById('container').style.height = h + 'px';
+    }
+    changeDivHeight();
+    //新建三个地图上点
+    var points = [
+        {"lng":113.900386,"lat":22.96528,"url":"http://www.baidu.com","id":1,"name":"p1"},
+        {"lng":113.899973,"lat":22.936411,"url":"http://www.mi.com","id":2,"name":"p2"},
+        {"lng":113.871155,"lat":22.90612,"url":"http://www.csdn.com","id":3,"name":"p3"}
+    ];
+    //创建标注点并添加到地图中
+        function addMarker(points) {
+            //循环建立标注点
+            for(var i=0, pointsLen = points.length; i<pointsLen; i++) {
+                var point = new BMap.Point(points[i].lng, points[i].lat); //将标注点转化成地图上的点
+                var marker = new BMap.Marker(point); //将点转化成标注点
+                map.addOverlay(marker);  //将标注点添加到地图上
+                //添加监听事件
+                (function() {
+                    var thePoint = points[i];
+                    marker.addEventListener("click",
+                        function() {
+                            showInfo(this,thePoint);
+                        });
+                })();
+            }
+        }
+    function showInfo(thisMarker,point) {
+        //获取点的信息
+        var sContent =
+            '<ul style="margin:0 0 5px 0;padding:0.2em 0">'
+            +'<li style="line-height: 26px;font-size: 15px;">'
+            +'<span style="width: 50px;display: inline-block;">id：</span>' + point.id + '</li>'
+            +'<li style="line-height: 26px;font-size: 15px;">'
+            +'<span style="width: 50px;display: inline-block;">名称：</span>' + point.name + '</li>'
+            +'<li style="line-height: 26px;font-size: 15px;"><span style="width: 50px;display: inline-block;">查看：</span><a href="'+point.url+'">详情</a></li>'
+            +'</ul>';
+        var infoWindow = new BMap.InfoWindow(sContent); //创建信息窗口对象
+        thisMarker.openInfoWindow(infoWindow); //图片加载完后重绘infoWindow
+    }
+
+    //提示：下面的代码用jquery，所以如果有不能运行的情况请引用后尝试
+    //百度地图api container对应前端div名称 前端要引用2.0版本的百度地图api
+    //需引用api.map.baidu.com/library/AreaRestriction/1.2/src/AreaRestriction_min.js
+    var map = new BMap.Map("container", {
+        enableMapClick: false,
+        minZoom : 11,
+        maxZoom : 18
+    }); // 创建地图实例，禁止点击地图底图
+    //设置样式
+    map.setMapStyle({
+        styleJson: [
+            {//不显示点信息
+                "featureType": "poi",
+                "elementType": "all",
+                "stylers": {
+                    "color": "#1fbcec",
+                    "visibility": "off"
+                }
+            }
+        ]
+    });
+    //    map.centerAndZoom(new BMap.Point(113.900584,22.96528), 11);  // 设置中心点
+    //    map.disableScrollWheelZoom(true); //  禁用滚轮放大缩小
+    map.enableScrollWheelZoom(true);//启用滚轮放大缩小，
+    //    map.disableDragging(true);//禁用地图拖拽
+    //    map.enableDoubleClickZoom(true);
+    //    map.disableDragging();//禁止拖动
+    //    map.disableDoubleClickZoom();//禁止双击缩放
+    var blist = [];
+    var pointArrayData ;
+    var districtLoading = 0;
+
+    function getBoundary() {
+        addDistrict("东莞市");
+    }
+
+    /**
+     * 添加行政区划
+     * @param {} districtName 行政区划名
+     * @returns  无返回值
+     */
+    function addDistrict(districtName) {
+        //使用计数器来控制加载过程
+        districtLoading++;
+        var bdary = new BMap.Boundary();
+        var count = rst.boundaries.length; //行政区域的点有多少个
+        for (var i = 0; i < count; i++) {
+            blist.push({points: rst.boundaries[i], name: districtName});
+            var ply = new BMap.Polygon(rst.boundaries[i], {fillColor: " #277DBC", strokeWeight: 2, strokeColor: "#277DBC"}); //建立多边形覆盖物
+            map.addOverlay(ply);  //添加覆盖物
+        }
+        ;
+        //加载完成区域点后计数器-1
+        districtLoading--;
+        if (districtLoading == 0) {
+            //全加载完成后画端点
+            drawBoundary();
+        }
+
+    }
+
+
+    /**
+     * 各种鼠标事件绑定
+     */
+    function click(evt) {
+        alert(evt.target.name);
+    }
+
+    function mouseover(evt) {
+        evt.target.label.setZIndex(99);
+        evt.target.label.setPosition(evt.point);
+        evt.target.label.show();
+    }
+
+    function drawBoundary() {
+        //包含所有区域的点数组
+        var pointArray = [];
+
+        /*画遮蔽层的相关方法
+         *思路: 首先在中国地图最外画一圈，圈住理论上所有的中国领土，然后再将每个闭合区域合并进来，并全部连到西北角。
+         *      这样就做出了一个经过多次西北角的闭合多边形*/
+        //定义中国东南西北端点，作为第一层
+        var pNW = { lat: 59.0, lng: 73.0 }
+        var pNE = { lat: 59.0, lng: 136.0 }
+        var pSE = { lat: 3.0, lng: 136.0 }
+        var pSW = { lat: 3.0, lng: 73.0 }
+        //向数组中添加一次闭合多边形，并将西北角再加一次作为之后画闭合区域的起点
+        var pArray = [];
+        pArray.push(pNW);
+        pArray.push(pSW);
+        pArray.push(pSE);
+        pArray.push(pNE);
+        pArray.push(pNW);
+        //循环添加各闭合区域
+        for (var i = 0; i < blist.length; i++) {
+            //添加显示用标签层
+            var label = new BMap.Label(blist[i].name, { offset: new BMap.Size(20, -10) });
+            label.hide();
+            map.addOverlay(label);
+
+            //添加多边形层并显示
+            var ply = new BMap.Polygon(blist[i].points, { strokeWeight: 2,fillColor: " #052542" ,strokeColor: "",  fillOpacity: 0.01}); //建立多边形覆盖物
+            ply.name = blist[i].name;
+            ply.label = label;
+
+            map.addOverlay(ply);
+
+            //将点增加到视野范围内
+            var path = ply.getPath();
+            pointArray = pointArray.concat(path);
+            //将闭合区域加到遮蔽层上，每次添加完后要再加一次西北角作为下次添加的起点和最后一次的终点
+            pArray = pArray.concat(path);
+            pArray.push(pArray[0]);
+        }
+
+        //限定显示区域，需要引用api库
+        var boundply = new BMap.Polygon(pointArray);
+        BMapLib.AreaRestriction.setBounds(map, boundply.getBounds());
+        pointArrayData = pointArray;
+        map.setViewport(pointArray);    //调整视野
+
+        //添加遮蔽层
+        var plyall = new BMap.Polygon(pArray,
+            { strokeOpacity: 0.0000001, strokeColor: "#040F28", strokeWeight: 0.00001, fillColor: "#040F28", fillOpacity: 1 }); //建立多边形覆盖物
+        map.addOverlay(plyall);
+//        addMarker(points);
+    }
+
+    setTimeout(function () {
+        getBoundary();
+    }, 100);
+    window.onresize = function () {
+        changeDivHeight();
+    }
+</script>
+</body>

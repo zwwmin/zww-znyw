@@ -1,0 +1,16 @@
+/**
+ * Created by DGDL-08 on 2017/4/21.
+ */
+(function ($) {
+    'use strict';
+    $.fn.bomb = function (options) {
+        var dom = $(this);
+        //错误提示框位置:errorStyle
+
+        // 提示模板
+        var error_tpl= '<div class="staffprompt backs" ><div class="backclose" onclick="closes()"></div><img onerror="NoAvatar()" src="'+options.img +'" alt=""><span>您要'+options.msa+'的是：'+options.name+'</span><input type="hidden" name="'+options.type +'" value="'+options.id+'" id="staffid"><a href="javascript:;" id="confirm" onclick="ass()">确认'+options.msa+'</a></div>';
+
+        //插入错误提示
+        dom.after(error_tpl);
+    };
+})(jQuery);

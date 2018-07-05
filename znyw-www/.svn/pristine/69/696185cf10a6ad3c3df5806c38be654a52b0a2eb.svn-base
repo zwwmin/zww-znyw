@@ -1,0 +1,95 @@
+body{
+    margin: 0;
+    padding: 0;
+    border: 0;
+    Font-Family: "Hiragino Sans GB", "Microsoft Yahei", SimSun, Arial, "Helvetica Neue", Helvetica;
+    min-width: 900px;
+}
+ul{
+   list-style-type: none;
+}
+a:hover{text-decoration: none;}
+.nav_header{
+    width: 100%;
+    background-color: #ffffff;
+    border-bottom: 2px solid rgba(206,206,206,0.47);
+}
+.nav_header .header_nav{
+    padding: 0 40px;
+    max-width: 1400px;
+    z-index: 99;
+    margin: 0 auto;
+    height: 50px;
+    position: relative;
+}
+.header_nav .header_ul{
+    float: left;
+    height: 100%;
+    margin-left: 20px;
+}
+.header_ul li{
+    float: left;
+    margin-right:30px ;
+}
+.header_ul li a{
+    display: inline-block;
+    font-size: 18px;
+    color: #4a4a4a;
+    line-height: 50px;
+}
+.header_ul li a:hover{
+    color: #1fbcec;
+    box-sizing: border-box;
+    -moz-box-sizing:border-box; /* Firefox */
+    -webkit-box-sizing:border-box; /* Safari */
+    border-top:3px solid #1fbcec ;
+    line-height: 45px;
+}
+.header_nav .header_right{
+    float: right;
+    height: 100%;
+    font-size: 18px;
+    color: #0000A6;
+}
+.header_nav .header_right a{
+    display: inline-block;
+    float: left;
+    line-height: 50px;
+    color:#4a4a4a ;
+    margin-right: 15px;
+}
+.header_right a:hover{
+    color: #1fbcec;
+}
+.avatar_center_nav h1{
+    margin-top: 0;
+    padding-top: 45px;
+    text-align: center;
+    font-size:28px ;
+    color: #ffffff;
+}
+.avatar-btns button {
+    height: 35px;
+}
+.btn-primary{
+    width: 150px;
+    height: 150px;
+    margin: 10px;
+    background-size: 100%;
+    background:url("../images/img2/plus_icon@1x.png") no-repeat center center;
+}
+.header_nav .header_logo{
+    float: left;
+    width: 108px;
+    height: 35px;
+    margin: 7px 35px 0 0 ;
+    display: inline-block;
+    background: url("../images/img2/logohei@1x.png")  ;
+    background-size: 100%;
+}
+.avatar_center .avatar_center_nav{
+    width: 100%;
+    height: 300px;
+    background: url("../images/img2/background1920.jpg") no-repeat center;
+    background-size:100% ;
+}

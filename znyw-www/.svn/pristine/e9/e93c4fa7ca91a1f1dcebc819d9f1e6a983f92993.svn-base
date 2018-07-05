@@ -1,0 +1,43 @@
+<table class="layui-table" lay-even lay-skin="nob">
+    <!--无边框表格（内部结构参见右侧目录“常规用法”）-->
+    <!--<colgroup>-->
+    <!--<col width="150">-->
+    <!--<col width="200">-->
+    <!--<col>-->
+    <!--</colgroup>-->
+    <thead>
+    <tr>
+        <th>项目</th>
+        <th>电费</th>
+        <th>占比</th>
+    </tr>
+    </thead>
+    <tbody>
+    <%for(var i=0;i<data.length;i++){
+        var arr = data[i];
+        var ss=0;
+        if(arr.name != "力调电费"){
+            if(arr.value != 0){
+                 ss= ((arr.value/total)*100).toFixed(2);
+            }
+    %>
+    <tr>
+        <td style="font-weight: 500;color: #9b9b9b"><%=arr.name%></td>
+        <td><%=(arr.value).toFixed(2)%></td>
+        <td><%=ss%>%</td>
+    </tr>
+    <%}else {%>
+    <tr>
+        <td style="font-weight: 500;color: #9b9b9b"><%=arr.name%></td>
+        <td><%=(arr.value).toFixed(2)%></td>
+        <td>--</td>
+    </tr>
+    <%}}%>
+    <tr>
+        <td style="font-weight: 500;color: #9b9b9b">总电费</td>
+        <td><%=total%></td>
+        <td>100%</td>
+    </tr>
+
+    </tbody>
+</table>

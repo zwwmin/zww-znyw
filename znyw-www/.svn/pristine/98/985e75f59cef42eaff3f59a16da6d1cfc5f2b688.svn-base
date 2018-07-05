@@ -1,0 +1,495 @@
+/**
+ * Created by DGDL-08 on 2018/4/12.
+ */
+define("p.Intelligent_load",function(require,exports,module){
+
+
+    var list={
+        itemId:0,
+        begin:"",
+        end:""
+    };
+    var BaseInfo={};
+    var time=[];
+    var value=[];
+    var site=$('#site');
+    var submit_btn=$('#submit_btn');
+
+    var app={
+        init:function(opts){
+            var me=this;
+            list.itemId=site.val();
+            me.pierChartTotal(list);
+            me.lineChartTotal();
+            me.determine();
+            site.change(function(){
+                list.itemId=site.val();
+                me.pierChartTotal();
+                for(var i=0;i<BaseInfo.length;i++){
+                    var arr = BaseInfo[i];
+                    if(list.itemId == arr.load_factor_item){
+                        me.SmartBaseInfoChart(arr);
+                        break;
+                    }
+                }
+            });
+        }
+        // 数据概况
+        ,pierChartTotal:function () {
+            var me=this;
+            $.ajax({
+                url:"/Intelligent/v5_SmartGetLoadDiagram"
+                ,data:list
+                ,method:"post"
+                ,success:function(res){
+                    if(res.code == 0){
+                        if(res.data.length!=0){
+                            var atts = res.data;
+                            me._renderList(atts.reverse());
+                        }else {
+                            alert("您选择的时间段没有信息,请重新选择。")
+                        }
+                    }else {
+                        alert(res.msg)
+                    }
+                }
+                ,error:function(){
+                }
+            });
+        }
+        // 数据概况BaseInfo
+        ,lineChartTotal:function () {
+            var me=this;
+            $.ajax({
+                url:"/Intelligent/v5_SmartBaseInfo"
+                ,data:{}
+                ,method:"post"
+                ,success:function(res){
+                    var atts = res.data;
+                    console.log(res);
+                    console.log(list.itemId);
+                    BaseInfo=res.data.loads;
+                    for(var i=0;i<res.data.loads.length;i++){
+                        var arr = res.data.loads[i];
+                        if(list.itemId == arr.load_factor_item){
+                            me.SmartBaseInfoChart(arr);
+                            break;
+                        }
+                    }
+                }
+                ,error:function(){
+
+                }
+            });
+        }
+        ,_renderList:function(data){
+            var me=this;
+            time=[];
+            value=[];
+            for(var i=0;i<data.length;i++){
+                var arr=data[i];
+                time.push(arr.name);
+                value.push(arr.value);
+            }
+
+            me.trendRendering()
+        }
+        ,trendRendering:function () {
+
+            var myChart4 = echarts.init(document.getElementById('assd'));
+            var option2 = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross'
+                    }
+                },
+
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: time
+                },
+                yAxis: {
+                    type: 'value',
+                    name:'有功功率(kW)',
+                    axisLabel: {
+                        formatter: '{value} '
+                    },
+                    axisPointer: {
+                        snap: true
+                    }
+                },
+                "dataZoom": [{
+                    "show": true,
+                    "height": 30,
+                    "xAxisIndex": [
+                        0
+                    ],
+                    bottom: 0,
+                    "start": 10,
+                    "end": 80,
+                    handleSize: '110%',
+                    handleStyle:{
+                        color:"#1fbcec"
+                    },
+                    textStyle:{
+                        color:"#000"},
+                    borderColor:"#90979c"
+
+
+                }, {
+                    "type": "inside",
+                    "show": true,
+                    "height": 15,
+                    "start": 1,
+                    "end": 35
+                }],
+                visualMap: {
+                    show: false,
+                    dimension: 0,
+                    pieces: [{
+                        lte: 6,
+                        color: 'green'
+                    }, {
+                        gt: 6,
+                        lte: 8,
+                        color: 'green '
+                    }, {
+                        gt: 8,
+                        lte: 14,
+                        color: 'green'
+                    }, {
+                        gt: 14,
+                        lte: 17,
+                        color: 'green '
+                    }, {
+                        gt: 17,
+                        color: 'green'
+                    }]
+                },
+                series: [{
+                    name: '功率',
+                    type: 'line',
+                    smooth: true,
+                    data: value,
+                    // markArea: {
+                    //     data: [
+                    //         [{
+                    //             name: '出现',
+                    //             xAxis: '7月20日'
+                    //         }, {
+                    //             xAxis: '7月24日'
+                    //         }],
+                    //         [{
+                    //             name: '反转',
+                    //             xAxis: '11月22日'
+                    //         }, {
+                    //             xAxis: '11月23日'
+                    //         }]
+                    //     ]
+                    // }
+                }]
+            };
+            myChart4.setOption(option2);
+            window.addEventListener('resize',function(){
+                myChart4.resize();
+            });
+        }
+        ,SmartBaseInfoChart:function (data) {
+            var real_times=data.currentval;
+            var real_day=data.daymax;
+            var real_month=data.monthmax;
+
+
+            var myChart = echarts.init(document.getElementById('main'));
+            var myChart2 = echarts.init(document.getElementById('main2'));
+            var myChart3 = echarts.init(document.getElementById('main3'));
+            var value =  real_times.toFixed(2);
+            var value_day = real_day.toFixed(2);
+            var value_month = real_month.toFixed(2);
+            var unit = "%";
+            var min = 0;
+            var max = 100;
+            var  option = {
+                title: {
+                    text: value + unit+" \n 负荷率",
+                    x: 'center',
+                    y: 'center',
+                    textStyle: {
+                        fontWeight: 'normal',
+                        color: "#000000",
+                        fontSize: 20
+                    }
+                },
+                tooltip: {
+                    show: false,
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                legend: {
+                    show: false,
+                    itemGap: 12,
+                    data: ['01', '02']
+                },
+                toolbox: {
+                    show: false,
+                    feature: {
+                        mark: {
+                            show: true
+                        },
+                        dataView: {
+                            show: true,
+                            readOnly: false
+                        },
+                        restore: {
+                            show: true
+                        },
+                        saveAsImage: {
+                            show: true
+                        }
+                    }
+                },
+                series: [{
+                    name: 'Line 1',
+                    type: 'pie',
+                    clockWise: false,
+                    radius: ['55%', '63%'],
+                    itemStyle: {
+                        normal: {
+                            label: {
+                                show: false
+                            },
+                            labelLine: {
+                                show: false
+                            },
+                            shadowBlur: 40,
+                            shadowColor: '#eaefff'
+                        }
+                    },
+                    hoverAnimation: false,
+                    data: [{
+                        value: value - min,
+                        name: '01',
+                        itemStyle: {
+                            normal: {
+                                color: '#7191fe'
+                            }
+                        },
+                    }, {
+                        value: max - value,
+                        name: 'invisible',
+                        itemStyle: {
+                            normal: {
+                                color: '#eaefff', //未完成的圆环的颜色
+                                label: {
+                                    show: false
+                                },
+                                labelLine: {
+                                    show: false
+                                }
+                            }
+                        }
+                    }
+
+                    ]
+                }, ]
+            };
+            var  option_day = {
+                title: {
+                    text: value_day + unit+" \n 负荷率",
+                    x: 'center',
+                    y: 'center',
+                    textStyle: {
+                        fontWeight: 'normal',
+                        color: "#000000",
+                        fontSize: 20
+                    }
+                },
+                tooltip: {
+                    show: false,
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                legend: {
+                    show: false,
+                    itemGap: 12,
+                    data: ['01', '02']
+                },
+                toolbox: {
+                    show: false,
+                    feature: {
+                        mark: {
+                            show: true
+                        },
+                        dataView: {
+                            show: true,
+                            readOnly: false
+                        },
+                        restore: {
+                            show: true
+                        },
+                        saveAsImage: {
+                            show: true
+                        }
+                    }
+                },
+                series: [{
+                    name: 'Line 1',
+                    type: 'pie',
+                    clockWise: false,
+                    radius: ['55%', '63%'],
+                    itemStyle: {
+                        normal: {
+                            label: {
+                                show: false
+                            },
+                            labelLine: {
+                                show: false
+                            },
+                            shadowBlur: 40,
+                            shadowColor: '#cafae0'
+                        }
+                    },
+                    hoverAnimation: false,
+                    data: [{
+                        value: value_day - min,
+                        name: '01',
+                        itemStyle: {
+                            normal: {
+                                color: '#66cc99'
+                            }
+                        },
+                    }, {
+                        value: max - value_day,
+                        name: 'invisible',
+                        itemStyle: {
+                            normal: {
+                                color: '#cafae0' //未完成的圆环的颜色
+                            }
+                        }
+                    }
+
+                    ]
+                }, ]
+            };
+            var  option_month = {
+                title: {
+                    text: value_month + unit+" \n 负荷率",
+                    x: 'center',
+                    y: 'center',
+                    textStyle: {
+                        fontWeight: 'normal',
+                        color: "#000000",
+                        fontSize: 20
+                    }
+                },
+                tooltip: {
+                    show: false,
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                legend: {
+                    show: false,
+                    itemGap: 12,
+                    data: ['01', '02']
+                },
+                toolbox: {
+                    show: false,
+                    feature: {
+                        mark: {
+                            show: true
+                        },
+                        dataView: {
+                            show: true,
+                            readOnly: false
+                        },
+                        restore: {
+                            show: true
+                        },
+                        saveAsImage: {
+                            show: true
+                        }
+                    }
+                },
+                series: [{
+                    name: 'Line 1',
+                    type: 'pie',
+                    clockWise: false,
+                    radius: ['55%', '63%'],
+                    itemStyle: {
+                        normal: {
+                            label: {
+                                show: false
+                            },
+                            labelLine: {
+                                show: false
+                            },
+                            shadowBlur: 40,
+                            shadowColor: '#feeed5'
+                        }
+                    },
+                    hoverAnimation: false,
+                    data: [{
+                        value: value_month - min,
+                        name: '01',
+                        itemStyle: {
+                            normal: {
+                                color: '#f5a623'
+                            }
+                        },
+                    }, {
+                        value: max - value_month,
+                        name: 'invisible',
+                        itemStyle: {
+                            normal: {
+                                color: '#feeed5', //未完成的圆环的颜色
+
+                            }
+                        }
+                    }
+
+                    ]
+                }]
+            };
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+            myChart2.setOption(option_day);
+            myChart3.setOption(option_month);
+            window.addEventListener('resize',function(){
+                myChart.resize();
+                myChart2.resize();
+                myChart3.resize();
+            });
+            $("#real_time").html(((data.currentval /100)*data.loading_capacity).toFixed(2));
+            $("#day").html(((data.daymax /100)*data.loading_capacity).toFixed(2));
+            $("#month").html(((data.monthmax /100)*data.loading_capacity).toFixed(2));
+        }
+        ,determine:function () {
+            var me=this;
+            submit_btn.click(function () {
+                list.begin=$('#stimes').val();
+                list.end=$('#etimes').val();
+                me.pierChartTotal();
+            })
+        }
+        ,showTip:function(text,cb){
+
+            var newTips = $("<div>");
+            $("body").append(newTips);
+            newTips.addClass('showtips');
+            newTips.text(text);
+            window.setTimeout(function() {
+                newTips.addClass('active');
+            }, 10);
+            g_tips = window.setTimeout(function() {
+                $(".showtips").remove();
+                if(cb){
+                    cb();
+                }
+            }, 3000);
+
+        }
+    };
+
+    module.exports=app;
+
+});

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+    <style type="text/css">
+        *{
+            margin:0;
+            padding: 0;
+            font-size: 0px;
+            font-family: '微软雅黑';
+        }
+        .contain-wrapper{
+            margin: 0 auto;
+            padding-top: 70px;
+            width: 470px;
+            height: 230px;
+            background: #000000;
+            border-radius: 30px;
+        }
+        .timer-wrapper p{
+            font-size: 44px;
+            color: #ffffff;
+        }
+        .year{
+            width: 470px;
+            text-align: center;
+        }
+        .timer-footer{
+            width: 460px;
+            text-align: center;
+        }
+        .timer-footer p:nth-child(1){
+            display: inline-block;
+        }
+        .timer-footer p:nth-child(2){
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<div class="contain-wrapper">
+    <div class="timer-wrapper">
+        <p class="year"></p>
+        <div class="timer-footer">
+            <p></p>
+            <p></p>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+
+    /*
+     *这是一个获取当前日期的函数
+     */
+    function showLocaleDate(objb){
+        var str = objb.getFullYear()+"年"+(objb.getMonth()+1)+"月"+objb.getDate()+"日";
+        return str;
+    }
+    var year=document.getElementsByClassName('timer-wrapper')[0].getElementsByTagName('p')[0];
+
+
+    /*
+     *这是一个获取星期几的函数
+     */
+    function showLocaleWeek(objC){
+        var weekArray = new Array("日", "一", "二", "三", "四", "五", "六");
+        var week = objC.getDay();
+        var weekString = "星期"+ weekArray[week];
+        return weekString;
+    }
+    var wk=document.getElementsByClassName('timer-wrapper')[0].getElementsByTagName('p')[1];
+    /*
+     *这是一个获取当前时间的函数
+     */
+
+    function showLocaleTime(objD){
+        var hh = objD.getHours();
+        if(hh<10) hh = '0' + hh;
+        var mm = objD.getMinutes();
+        if(mm<10) mm = '0' + mm;
+        var ss = objD.getSeconds();
+        if(ss<10) ss = '0' + ss;
+        var reflash=hh + ":" + mm + ":" + ss;
+        return reflash;
+    }
+    var now=document.getElementsByClassName('timer-wrapper')[0].getElementsByTagName('p')[2];
+console.log(year)
+    function showTime(){
+        var today=new Date();
+        year.innerHTML=showLocaleDate(today);
+        wk.innerHTML=showLocaleWeek(today);
+        now.innerHTML=showLocaleTime(today);
+        window.setTimeout("showTime()",1000);
+    }
+    showTime();
+</script>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>智能代维</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/AdminLTE.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/Admintxt.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/bootstrap-daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/Ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/skins/skin-blue.css">
+    <!--layui-->
+    <link rel="stylesheet" type="text/css" href="../layui/css/layui.css">
+
+    <!--ECharts-->
+    <script type="text/javascript" src="../dist/echarts.common.min.js"></script>
+    <style>
+        a:link,a:active ,a:visited,a:hover {text-decoration:none;}
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+    <%-partial("layout/Intelligent.ejs",{data:{TotalMenu:"usage",CurrentMenu:"survey",memberInfo:memberInfo,BaseInfo:BaseInfo,currentData:current}})%>
+    <!--主体-->
+    <div class="content-wrapper" >
+        <section class="content">
+            <div class="row" style="margin-top: 5px;">
+                <div class="col-md-12" >
+                    <div class="conter-warning-header">
+                        <img src="/res/images/imgv6/green_left.png" alt="" class="conter-warning-top-img2" >
+                        <span style="font-weight: 900;">用电概况</span>
+                    </div>
+                    <div class="survey_one" >
+                        <div onclick="slide(Avertissement_body)" class="survey_div survey_one_margin thinner-border">
+                            <img src="/res/images/imgv7/ydgk_jrgj_icon.png" alt="">
+                            <div class="survey_div_spna">今日告警</div>
+                        </div>
+                        <div onclick="slide(Overview_bady)" class="survey_div survey_one_margin thinner-border">
+                            <img src="/res/images/imgv7/ydgk_zgk_icon.png" alt="">
+                            <div class="survey_div_spna">总概况</div>
+                        </div>
+                        <div onclick="slide(structure_bady)" class="survey_div survey_one_margin thinner-border">
+                            <img src="/res/images/imgv7/ydgk_dfjg_icon.png" alt="">
+                            <div class="survey_div_spna">电费结构</div>
+                        </div>
+                        <div onclick="slide(Factor_bady)" class="survey_div thinner-border" style="margin-bottom: 20px;">
+                            <img src="/res/images/imgv7/ydgk_glys_icon.png" alt="">
+                            <div class="survey_div_spna">功率因数</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="Avertissement_body"  style="margin-top: 20px;">
+                <div class="col-md-12" >
+                    <div class="conter-warning-header">
+                        <img src="/res/images/imgv6/green_left.png" alt="" class="conter-warning-top-img2" >
+                        <span style="font-weight: 900;">今日告警</span>
+                        <a href="/user/Intelligent_warning" class="Subtitle_right">查看历史数据 ></a>
+                    </div>
+                    <div class="survey_two" >
+                        <div class="layui-tab layui-tab-brief"  lay-filter="demo" style="margin: 0" lay-filter="docDemoTabBrief">
+                            <ul class="layui-tab-title">
+                                <li data-value="0" class="layui-this thinner-border">全部</li>
+                                <li data-value="2" class="thinner-border">严重</li>
+                                <li data-value="1" class="thinner-border">普通</li>
+                                <li data-value="3" class="thinner-border">预警</li>
+                            </ul>
+                            <div class="layui-tab-content survey_two_height" >
+                                <div class="layui-tab-item layui-show">
+                                    <div id="table_0">
+
+                                        <%if(list.code != -1){%>
+                                        <table class="layui-table" lay-skin="nob"   lay-filter="test">
+                                            <thead>
+                                            <tr>
+                                                <th >编号</th>
+                                                <th >站点名称</th>
+                                                <th >告警内容</th>
+                                                <th >等级</th>
+                                                <th >告警时间</th>
+                                                <th >结束时间</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <%for (var i=0;i<list.data.length;i++){
+                                                var arr=list.data[i];
+                                            %>
+                                            <tr>
+                                                <td><%= i%></td>
+                                                <td><%=arr.s_name%></td>
+                                                <td><%=arr.alarminfo%></td>
+                                                <td><%=arr.level%></td>
+                                                <td><%=arr.stime%></td>
+                                                <td><%=arr.etime%></td>
+                                            </tr>
+                                            <%}}else {%>
+                                                <div class="empty">
+                                                    <img src="/res/images/imgv6/nocase_icon.png" alt="">
+                                                    <span>目前暂无数据</span>
+                                                </div>
+                                            <%}%>
+
+                                        </table>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-5 col-md-5"></div>
+                                        <div class="col-sm-7 col-md-7">
+                                            <div id="test0">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="layui-tab-item">
+                                    <div id="table_2">
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-5 col-md-5"></div>
+                                        <div class="col-sm-7 col-md-7">
+                                            <div id="test2"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="layui-tab-item">
+                                    <div id="table_1">
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-5 col-md-5"></div>
+                                        <div class="col-sm-7 col-md-7">
+                                            <div id="test1"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="layui-tab-item">
+                                    <div id="table_3">
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-5 col-md-5"></div>
+                                        <div class="col-sm-7 col-md-7">
+                                            <div id="test3"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="Overview_bady" style="margin-top: 20px;">
+                <div class="col-md-12" >
+                    <div class="conter-warning-header">
+                        <img src="/res/images/imgv6/blue_left.png" alt="" class="conter-warning-top-img2" >
+                        <span style="font-weight: 900;">总概况</span>
+                        <div class="btn_group">
+                            <div class="title_btn title_Anbt" data-value="1">今天</div>
+                            <div class="title_btn " data-value="2">昨日</div>
+                            <div class="title_btn " data-value="0">本月</div>
+                            <div class="btn_group_time">
+                                月份选择：
+                                <input class="btn_group_time_n" readonly placeholder="选择时间" id="time"></input>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="survey_three" id="general" ></div>
+                </div>
+            </div>
+            <div class="row" id="structure_bady" style="margin-top: 20px;">
+                <div class="col-md-12" >
+                    <div class="conter-warning-header">
+                        <img src="/res/images/imgv6/green_left.png" alt="" class="conter-warning-top-img2" >
+                        <span style="font-weight: 900;">电费结构</span>
+                        <div class="btn_group" style="width: calc(100% - 90px);">
+                            <div class="btn_group_time">
+                                月份选择：
+                                <input class="btn_group_time_n" readonly placeholder="选择时间" id="time2"></input>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="survey_four ">
+                        <div class="col-xs-12 col-md-6 ">
+                            <div id="main" style="width: 100%;height: 318px;"></div>
+                        </div>
+                        <div class="col-xs-12 col-md-6 survey_four_two" id="index2">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" id="Factor_bady"  style="margin-top: 20px;">
+                <div class="col-md-12" >
+                    <div class="conter-warning-header">
+                        <img src="/res/images/imgv6/blue_left.png" alt="" class="conter-warning-top-img2" >
+                        <span style="font-weight: 900;">功率因数</span>
+                        <span style="font-size: 14px;color: #9b9b9b;margin: 0">(每隔1小时可刷新一次数据)</span>
+                        <div class="btn_group" style="width: calc(100% - 260px);">
+
+                            <a href="/user/Intelligent_warning" class="Subtitle_right">查看历史功率因数 ></a>
+                            <div class="refresh " id="refresh_btn">
+                                <img src="/res/images/imgv7/shauxin.png" class="layui-anim layui-anim-rotate " alt="">
+                                刷新
+                            </div>
+                        </div>
+                    </div>
+                    <div class="survey_Five" id="factor">
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!--底部-->
+
+</div>
+
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/dist/js/adminlte.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/moment/min/moment.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
+<!--layui-->
+<script type="text/javascript" src="../layui/layui.all.js"></script>
+
+<% include layout/inc_js.ejs%>
+<script>
+//    layer.load(2); //风格1的加载
+    var pageOptions={
+        total:<%= list.total%>
+    };
+    seajs.use("p.Intelligent_index",function(page){
+        page.init(pageOptions);
+    });
+
+function slide(data) {
+    $('html,body').animate({scrollTop: $('#'+data.id +'').offset().top}, 800);
+}
+</script>
+</body>
+</html>

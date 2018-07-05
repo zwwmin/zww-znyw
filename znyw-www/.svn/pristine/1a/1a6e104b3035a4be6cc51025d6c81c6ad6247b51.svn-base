@@ -1,0 +1,144 @@
+var workerCommon ={
+    json1:[],
+    json2:[],
+    json3:[],
+//        areaList:[],//选择接单区域存放json
+//        workTypeList:[],//选择从业工种存放json
+forTopHtml:function(opt){
+    var html="",idlist="";
+    console.log(opt);
+    for(var i=0;i<opt.List.length;i++)
+{
+    html = i == (opt.List.length-1) ? html + opt.List[i].name:html + opt.List[i].name + "/";
+    idlist = i == (opt.List.length-1) ? idlist + opt.List[i]['quote_product_id'] : idlist + opt.List[i]['quote_product_id'] + ",";
+}
+    $(opt.inputid).val(idlist);
+    if(html ==""){
+        html=opt.jub
+    }
+    console.log(html);
+    return html;
+},
+select_AerList:function(boxId,List){
+
+    $(boxId + " ul").on("click","li a",function(){
+        var ss=0;
+        var $a=$(this).parents("li").children("a");
+        $(this).parents('li').siblings('li').children(".offer_li_bg").show();
+        $(this).parents('li').find(".offer_li_bg").hide();
+
+        var $number=$(this).parents("li").children(".number");
+        var number=$(this).parents("li").children(".number").html();
+
+            if(number>0){
+
+            }else {
+                $(this).parents('li').find(".offer_plugin").show();
+                $number.html('1');
+                $.each(List,function(c,list){
+                    if(list.quote_product_id == $a.data("value")){
+                        ss=1;
+                        list.amount=number;
+                        list.name=$a.find("span").html();
+                    }
+                });
+            if(ss == 0){
+                List.push({"quote_product_id":$a.data("value"),"name":$a.find("span").html(),"amount":1});
+            }
+        }
+
+    });
+    $(boxId + " ul ").on("click","li .a1",function(){
+        var ss=0;
+        var $a=$(this).parents("li").children("a");
+        var number=$(this).parents("li").children(".number").html();
+        var $number=$(this).parents("li").children(".number");
+        if(number <= 0 ){
+            $number.html(" ");
+            for(var i=0;i<List.length;i++){
+                if(List[i]["quote_product_id"]==$a.data("value"))
+                    List.splice(i,1);
+            }
+            $(this).parents('li').find(".offer_plugin").hide();
+        }else {
+            number -- ;
+            if(number ==0){
+                $number.html(" ");
+                for(var i=0;i<List.length;i++){
+                    if(List[i]["quote_product_id"]==$a.data("value"))
+                        List.splice(i,1);
+                }
+                $(this).parents('li').find(".offer_plugin").hide();
+            }else {
+                $number.html(number);
+                $.each(List,function(c,list){
+                    if(list.quote_product_id == $a.data("value")){
+                        ss=1;
+                        list.amount=number;
+                        list.name=$a.find("span").html();
+                    }
+                });
+                if(ss == 0){
+                    List.push({"quote_product_id":$a.data("value"),"name":$a.find("span").html(),"amount":number});
+                }
+            }
+
+
+        }
+    });
+
+    $(boxId + " ul ").on("click"," li .a2",function(){
+        var jubge=0;
+        var $a=$(this).parents("li").children("a");
+        var number=$(this).parents("li").children(".number").html();
+        var $number=$(this).parents("li").children(".number");
+        if(number == ""){
+            number = 1;
+        }else {
+            number++;
+        }
+        $number.html(number);
+        if(List[0] == undefined){
+            List.push({"quote_product_id":$a.data("value"),"name":$a.find("span").html(),"amount":number});
+        }else {
+            $.each(List,function(c,list){
+                if(list.quote_product_id == $a.data("value")){
+                    jubge=1;
+                    list.amount=number;
+                    list.name=$a.find("span").html();
+                }
+            });
+            if(jubge == 0){
+                List.push({"quote_product_id":$a.data("value"),"name":$a.find("span").html(),"amount":number});
+            }
+        }
+    });
+},
+select_Aer:function(boxId,List){
+        $(boxId + " ul").on("click","li a",function(){
+            var $this = $(this);
+            var $index = $(boxId + " ul").find("a").index($this);
+            if($this.hasClass("active")){
+                $this.removeClass("active");
+                $(this).parents('li').siblings('li').find("a").removeClass("active");
+                $("#plugin").remove();
+                for(var s=0;s<List.length;s++){
+                    if(List[s]["quote_product_id"]==$this.data("value"))
+                        List.splice(s,1);
+                }
+            }
+            else{
+                $this.addClass("active");
+                $(this).parents('li').siblings('li').find("a").removeClass("active");
+                List.splice(0,List.length);
+                List.push({"quote_product_id":$this.data("value"),"name":$this.html()});
+            }
+        })
+    }
+};
+$(function(){
+//工种弹窗后选择
+        workerCommon.select_Aer("#select_WorkTypeListBox",workerCommon.json1);
+        workerCommon.select_AerList("#select_VolumeBox",workerCommon.json2);
+        workerCommon.select_AerList("#select_VolumeBox_two",workerCommon.json3);
+    });

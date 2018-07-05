@@ -1,0 +1,112 @@
+
+/**
+ * 注册页面逻辑。
+ */
+define("p.login",function(require,exports,module){
+
+    var settings={};
+    var reg_area=$("#reg-area");
+    var ipt_account=reg_area.find('[name="account"]');
+    var ipt_password=reg_area.find('[name="password"]');
+    var btn_submit=$("#btn-submit");
+    var tips_error=$('#error-msg');
+    var tips_content=tips_error.find('[ui="msg-content"]');
+    var queryObject=util.getQueryObject();
+    var lcbox_remember=$("#lcbox-remember");
+    var drag=$("#drag");
+    var btn_send=$("#btn-verify-code");
+
+    // 滑块
+    var dragbox=$("#dragbox");
+
+    var checkMobileData=true;
+
+    var shake_btn_submit=UiUtil.ShakeButton({
+        element:btn_submit
+    });
+
+    var _all=require("p.all");
+
+
+    var app={
+        init:function(opts){
+            $.extend(settings,opts);
+            var me=this;
+            // me.initFormUI();
+            me.initEvents();
+
+
+
+        }
+        ,initFormUI:function(){
+            // --添加对记住账号功能。
+            if(localStorage.getItem("my_account_name")!=null){
+                //ltxt_mobile.css('visibility',"hidden");
+                setTimeout(function(){
+                    ipt_account.removeClass('placeholder');
+                    ipt_account.val(localStorage.getItem("my_account_name"));
+                    //ltxt_mobile.css('visibility',"visible");
+                },1000);
+                lcbox_remember.prop("checked",true);
+            }
+
+        }
+        ,initEvents:function(){
+            var me=this;
+            var sending=false;
+            $(window).keydown(function(e){
+                if(e.keyCode==13){
+                    btn_submit.trigger('click');
+                }
+            });
+            btn_submit.on('click',function(){
+                tips_error.hide();
+                if(sending){
+                    return;
+                }
+                sending=true;
+                setTimeout(function(){
+                    sending=false;
+                },1000);
+
+
+                $.ajax({
+                    url:"/login"
+                    ,data:$("#form").serialize()
+                    ,method:"post"
+                    ,success:function(sdata){
+                        if(sdata.code!=0){
+                           alert(sdata.message);
+                            return;
+                        }
+                        setTimeout(function(){
+                            var _url="/Intelligent/Intelligent_energy";
+                            if(queryObject["from"]){
+                                _url=queryObject["from"];
+                            }
+                            if(history.replaceState){
+                                history.replaceState("","",_url);
+                                location.reload();
+                            }
+                            else{
+                                location.href=_url;
+                            }
+                        },10);
+
+                    }
+                    ,error:function(){
+
+                    }
+                });
+
+
+            });
+
+
+
+        }
+    };
+
+    module.exports=app;
+
+});

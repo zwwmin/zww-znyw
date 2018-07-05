@@ -1,0 +1,40 @@
+<%
+/**dialog box 模板。**/
+%>
+<div class="oppbox com_opp2">
+    <div class="opp_tit1">
+        <h3><%=data.title%></h3>
+        <%
+        if(data.showClose){
+        %>
+        <a href="javascript:void(0);" ui="btn-close"><i></i></a>
+        <%
+        }
+        %>
+    </div>
+    <div class="opp_con2">
+        <p class="p1"><%=data.message%></p>
+        <%
+        if(util.checkEmpty(data.smallMessage)==false){
+        %>
+        <p class="p2"><%=data.smallMessage%></p>
+        <%
+        }
+        %>
+        <%
+        if(data.showConfirm){
+        %>
+        <a class="confirm_btn2" href="javascript:void(0);" ui="btn-confirm"><%=data.confirmText%></a>
+        <%
+        }
+        %>
+        <%
+        if(data.showCancel){
+        %>
+        <a class="cancel_btn2 ml10" href="javascript:void(0);" ui="btn-cancel"><%=data.cancelText%></a>
+        <%
+        }
+        %>
+    </div>
+
+</div>

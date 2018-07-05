@@ -1,0 +1,59 @@
+<%
+ var _inc_now_stamp=new Date().getTime();
+%>
+
+<script type="text/javascript" src="/res/lib/fixed.js"></script>
+<script type="text/javascript" src="/res/js/jquery.js"></script>
+<script type="text/javascript" src="/res/lib/jquery-migrate-1.2.1.min.js"></script>
+<script type="text/javascript" src="/res/lib/moment.min.js"></script>
+
+<script type="text/javascript" src="/res/lib/util.min.js"></script>
+
+<script type="text/javascript">
+
+    window.ContextPath="";
+    window.__js_debug=false;
+    (function(){
+        var _queryObject=util.getQueryObject();
+        if(_queryObject["debug"]){
+            window.__js_debug=true;
+        }
+    })();
+
+</script>
+
+<!--base ui-->
+
+<script type="text/javascript" src="/res/ui/UiUtil.js"></script>
+<link type="text/css" rel="stylesheet" href="/res/ui/ui.css">
+
+<script type="text/javascript" src="/javascripts/global.js"></script>
+
+<!--seajs引入-->
+<script type="text/javascript" src="/res/module/config.js?v=<%=_inc_now_stamp%>"></script>
+<!--<script type="text/javascript" src="/res/mobile/template/tpl.js?v=<%=_inc_now_stamp%>"></script>-->
+<!--<script type="text/javascript" src="/res/mobile/module/config.js?v=--><!--"></script>-->
+<!--<script type="text/javascript" src="/res/mobile/template/tpl.js?v=--><!--"></script>-->
+<script type="text/javascript" src="/res/lib/sea.js"></script>
+<script type="text/javascript" src="/res/config/seajs.config.js"></script>
+
+<script type="text/javascript" src="/res/lib/ejs_production.js"></script>
+<script type="text/javascript" src="/res/ui/WebUI.js"></script>
+<script type="text/javascript" src="/res/ui/UiUtil.js"></script>
+<script type="text/javascript" src="/res/web/OrderCart.js"></script>
+<script type="text/javascript" src="/res/web/orderCollection.js"></script>
+<link href="/res/ui/ui.css" rel="stylesheet" type="text/css"/>
+
+<script type="text/javascript" src="/res/vendor/iPager/iPager.js"></script>
+
+
+<script type="text/javascript" src="/res/js/funParabola.js"></script>
+
+<script type="text/javascript" src="/res/js/bld.util.js"></script>
+<script type="text/javascript" src="/res/js/bld.public.js"></script>
+<script type="text/javascript" src="/res/js/qrcodejs/qrcode.min.js"></script>
+<script type="text/javascript" src="/res/js/chosen/chosen.jquery.js"></script>
+
+<script type="text/javascript" src="/res/js/jquery.cookie.js"></script>
+<!--随机字符串-->
+<script type="text/javascript" src="/res/js/string.js"></script>

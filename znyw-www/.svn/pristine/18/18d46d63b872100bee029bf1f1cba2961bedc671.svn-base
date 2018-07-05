@@ -1,0 +1,365 @@
+/*
+ * 多级联动地区选择框插件
+ *
+ * 预加载数据 需要引入文件cityselect.data.js
+ * author: huozhanyi
+ * email: huozhanyi.work@gmail.com
+ * Create: 2014-06-12
+ * Date: 2014-07-05
+ * version: 1.1
+ */
+var CitySelect = {};
+(function(object){
+	//起始id值
+	object.id  = 1;
+	//全局缓存容器
+	object.cache = {
+		data: []//地区缓存{pid:data}
+	};
+	if(typeof(cityselect_data) == 'object')//预加载数据
+		object.cache.data = cityselect_data;
+
+	//创建方法
+	object.create = function(elemId,config){
+		var widget = new this.widget(elemId,config);
+		widget.init();
+		object.set(elemId,widget);
+		return widget;
+	};
+
+	//实体map
+	object.map = {};
+	object.set = function(elemId,widget){
+		object.map[elemId] = widget;
+	};
+	object.get = function(elemId){
+		return object.map[elemId];
+	};
+
+	//自定义事件接口容器
+	object.even = {
+		selectChangeEven: function(widget,$select){}	//选择框改变事件
+	};
+
+	//实体类
+	object.widget = function(elemId,config){
+		var _this 	= this;
+		//当前实体的jQuery对象
+		var $widget 	= $("#"+elemId);
+		//配置	
+		var _config = {
+			getParenstUrl: '/common/region/getAllParent',
+			getChildsUrl: '/common/region/getChildren',
+			minSelectQty: 3,			//最少选择框数
+			maxSelectQty: 4,            //最多选择框数
+			template: 'default',		//默认模板
+			input:{},					//自定义input元素设置
+			inputDefault: {				//默认存储结果id的input元素设置
+				id: 'cityselect-input_'+object.id,
+				name: 'cityselect-input-name',
+				value: 0,
+				type: 'hidden',
+				'class': '',
+				style: ''
+			},
+			select: {
+				'class': '',
+				style: ''
+			},
+			data: {						//数据格式
+				idKey: 'id',
+				pidKey: 'parent_id',
+				nameKey: 'name',
+				rootId: 1
+			}
+		};
+		//模板容器
+		var _template  = {
+			input : function(){
+				++object.id;
+				var set = _this.config().input;
+				var def	= _this.config().inputDefault;
+				var id 		= set.id ? set.id : def.id
+					,name 	= set.name ? set.name : def.name
+					,type 	= set.type ? set.type : def.type
+					,value 	= set.value ? set.value : def.value
+					,iclass = set['class'] ? set['class'] : def['class']
+					,style 	= set.style ? set.style : def.style;
+				return '<input id="'+id+'" name="'+name+'"" type="'+type+'" value="'+value+'" class="'+iclass+'" style="'+style+'">';
+			},
+			'default' : function(pid,data,seletedId){
+				pid 		= (pid > 1 ) ? pid : 0;
+				data		= data? data : [];
+				seletedId	= seletedId ? seletedId : 0;
+
+				var cfg 	= _this.config();
+				var iclass 	= cfg.select['class'] ? cfg.select['class'] : '';
+				var style  	= cfg.select.style ? cfg.select.style : '';
+				var html 	= '<select pid="'+pid+'" class="'+iclass+'" style="'+style+'"><option value="0">请选择</option>';
+				$.each(data,function(i,n){
+					var selected = n[cfg.data.idKey] == seletedId ? 'selected' : '';
+					html += '<option value="'+n[cfg.data.idKey]+'" '+selected+'>'+n[cfg.data.nameKey]+'</option>';
+				});
+				html += '</select>';
+				return html;
+			}
+		};
+
+		/******************************************基础方法******************************************/
+		/**
+		 * 初始化
+		 */
+		_this.init = function(){
+			_this.config(config);
+		};
+		/**
+		 * 修改设置
+		 */
+		_this.config = function(cfg){
+			if(!cfg)
+				return _config;
+			_config = $.extend(_config, cfg);
+		};
+		/**
+		 *渲染模板
+		 */
+		_this.render = function(){
+			var html 	= '';
+			var cfg  	= _this.config();
+			var rootId  = cfg.data.rootId;
+			var tpl  	= _this.template();
+			var curId   = cfg.input.value; 
+			html += _template.input();
+			if(curId && curId != rootId){ //存在地区ID则生成父选择框
+				var parentsData = _this.getParentsData(curId);
+				if(parentsData.length == 0){
+					html += tpl(rootId,_this.getChildsData(rootId));
+				}else{//@todo 优化兼容性，返回的结果不一定是按顺序的，所以这里要做排序
+					var parentArr = [];
+					var k = 0; //计算父地区个数
+					//生成父地区
+					$.each(parentsData,function(i,n){
+						var id  = n[cfg.data.idKey];
+						var pid = n[cfg.data.pidKey];
+						if(pid >= rootId){
+							html += tpl(pid,_this.getChildsData(pid),id);
+							k++;
+						}
+					});
+					//生成子地区
+					if(k < _this.config().maxSelectQty){
+						var childsData = _this.getChildsData(curId);
+						if(childsData.length > 0)
+							html += tpl(curId,childsData);
+					}
+				}
+			}else{//生成默认选择框
+				html += tpl(rootId,_this.getChildsData(rootId));
+			}
+			return html;
+		};
+		/**
+		 * 输出模板
+		 */
+		_this.show = function(){
+			$widget.html(_this.render());
+			_this.completeAfterSelect();
+			bindEven();
+			return _this;
+		};
+		/**
+		 * 获取input的jq对象
+		 */
+		_this.input = function(){
+			var cfg = _this.config();
+			var id 	= cfg.input.id ? cfg.input.id : cfg.inputDefault.id;
+			return $widget.find("#"+id);
+		};
+		/**
+		 * 设置/获取模板
+		 */
+		_this.template = function(tpl){
+			var cfg = _this.config();
+			if(tpl){
+				_this.config({template:tpl});
+			}
+			return _template[cfg.template];
+		};
+		/**
+		 * 设置/获取缓存
+		 */
+		_this.cache = function(pid,data){
+			if(!data)
+				return object.cache.data[pid];
+			else
+				object.cache.data[pid] = data;
+		};
+
+		/******************************************数据操作******************************************/
+		/**
+		 * 获取结果
+		 */
+		_this.getValue = function(){
+			return _this.input().val();
+		};
+		/**
+		 * 获取当前地址字符串
+		 */
+		_this.getAddress = function(){
+			var addr = '';
+			$.each($widget.find("option:selected"),function(i,n){
+				var $n = $(n);
+				if($n.attr('value') > 0){
+					addr += $n.html();
+				}
+			});
+			return addr;
+		};
+		/**
+		 * 获取指定select对象的值，如果为0则获取pid值
+		 */
+		_this.getSelectVal = function($select){
+	        var val = $select.val();
+	        if(val == 0)
+	        	val = $select.attr("pid");
+	        return val;
+		};
+
+		/**
+		 * 获取上一级数据
+		 */
+		_this.getParentsData = function(id){		
+			var cfg = _this.config();
+			var data= [];
+			$.ajax({
+				type: "POST",
+				url: cfg.getParenstUrl,
+				data: {id:id},
+				dataType: "json",
+				async: false,
+				success: function(rst){
+					data = rst;
+				}
+			});
+			return data;
+		};
+
+		/**
+		 * 获取下一级数据
+		 */
+		_this.getChildsData = function(id){
+			var cfg = _this.config();
+			var data= _this.cache(id);
+			if(!data){
+				$.ajax({
+					type: "POST",
+					url: cfg.getChildsUrl,
+					data: {region_id:id},
+					dataType: "json",
+					async: false,
+					success: function(rst){
+						data = rst;
+					}
+				});
+				_this.cache(id,data);
+			}
+			return data;
+		};
+
+		/**
+		 * 获取select元素总数
+		 */
+		_this.getSelectQty = function(){
+			return $widget.find("select").length;
+		};
+
+		/**
+		 * 获取select元素总数
+		 */
+		_this.getBeforeSelectQty = function($select){
+			return $select.prevAll("select").length;
+		};
+
+		/**
+		 * 获取select元素总数
+		 */
+		_this.getAfterSelectQty = function($select){
+			return $select.nextAll("select").length;
+		};
+
+		/**
+		 * 创建子选择框
+		 */
+		_this.createChildSelect = function($select){
+			var id = $select.val();
+			if(id < 0) 
+				return false;
+			var template = _this.template();
+			
+			_this.deleteAllAfterSelect($select);//删除后面多余选择框
+			//如果选择框超出设置限制，则不再生成
+			if(_this.getSelectQty() < _this.config().maxSelectQty){
+				var data = _this.getChildsData(id);
+				if(data.length > 0)
+					$select.after(template(id,data));//生成选择框
+			}
+			_this.completeAfterSelect();//补齐默认个数选择框
+		};
+
+		/**
+		 * 删除子选择框
+		 */
+		_this.deleteChildSelect = function($select){
+			_this.deleteAllAfterSelect($select);
+			_this.completeAfterSelect();
+		}
+
+		/**
+		 * 删除指定select后的所有select元素
+		 */
+		_this.deleteAllAfterSelect = function($select){
+			$select.nextAll("select").remove();
+		};
+	    /**
+	     * 补齐默认个数选择框
+	     */
+	    _this.completeAfterSelect = function(){
+	    	var diff = _this.config().minSelectQty - _this.getSelectQty();
+	    	if(diff > 0){
+	    		var tpl  = _this.template();
+	    		var sel  = tpl(0,[]);
+	    		var html = '';
+	    		for(var i=0;i<diff;i++){
+	    			html += sel;
+	    		}
+	    		$widget.find("select:last").after(html);
+	    	}
+	    }
+
+		/******************************************事件******************************************/
+		/**
+		 * 绑定全局事件
+		 */
+		var bindEven = function(){
+			//选择框改变事件
+			$widget.on("change","select",function(){
+				selectChangeEvenGroup($(this));//事件队列
+			});
+		};
+		//选择框改变事件组
+	    var selectChangeEvenGroup = function($select){
+	    	var val = $select.val();
+	    	_this.input().val(_this.getSelectVal($select));
+	    	if(val == 0){
+	    		_this.deleteChildSelect($select);
+	    	}else{
+	    		_this.createChildSelect($select);
+	    	}
+			_this.selectChangeEven(_this,$select);//自定义事件
+	    };
+	    //自定义选择框改变事件
+	    _this.selectChangeEven = function(widget,$select){
+	    	object.even.selectChangeEven(widget,$select);
+	    };
+	};
+})(CitySelect);

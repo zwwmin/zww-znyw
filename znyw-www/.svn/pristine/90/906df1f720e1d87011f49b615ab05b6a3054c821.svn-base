@@ -1,0 +1,524 @@
+/**
+ * Created by DGDL-08 on 2018/3/30.
+ */
+var express = require('express');
+var router = express.Router();
+var Settings=require("../settings");
+var ServerConf=require("../ServerConf");
+var logger = require('../util/logHelper.js').Logger;
+var fs=require("fs");
+var Q = require('q');
+/*******注意，为了自动模拟php服务器的request并且发送带有session id的cookie，
+ * 现在用WebRequestHelper代替RequestHelper，两者的区别在于，前者可以模拟cookie环境，并且自动发送带有session的cookie，后者没有。
+ * 并且，后者会出现多个接口报请先登陆的错误。
+ * ********/
+
+var WebRequestHelper=require("../util/WebRequestHelper");
+var Intelligent=require("../service/IntelligentJS.js");
+var util=require("../util/util.js");
+var request = require('request');
+var plugins=require("../service/plugins.js");
+
+var crypto = require('crypto');
+
+
+router.get('*',function(req,res,next){
+
+
+    var isAjaxRequest=false;
+    //--检查是否ajax。
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        // send your xhr response here
+        isAjaxRequest=true;
+    } else {
+        isAjaxRequest=false;
+    }
+
+    function checkLogin(callback_success,callback_error){
+        //--判断当前sid是否有效的。
+        var _check_login_error=false;
+        var _lv1Ajax=new WebRequestHelper(req);
+        var _check_result={};
+        // callback_success(_check_result);
+        // return
+        _lv1Ajax.addTask({
+            url:ServerConf.ApiHost+Settings.WebApi.MemberInfoApi
+            ,data:{}
+            ,success:function(theData){
+                _check_login_error=false;
+                _check_result=theData;
+            }
+            ,error:function(error){
+                _check_login_error=true;
+                logger.error(error);
+            }
+        });
+
+        _lv1Ajax.run(function(){
+            if(_check_login_error){
+                if(isAjaxRequest){
+                    res.send({
+                        state:"failure"
+                        ,msg:"系统无法访问后端服务，后端服务错误"
+                    })
+                }else{
+                    res.send("系统无法访问后端服务，后端服务错误");
+                    return;
+                }
+                return;
+            }
+            else{
+                if(callback_success){
+                    callback_success(_check_result);
+                }
+            }
+        });
+    }
+
+    function loginAndRedirect(){
+        //清空多余的sid和user。
+        if(req.session.sid){
+            delete req.session.sid;
+        }
+        if(req.session.user){
+            delete req.session.user;
+        }
+        var _redirect_url="/login";
+        var _from=req.url;//   空
+        var _org_url=req.originalUrl;// /user
+        var _now_url=util.Json2URL(_redirect_url,{from:_org_url});
+        console.log("from:"+_from+"  "+_org_url);
+        res.redirect(_now_url);
+    }
+
+
+    if(req.session.user){
+        checkLogin(function(theData){
+            if(theData.code=="4003"){
+                if(isAjaxRequest){
+                    res.send(theData);
+                }else{
+                    console.log(isAjaxRequest);
+                    loginAndRedirect();
+                }
+                return;
+            }
+            else{
+                next();
+            }
+        },function(errorstr){
+
+        });
+        return;
+    }
+
+    if(!req.session.user){
+        if(isAjaxRequest){
+            res.send({code:'-1',msg:"请先登录"});
+        }
+        else{
+            loginAndRedirect();
+        }
+    }else{
+        next();
+    }
+
+});
+//
+router.get('/', function(req, res, next) {
+    // Intelligent.getCommonPageData(req,function(commonData){
+        // var _ajaxHelper=new WebRequestHelper(req);
+        //获取数据字典
+
+
+
+        // _ajaxHelper.run(function(){
+
+        res.render('Intelligent',{});
+
+        // });
+
+    // });
+
+});
+
+// 报警信息
+router.get('/Intelligent_warning', function(req, res, next) {
+    // Intelligent.getCommonPageData(req,function(commonData){
+        var _ajaxHelper=new WebRequestHelper(req);
+        var _result={};
+        //获取数据字典
+        _ajaxHelper.addTask({
+            url:ServerConf.ApiHost+Settings.WebApi.v5_SmartAlarmCount
+            ,method:"get"
+            ,data:{}
+            ,dataType:"json"
+            ,success:function(data){
+                _result=data;
+            }
+            ,error:function(error){
+                logger.error("数据获取失败 "+JSON.stringify(error));
+            }
+        });
+
+
+        // _ajaxHelper.run(function(){
+        //     commonData["data"]=_result;
+            res.render('Intelligent_warning',{data:_result});
+
+        // });
+
+    // });
+
+});
+// 负荷分析
+router.get('/Intelligent_load', function(req, res, next) {
+    Intelligent.getCommonPageData(req,function(commonData){
+        var _ajaxHelper=new WebRequestHelper(req);
+
+        //获取数据字典
+
+        _ajaxHelper.run(function(){
+            res.render('Intelligent_load',commonData);
+
+        });
+
+    });
+
+});
+// 实时分析
+router.get('/Intelligent_analysis', function(req, res, next) {
+    Intelligent.getCommonPageData(req,function(commonData){
+        var _ajaxHelper=new WebRequestHelper(req);
+        var _result;
+        //获取数据字典
+
+        _ajaxHelper.run(function(){
+
+            res.render('Intelligent_analysis',commonData);
+
+        });
+
+    });
+
+});
+// 运维专家
+router.get('/Intelligent_experts', function(req, res, next) {
+    Intelligent.getCommonPageData(req,function(commonData){
+        var _ajaxHelper=new WebRequestHelper(req);
+        var _result={};
+        //获取数据字典v5_SmartGetOperationalExperts
+        _ajaxHelper.addTask({
+            url:ServerConf.ApiHost+Settings.WebApi.v5_SmartGetOperationalExperts
+            ,method:"post"
+            ,data:{}
+            ,dataType:"json"
+            ,success:function(data){
+                _result=data;
+            }
+            ,error:function(error){
+                logger.error("数据获取失败 "+JSON.stringify(error));
+            }
+        });
+
+
+        _ajaxHelper.run(function(){
+            commonData['data']=_result;
+            res.render('Intelligent_experts',commonData);
+
+        });
+
+    });
+
+});
+// 环境
+router.get('/Intelligent_environment', function(req, res, next) {
+    Intelligent.getCommonPageData(req,function(commonData){
+        var _ajaxHelper=new WebRequestHelper(req);
+        var _result={};
+        //获取数据字典
+        _ajaxHelper.addTask({
+            url:ServerConf.ApiHost+Settings.WebApi.v5_SmartGetEnvironmentInfo
+            ,method:"post"
+            ,data:{}
+            ,dataType:"json"
+            ,success:function(data){
+                _result=data;
+            }
+            ,error:function(error){
+                logger.error("数据获取失败 "+JSON.stringify(error));
+            }
+        });
+
+
+        _ajaxHelper.run(function(){
+            commonData['data']=_result;
+            res.render('Intelligent_environment',commonData);
+
+        });
+
+    });
+
+});
+// 系统
+router.get('/Intelligent_system', function(req, res, next) {
+    Intelligent.getCommonPageData(req,function(commonData){
+        var _ajaxHelper=new WebRequestHelper(req);
+        var _result={};
+        //获取数据字典
+        _ajaxHelper.addTask({
+            url:ServerConf.ApiHost+Settings.WebApi.v5_SmartStruct
+            ,method:"get"
+            ,data:{}
+            ,dataType:"json"
+            ,success:function(data){
+                _result=data;
+            }
+            ,error:function(error){
+                logger.error("数据获取失败 "+JSON.stringify(error));
+            }
+        });
+
+
+        _ajaxHelper.run(function(){
+            commonData['data']=_result;
+            res.render('Intelligent_system',commonData);
+
+        });
+
+    });
+
+});
+// 账号设置
+router.get('/Intelligent_Account', function(req, res, next) {
+    Intelligent.getCommonPageData(req,function(commonData){
+        var _ajaxHelper=new WebRequestHelper(req);
+        var _result={};
+        //获取数据字典
+
+
+        _ajaxHelper.run(function(){
+
+            res.render('Intelligent_Account',commonData);
+
+        });
+
+    });
+
+});
+// 能耗分析
+router.get('/Intelligent_energy', function(req, res, next) {
+    Intelligent.getCommonPageData(req,function(commonData){
+        var _ajaxHelper=new WebRequestHelper(req);
+        var _result={};
+        //获取数据字典
+
+
+
+        _ajaxHelper.run(function(){
+
+            res.render('Intelligent_energy',commonData);
+
+        });
+
+    });
+
+});
+// 智能代维系统站点信息(总)
+router.post('/v5_SmartGetStationAlarmInfoForPc', function(req, res, next) {
+
+    var _ajaxHelper=new WebRequestHelper(req);
+
+    var _result={};
+    var _paras=req.body;
+
+    _ajaxHelper.addTask({
+        url:ServerConf.ApiHost+Settings.WebApi.v5_SmartGetStationAlarmInfoForPc
+        ,method:"get"
+        ,data:_paras
+        ,dataType:"json"
+        ,success:function(data){
+            _result=data;
+        }
+        ,error:function(error){
+            logger.error("数据获取失败 "+JSON.stringify(error));
+        }
+    });
+
+    _ajaxHelper.run(function(){
+        res.send(_result);
+    });
+
+});
+// 智能代维系统站点信息(前10)
+router.post('/v5_SmartAlarmRanking', function(req, res, next) {
+    var _ajaxHelper=new WebRequestHelper(req);
+
+    var _result={};
+    var _paras=req.body;
+
+    _ajaxHelper.addTask({
+        url:ServerConf.ApiHost+Settings.WebApi.v5_SmartAlarmRanking
+        ,method:"get"
+        ,data:_paras
+        ,dataType:"json"
+        ,success:function(data){
+            _result=data;
+        }
+        ,error:function(error){
+            logger.error("数据获取失败 "+JSON.stringify(error));
+        }
+    });
+
+    _ajaxHelper.run(function(){
+        res.send(_result);
+    });
+
+});
+// 能耗分析
+router.post('/v5_SmartTotalEnergy', function(req, res, next) {
+    var _ajaxHelper=new WebRequestHelper(req);
+
+    var _result={};
+    var _paras=req.body;
+
+    _ajaxHelper.addTask({
+        url:ServerConf.ApiHost+Settings.WebApi.v5_SmartTotalEnergy
+        ,method:"get"
+        ,data:_paras
+        ,dataType:"json"
+        ,success:function(data){
+            _result=data;
+        }
+        ,error:function(error){
+            logger.error("数据获取失败 "+JSON.stringify(error));
+        }
+    });
+
+    _ajaxHelper.run(function(){
+        res.send(_result);
+    });
+
+});
+router.post('/v5_SmartGetLoadDiagram', function(req, res, next) {
+    var _ajaxHelper=new WebRequestHelper(req);
+
+    var _result={};
+    var _paras=req.body;
+
+    _ajaxHelper.addTask({
+        url:ServerConf.ApiHost+Settings.WebApi.v5_SmartGetLoadDiagram
+        ,method:"get"
+        ,data:_paras
+        ,dataType:"json"
+        ,success:function(data){
+            _result=data;
+        }
+        ,error:function(error){
+            logger.error("数据获取失败 "+JSON.stringify(error));
+        }
+    });
+
+    _ajaxHelper.run(function(){
+        res.send(_result);
+    });
+
+});
+router.post('/v5_SmartPowerQualityCondition', function(req, res, next) {
+    var _ajaxHelper=new WebRequestHelper(req);
+
+    var _result={};
+    var _paras=req.body;
+
+    _ajaxHelper.addTask({
+        url:ServerConf.ApiHost+Settings.WebApi.v5_SmartPowerQualityCondition
+        ,method:"get"
+        ,data:_paras
+        ,dataType:"json"
+        ,success:function(data){
+            _result=data;
+        }
+        ,error:function(error){
+            logger.error("数据获取失败 "+JSON.stringify(error));
+        }
+    });
+
+    _ajaxHelper.run(function(){
+        res.send(_result);
+    });
+
+});
+router.post('/v5_SmartPowerQuality', function(req, res, next) {
+    var _ajaxHelper=new WebRequestHelper(req);
+
+    var _result={};
+    var _paras=req.body;
+
+    _ajaxHelper.addTask({
+        url:ServerConf.ApiHost+Settings.WebApi.v5_SmartPowerQuality
+        ,method:"get"
+        ,data:_paras
+        ,dataType:"json"
+        ,success:function(data){
+            _result=data;
+        }
+        ,error:function(error){
+            logger.error("数据获取失败 "+JSON.stringify(error));
+        }
+    });
+
+    _ajaxHelper.run(function(){
+        res.send(_result);
+    });
+
+});
+router.post('/v5_SmartBaseInfo', function(req, res, next) {
+    var _ajaxHelper=new WebRequestHelper(req);
+
+    var _result={};
+    var _paras=req.body;
+
+    _ajaxHelper.addTask({
+        url:ServerConf.ApiHost+Settings.WebApi.v5_SmartBaseInfo
+        ,method:"get"
+        ,data:_paras
+        ,dataType:"json"
+        ,success:function(data){
+            _result=data;
+        }
+        ,error:function(error){
+            logger.error("数据获取失败 "+JSON.stringify(error));
+        }
+    });
+
+    _ajaxHelper.run(function(){
+        res.send(_result);
+    });
+
+});
+
+router.post('/changePassWord', function(req, res, next) {
+    var _ajaxHelper=new WebRequestHelper(req);
+
+    var _result={};
+    var _paras=req.body;
+
+    _ajaxHelper.addTask({
+        url:ServerConf.ApiHost+Settings.WebApi.changePassWord
+        ,method:"get"
+        ,data:_paras
+        ,dataType:"json"
+        ,success:function(data){
+            _result=data;
+        }
+        ,error:function(error){
+            logger.error("数据获取失败 "+JSON.stringify(error));
+        }
+    });
+
+    _ajaxHelper.run(function(){
+        res.send(_result);
+    });
+
+});
+module.exports = router;

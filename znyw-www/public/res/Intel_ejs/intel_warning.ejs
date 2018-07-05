@@ -1,0 +1,33 @@
+<style>
+    .layui-table td, .layui-table th {
+        position: relative;
+        padding: 9px 15px;
+        min-height: 20px;
+        line-height: 20px;
+        font-size: 12px;
+
+        text-align: center;
+    }
+</style>
+<table  class="layui-table"  lay-skin="nob"  >
+    <tbody>
+    <%
+    for (var i=0;i< data.length;i++){
+        var res=data[i];
+        var s= i +1;
+        if(i<3){
+    %>
+    <tr>
+        <td style="color: #f5a623;font-weight: 500;">Top 0<%= s %></td>
+        <td><%=res.s_name%></td>
+        <td><%=res.alarminfo%></td>
+    </tr>
+    <%}else {%>
+    <tr>
+        <td>Top 0<%= s %></td>
+        <td><%=res.s_name%></td>
+        <td><%=res.alarminfo%></td>
+    </tr>
+    <%}}%>
+    </tbody>
+</table>

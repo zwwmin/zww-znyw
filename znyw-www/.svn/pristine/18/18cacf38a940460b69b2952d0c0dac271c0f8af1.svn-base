@@ -1,0 +1,229 @@
+var ImageEditorHandler=function(editorOptions){
+var e_opts={
+        cutWidth:150 //裁剪框的宽度。
+        ,cutHeight:200 //裁剪框的高度
+        ,containerWidth:800 //容器宽度
+        ,containerHeight:600 //容器高度
+        ,imageShowWidth:400 //图片默认显示的宽度【会按照要求的宽度及高度等比缩放】
+        ,imageShowHeight:500 //图片默认显示的高度【会按照要求的宽度及高度等比缩放】
+        ,imageEditorElement:"" //图片编辑器默认元素容器。
+
+
+        ,onSave:function(imgData){}//当用户点击保存按钮要保存图片数据时候的回调函数。
+
+        ,onBtnResetClick:function(){}//reset按钮点击以后。
+        ,tpl:"/static/ui-template/power-img-cut.ejs" //模板url
+};
+    $.extend(e_opts,editorOptions);
+
+
+//--相关ui元素。
+var editor_element=$(e_opts.imageEditorElement);
+var _tpl=new EJS({url:e_opts.tpl});
+editor_element.empty().append(_tpl.render({data:{}}));
+
+var img_preview=editor_element.find("[ui='preview_img']");
+var previewer=editor_element.find("[ui='previewer']");
+var div_cropper=editor_element.find("[ui='cut-area']");
+var bar_tool=editor_element.find("[ui='bar_tool']");
+//var upload_panel=$("#upload_panel");
+
+var btn_save=editor_element.find("[ui='btn_save']");
+var btn_reset=editor_element.find("[ui='btn_reset']");
+var FinalImageBase64="";
+var loading_tips=editor_element.find("[ui='loading_tips']");
+var btn_zoom_out=editor_element.find("[ui='btn_zoom_out']");
+    var btn_zoom_in=editor_element.find("[ui='btn_zoom_in']");
+    var btn_turn_left=editor_element.find("[ui='btn_turn_left']");
+    var btn_turn_right=editor_element.find("[ui='btn_turn_right']");
+    var btn_cut=editor_element.find("[ui='btn_cut']");
+
+    var btn_zoom_much_in=editor_element.find("[ui='btn_zoom_much_in']");
+    var btn_zoom_much_out=editor_element.find("[ui='btn_zoom_much_out']");
+
+
+
+    var bar_confirm=editor_element.find("[ui='bar_confirm']");
+    var btn_cancel=editor_element.find("[ui='btn_cancel']");
+
+    var _image_editor={};
+    e_opts.containerElement=div_cropper;
+
+        _image_editor =new ImgCut(e_opts);
+
+
+//--页面ui层控制器。
+var UIContr={
+    //--隐藏全部
+    hideAll:function(useAnimation){
+        editor_element.hide();
+    }
+    //--显示裁剪框。
+    ,showImageEditor:function(){
+        editor_element.show();
+        previewer.hide();
+
+        bar_confirm.hide();
+        bar_tool.show();
+        div_cropper.show();
+    }
+    //--显示完成后的预览界面。
+    ,showPreview:function(){
+        editor_element.show();
+            bar_tool.hide();
+            div_cropper.hide();
+
+        bar_confirm.show();
+        previewer.show();
+    }
+};
+
+
+btn_zoom_out.click(function(){
+    if(_image_editor.hasImage()==false){
+        alert("请先选择图片！");
+        return;
+
+    }
+    var _zoom=_image_editor.getImageZoom();
+    if(_zoom<0.5){
+        //alert("最小倍率是0.5，无法继续缩小");
+        //return;
+    }
+    var _minimize_scale=_image_editor.getMinimizeScale();
+    var _current_scale=_zoom*0.9;
+    _current_scale=parseInt(_current_scale*10000)/10000;
+
+    if(_current_scale<_minimize_scale){
+        _current_scale=_minimize_scale;
+    }
+
+    _image_editor.ScaleImage(_current_scale);
+});
+
+
+    btn_zoom_much_out.click(function(){
+        if(_image_editor.hasImage()==false){
+            alert("请先选择图片！");
+            return;
+
+        }
+        var _zoom=_image_editor.getImageZoom();
+        if(_zoom<0.5){
+            //alert("最小倍率是0.5，无法继续缩小");
+            //return;
+        }
+        var _minimize_scale=_image_editor.getMinimizeScale();
+        var _current_scale=_zoom*0.4;
+        _current_scale=parseInt(_current_scale*10000)/10000;
+
+        if(_current_scale<_minimize_scale){
+            _current_scale=_minimize_scale;
+        }
+
+        _image_editor.ScaleImage(_current_scale);
+    });
+
+    btn_zoom_in.click(function(){
+    if(_image_editor.hasImage()==false){
+        alert("请先选择图片！");
+        return;
+
+    }
+    var _zoom=_image_editor.getImageZoom();
+
+    var _current_scale=_zoom*1.1;
+    _current_scale=parseInt(_current_scale*10000)/10000;
+
+    if(_current_scale>3){
+        _current_scale=3;
+    }
+    _image_editor.ScaleImage(_current_scale);
+});
+
+    btn_zoom_much_in.click(function(){
+        if(_image_editor.hasImage()==false){
+            alert("请先选择图片！");
+            return;
+
+        }
+        var _zoom=_image_editor.getImageZoom();
+
+        var _current_scale=_zoom*1.4;
+        _current_scale=parseInt(_current_scale*10000)/10000;
+
+        if(_current_scale>3){
+            _current_scale=3;
+        }
+        _image_editor.ScaleImage(_current_scale);
+    });
+
+    btn_turn_left.click(function(){
+    if(_image_editor.hasImage()==false){
+        alert("请先选择图片！");
+        return;
+
+    }
+    var _angle=_image_editor.getImageAngle();
+    _angle=(_angle+360)-90;
+    _angle=(_angle)%360;
+    _image_editor.RotateImage(_angle);
+});
+
+
+    btn_turn_right.click(function(){
+    if(_image_editor.hasImage()==false){
+        alert("请先选择图片！");
+        return;
+
+    }
+    var _angle=_image_editor.getImageAngle();
+    _angle=(_angle+0)+90;
+    _angle=(_angle)%360;
+    _image_editor.RotateImage(_angle);
+});
+
+    btn_cut.click(function(){
+    if(_image_editor.hasImage()==false){
+        alert("请先选择图片！");
+        return;
+    }
+    _image_editor.cutImg(function(imgStr){
+        img_preview.attr("src",imgStr);
+        FinalImageBase64=imgStr;
+
+        UIContr.showPreview();
+        e_opts.onSave(FinalImageBase64);
+    });
+});
+
+btn_cancel.click(function(){
+    UIContr.showImageEditor();
+});
+btn_save.click(function(){
+    var _base64=FinalImageBase64;
+     //上面就是图片字符串了。
+    e_opts.onSave(FinalImageBase64);
+
+});
+btn_reset.click(function(){
+    if(e_opts.onBtnResetClick){
+        e_opts.onBtnResetClick();
+    }
+});
+
+    var returnObject={
+        init:function(_base64ImageStr,originFile){
+            _image_editor.init(_base64ImageStr,originFile);
+            UIContr.showImageEditor();
+        }
+        ,hideEditor:function(){
+            UIContr.hideAll();
+        }
+    };
+
+    return returnObject;
+
+};
+
+

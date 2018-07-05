@@ -1,0 +1,325 @@
+/**
+ * Created by DGDL-08 on 2018/5/18.
+ */
+define("p.Intelligent_index", function (require, exports, module) {
+
+    var _all = require("p.all");
+    var tpl_empty = new EJS({url: "/res/Intel_ejs/intel_empty.ejs"});
+    var tpl_index = new EJS({url: "/res/Intel_ejs/inel_index.ejs"});
+    var tpl_index2 = new EJS({url: "/res/Intel_ejs/inel_index2.ejs"});
+    var tpl_indexFactor= new EJS({url: "/res/Intel_ejs/inel_index_Factor.ejs"});
+    var tpl_indexGeneral= new EJS({url: "/res/Intel_ejs/inel_index_General.ejs"});
+    var table = $("#table");
+    var test1 = $("#test1");
+    var factor = $("#factor");
+    var general = $("#general");
+    var Selected_sid = $("#Selected_sid").data('value');
+    var current = 0;//level=0全部，1 普通，2严重，3预警
+    var PagingData=true;
+    var app = {
+        init: function (opts) {
+            var the = new Date().getTime();
+            var the1 = Date.parse(new Date().toLocaleDateString());
+            var me = this;
+            _all.timer();
+            me.ModularOne(opts);
+            me.text();
+            me.structure(the1);
+            me.PowerFactor();
+            me.General(1,the);
+            if (opts.total > 3){
+                me.Paging(opts);
+            }
+            $('.title_btn').click(function () {
+                $(this).siblings().removeClass("title_Anbt");
+                $(this).addClass("title_Anbt");
+                var sdat=$(this).data('value');
+                me.General(sdat,the);
+            });
+            $('#refresh_btn').click(function () {
+                $(this).children('img').addClass("layui-anim-loop");
+                me.PowerFactor();
+            })
+        }
+        , ModularOne: function () {
+            var me = this;
+            layui.use(['laydate', 'laypage', 'layer', 'table', 'carousel', 'upload', 'element'], function () {
+                var laydate = layui.laydate; //日期
+                var laypage = layui.laypage; //分页
+                var layer = layui.layer; //弹层
+                var table = layui.table; //表格
+                var element = layui.element; //元素操作
+
+
+                //监听Tab切换
+                element.on('tab(demo)', function (data) {
+                    // layer.msg('切换了：'+ this.innerHTML);
+                    current = $(this).data('value');
+                    if(current != 0 ){
+                        me.Warning(1, current);
+                    }
+                    PagingData= true;
+                });
+
+                //执行一个 table 实例
+                //总概况的时间选择
+                laydate.render({
+                    elem: '#time'
+                    ,type: 'month'
+                    , theme: '#1fbcec'
+                    , format: 'yyyy-MM'
+                    , done: function (value) {
+                        me.General(0,Date.parse(value));
+                    }
+                });
+                //电费结构的时间选择
+                laydate.render({
+                    elem: '#time2'
+                    ,type: 'month'
+                    , theme: '#1fbcec'
+                    , format: 'yyyy-MM'
+                    , done: function (value) {
+                        me.structure(Date.parse(value));
+                    }
+                });
+            });
+        }
+        , Warning: function (site, level) {
+            var me = this;
+            //level=0全部，1 普通，2严重，3预警
+            $.ajax({
+                url: "/user/whole"
+                , data: {
+                    site: site //当前页数
+                    , level: level //告警分类
+                }
+                , method: "post"
+                , success: function (res) {
+                    me._renderList(res);
+console.log(JSON.stringify(res))
+                    // if(!PagingData && res.code != 0 && res.total > 3   ){
+                    if(res.total > 3 && PagingData){
+                        me.Paging(res);
+                        PagingData= false;
+                    }
+                }
+                , error: function () {}
+            });
+        }
+        ,Paging:function (res) {
+            var me = this;
+            var laypage = layui.laypage; //分页
+            laypage.render({
+                elem: 'test' + current //分页容器的id
+                , count:res.total //总页数
+                , theme: '#1fbcec' //自定义选中色值
+                ,limit:3
+                , jump: function (obj, first) {
+                    // console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                    // console.log(obj.limit); //得到每页显示的条数
+                    if (!first) {
+                        me.Warning(obj.curr, current);
+                    }
+                }
+            });
+        }
+        , _renderList: function (sdata) {
+            if (sdata.code != 0 || sdata.data.length == 0 || sdata == undefined) {
+                var _html = tpl_empty.render({
+                    data: sdata.data
+                });
+                $("#table_" + current).empty().append(_html);
+                $("#text" + current).empty();
+                return;
+            } else {
+                var _html = tpl_index.render({
+                    data: sdata.data
+                });
+                $("#table_" + current).empty().append(_html);
+            }
+        }
+        , text: function () {
+            $.ajax({
+                url: "/user/v5_SmartLoads"
+                , data: {}
+                , method: "post"
+                , success: function (res) {
+
+                }
+                , error: function () {
+
+                }
+            });
+        }
+        // 电费结构
+        , structure: function (data) {
+            var me=this;
+            $.ajax({
+                url: "/user/v5_SmartElectricityStructure"
+                , data: {
+                    sid:Selected_sid
+                    ,timestamp:data
+                }
+                , method: "post"
+                , success: function (res) {
+                    if(res.code == 0){
+                        me.structureResolve(res);
+                    }else {
+                        var layer = layui.layer; //弹层
+                        layer.msg( res.message);
+                    }
+
+                }
+                , error: function () {
+
+                }
+            });
+        }
+        // 电费结构 数据渲染解析
+        ,structureResolve:function (res) {
+            var data=[];
+            var total=0;
+            for (var i=0;i<res.data.length;i++){
+                var arr = res.data[i];
+                total = total + arr.value;
+                if(arr.name != "力调电费"){
+                    var str ={name:arr.name,value:arr.value};
+                    if(arr.value != 0.00 ){
+                        data.push(str);
+                    }
+                }
+            }
+            var myChart = echarts.init(document.getElementById('main'));
+
+// 指定图表的配置项和数据
+            var option = {
+                title: {
+                    text: total.toFixed(2),
+                    subtext: '总电费(元)',
+                    x: 'center',
+                    y: 'center',
+                    textStyle: {
+                        fontWeight: 'normal',
+                        fontSize: 26
+                    }
+                },
+                tooltip: {
+                    show: true,
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b}: {c}kWh({d}%)"
+                },
+
+                color:['#f5a623','#66cc99','#1fbcec','#7191fe'],
+                series: [
+                    {
+                        name:'总用电费',
+                        type:'pie',
+                        label: {
+                            normal: {
+                                show: true,
+                                formatter: '{b}\n {c}kWh\n({d}%)'
+                            }
+                        },
+                        radius: ['45%', '70%'],
+                        avoidLabelOverlap: false,
+                        data:data
+                    }
+                ]
+            };
+
+// 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+            window.addEventListener('resize', function () {
+                myChart.resize();
+            });
+
+            if (res.code != 0 || res.data == undefined || res == undefined) {
+                var _htl = tpl_empty.render({
+                    data: res.data
+                });
+                $("#index2").empty().append(_htl);
+                return;
+            } else {
+                var _htl = tpl_index2.render({
+                    data: res.data
+                    , total: total.toFixed(2)
+                });
+                $("#index2").empty().append(_htl);
+            }
+        }
+        // 功率因数 数据渲染解析
+        , PowerFactor: function () {
+            var me=this;
+            $.ajax({
+                url: "/user/v5_SmartPowerFactorList"
+                , data: {
+                    sid:Selected_sid
+                }
+                , method: "post"
+                , success: function (res) {
+                    if(res.code != -1 ){
+                        $('#refresh_btn').children('img').removeClass("layui-anim-loop");
+                        me._renderListFactor(res);
+                    }else {
+                        layer.msg(res.msg + "；出现了些问题")
+                    }
+                }
+                , error: function () {
+
+                }
+            });
+        }
+        , _renderListFactor: function (sdata) {
+            if (sdata.code != 0 || sdata.data == undefined || sdata == undefined) {
+                var _html = tpl_empty.render({
+                    data: sdata.data
+                });
+                factor.empty().append(_html);
+                return;
+            } else {
+                var _html = tpl_indexFactor.render({
+                    data: sdata.data
+                });
+                factor.empty().append(_html);
+
+            }
+        }
+        //总概况
+        , General: function (date,time) {
+            var me=this;
+            $.ajax({
+                url: "/user/v5_SmartElectricitySituation"
+                , data: {
+                    sid:Selected_sid
+                    ,timeType:date
+                    ,timestamp:time
+                }
+                , method: "post"
+                , success: function (res) {
+                    me.GeneralData(res,date);
+                }
+                , error: function () {
+
+                }
+            });
+        }
+        ,GeneralData:function (sdata,sttr) {
+            if (sdata.code != 0 || sdata.data == undefined || sdata == undefined) {
+                var html = tpl_empty.render({
+                    data: sdata.data
+                });
+                general.empty().append(html);
+                return;
+            } else {
+                var html = tpl_indexGeneral.render({
+                    data: sdata.data
+                    ,attr:sttr
+                });
+                general.empty().append(html);
+
+            }
+        }
+    };
+
+    module.exports = app;
+});

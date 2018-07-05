@@ -1,0 +1,173 @@
+<!-- 头部 -->
+<%
+ var TotalMenu=data.TotalMenu;
+ var CurrentMenu=data.CurrentMenu;
+ var memberInfo=data.memberInfo;
+ var BaseInfo=data.BaseInfo;
+ var currentData=data.currentData;
+
+ %>
+<style>
+    .dropdown-menu > .active > a :hover{
+         color: white;
+         text-decoration: none;
+         outline: 0;
+         background-color: #1FBCeC;}
+
+</style>
+<header class="main-header">
+
+    <!-- Logo -->
+    <div  class="logo" >
+        <!-- mini logo for sidebar mini 50x50 pixels -->
+        <span class="logo-mini"><img src="/res/images/imgv6/logo_white68X76.png" width="25" height="25"  alt=""></span>
+        <!-- logo for regular state and mobile devices -->
+        <span class="logo-lg">
+                <img src="/res/images/imgv6/logo_white68X76.png" width="25" height="25" style="margin-right: 10px;"  alt="">
+                <b>智能运维中心</b>
+            </span>
+    </div>
+
+    <!-- Header Navbar -->
+    <nav class="navbar navbar-static-top" role="navigation">
+        <!-- Sidebar toggle button-->
+        <div  class="sidebar-toggle" data-toggle="push-menu" role="button">
+            <!--<span class="sr-only">Toggle navigation</span>-->
+        </div>
+        <
+        <!-- Navbar Right Menu -->
+        <div style="width: calc(100% - 52px)" class="navbar-custom-menu">
+            <ul style="width: 100%;" class="nav navbar-nav">
+                <!-- Notifications Menu -->
+                <li  class="dropdown user user-menu notifications-menu">
+                    <!-- Menu Toggle Button -->
+                    <a  class="dropdown-toggle" data-toggle="dropdown">
+                        <!-- The user image in the navbar-->
+                        <!--<img src="dist/img/user2-160x160.jpg" class="user-image" alt="User Image">-->
+                        <!-- hidden-xs hides the username on small devices so only the image appears. -->
+
+                        <span id="Selected_sid" data-value="<%=currentData.sid%>"><%=currentData.name%></span>
+
+                        <!--下拉标签-->
+                        <i class="fa fa-angle-left pull-right dropdown-bottom"></i>
+                    </a>
+                    <ul class="dropdown-menu header_site">
+                        <% for(var s = 0;s < BaseInfo.length;s++){
+                            var datas = BaseInfo[s];
+                        %>
+                        <li class="dropdown-menu-settings" onclick="Sid(<%- datas.sid %>)" >
+                            <%= datas.name %>
+                        </li>
+                        <% } %>
+                    </ul>
+                </li>
+                <li style="float: right" class="dropdown notifications-menu">
+                    <!-- Menu toggle button -->
+                    <a href="/user/Intelligent_warning" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-bell-o"></i>
+                    </a>
+                </li>
+                <!-- Tasks Menu -->
+                <!-- User Account Menu -->
+                <li style="float: right" class="dropdown user user-menu notifications-menu">
+                    <!-- Menu Toggle Button -->
+                    <a  class="dropdown-toggle" data-toggle="dropdown">
+                        <!-- The user image in the navbar-->
+                        <!--<img src="dist/img/user2-160x160.jpg" class="user-image" alt="User Image">-->
+                        <!-- hidden-xs hides the username on small devices so only the image appears. -->
+                        <span class=""><%=memberInfo.mobile%></span>
+                        <!--下拉标签-->
+                        <i class="fa fa-angle-left pull-right dropdown-bottom"></i>
+
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-menu-settings">
+                            <a href="/user/Intelligent_Account" >账号设置</a></li>
+                        <li class="dropdown-menu-settings">
+                            <a  onclick='$.ajax({url:"/logout",success:function(){ location.reload();}});' >退出</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div>
+    </nav>
+</header>
+<!--侧边栏-->
+<style>
+    .dropdown-menu>li>a:focus, .dropdown-menu>li>a:hover {
+        color: white;
+        text-decoration: none;
+        background-color: #1fbcec;
+    }
+</style>
+<script>
+    function Sid(data) {
+        var index = layer.load(2);
+        $.ajax({
+            url: "/user/changePassWord"
+            , data: {
+                sid:data
+            }
+            , method: "post"
+            , success: function (sdata) {
+                console.log(sdata)
+                location.reload();
+            }
+            , error: function () {
+
+            }
+        });
+    }
+</script>
+<aside class="main-sidebar">
+
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+
+        <!-- Sidebar Menu -->
+        <ul class="sidebar-menu" data-widget="tree">
+
+            <!-- Optionally, you can add icons to the links -->
+            <li  class="active treeview" >
+                <a   <%-TotalMenu=="usage"?'class="current"':'' %> >
+                    <div class="active_nav_img" style="display: inline-block;">
+                        <img src="/res/images/imgv6/ydgl_n_icon.png"  width="20" height="20" alt="">
+                    </div>
+                    <span >用电管理</span>
+                    <!--下拉标签-->
+                    <!--<span class="pull-right-container">-->
+                    <!--<i class="fa fa-angle-left pull-right"></i>-->
+                    <!--</span>-->
+                </a>
+                <ul class="treeview-menu">
+                    <li <%-CurrentMenu=="survey"?'class="active"':'' %>><a href="/user"><img src="/res/images/imgv6/2nd.png" style="margin:0  25px 0 20px;" width="27" height="37" alt="">用电概况</a></li>
+                    <li <%-CurrentMenu=="energy"?'class="active"':'' %> ><a href="/user/Intelligent_energy"><img src="/res/images/imgv6/2nd.png" style="margin:0  25px 0 20px;" width="27" height="37" alt="">能耗分析</a></li>
+                    <li <%-CurrentMenu=="load"?'class="active"':'' %>><a href="/user/Intelligent_load"><img src="/res/images/imgv6/2nd.png" style="margin:0  25px 0 20px;" width="27" height="37" alt="">负荷分析</a></li>
+                    <li <%-CurrentMenu=="analysis"?'class="active"':'' %>><a href="/user/Intelligent_analysis"><img src="/res/images/imgv6/2nd.png" style="margin:0  25px 0 20px;" width="27" height="37" alt="">实时分析</a></li>
+                    <li <%-CurrentMenu=="warning"?'class="active"':'' %>><a href="/user/Intelligent_warning"><img src="/res/images/imgv6/4th.png" style="margin:0  25px 0 20px;" width="27" height="37" alt="">告警信息</a></li>
+                </ul>
+            </li>
+            <li class="active treeview" >
+                <a  <%-TotalMenu=="System_environment"?'class="current"':'' %> >
+                    <img src="/res/images/imgv6/xthj_m_icon.png" class="active_nav_img" width="20" height="20" alt="">
+                    <span>系统环境</span>
+                    <!--<span class="pull-right-container">-->
+                    <!--<i class="fa fa-angle-left pull-right"></i>-->
+                    <!--</span>-->
+                </a>
+                <ul class="treeview-menu">
+                    <li <%-CurrentMenu=="environment"?'class="active"':'' %>><a href="/user/Intelligent_environment"><img src="/res/images/imgv6/2nd.png" style="margin:0  25px 0 20px;" width="27" height="37" alt="">环境</a></li>
+                    <!--<li><a href="/"><img src="/res/images/imgv6/2nd.png" style="margin:0  25px 0 20px;" width="27" height="37" alt=""> 系统图</a></li>-->
+                    <li <%-CurrentMenu=="system"?'class="active"':'' %>><a href="/user/Intelligent_system"><img src="/res/images/imgv6/4th.png" style="margin:0  25px 0 20px;" width="27" height="37" alt="">系统图</a></li>
+                </ul>
+            </li>
+            <li  class="active treeview"><a onclick="window.location.href='/user/Intelligent_experts' " id="experts" <%-TotalMenu=="experts"?'class="current"':'' %> >
+                    <img src="/res/images/imgv6/ywzj_m_icon.png" class="active_nav_img" width="20" height="20" alt="">
+                    <span>运维专家</span></a></li>
+            <li  class="active treeview" ><a onclick="window.location.href='/user/Intelligent_Account' " id="Account" <%-TotalMenu=="Account"?'class="current"':'' %>  style=" border-bottom: 1px solid #294355;"><img src="/res/images/imgv6/zhsz_m_icon.png" class="active_nav_img" width="20" height="20" alt=""> <span>账号设置</span></a></li>
+        </ul>
+        <!-- /.sidebar-menu -->
+    </section>
+    <!-- /.sidebar -->
+</aside>
+

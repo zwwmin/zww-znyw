@@ -1,0 +1,220 @@
+/**
+ * Created by DGDL-08 on 2018/4/10.
+ */
+define("p.Intelligent_warning",function(require,exports,module){
+
+    var tpl_warning=new EJS({url:"/res/Intel_ejs/intel_warning.ejs"});
+    var tpl_empty=new EJS({url:"/res/Intel_ejs/intel_empty.ejs"});
+    var tpl_total=new EJS({url:"/res/Intel_ejs/inel_warning_total.ejs"});
+    // 分页
+    var pager_container=$('#pager');
+    var warning_footer=$("#warning-footer");
+    var warning_total=$("#warning_total");
+    var submit_btn=$("#submit_btn");
+    var __PAGE_INDEX=1;
+
+    var list={
+        pageIndex:1,
+        pageSize:20,
+        level:"",
+        stime:"",
+        etime:""
+    };
+
+
+    var app={
+        init:function(opts){
+            var me=this;
+            me.gotoPage();
+            me.pierChartPart();
+            me._WarningClick();
+            __PAGE_INDEX=1;
+        }
+        // 全数据
+        ,gotoPage:function (pageIndex,callback) {
+            var me=this;
+            warning_total.hide();
+            // panel_loading.show();
+            list.pageIndex=pageIndex;
+            __PAGE_INDEX=pageIndex;
+            $.ajax({
+                url:"/Intelligent/v5_SmartGetStationAlarmInfoForPc"
+                ,data:list
+                ,method:"post"
+                ,success:function(res){
+                    // console.log(res.data[1])
+                    var _total=parseInt(res.total);
+                    var _pageSize=10;
+                    var _curPageIndex=1;
+                    var _totalPages=0;
+
+                    if(_total<=0){
+                        $("#pager").hide();
+                        me._renderTotal(res);
+                    }
+                    else{
+                        $("#pager").show();
+                        _curPageIndex=parseInt(res.pageIndex);
+                        _pageSize=parseInt(_pageSize);
+                        _totalPages=util.getTotalPages(_pageSize,_total);
+                        me._renderTotal(res);
+                        me._renderPager(_totalPages,_curPageIndex);
+                    }
+                    $('[ui="total-count"]').text(_total);
+                    setTimeout(function(){
+                        warning_total.fadeIn();
+                    },500);
+                    //--初始化最新的分页控件。
+
+                }
+                ,error:function(){
+
+                }
+            });
+        }
+        // 部分(10)
+        ,pierChartPart:function () {
+            var me=this;
+            $.ajax({
+                url: "/Intelligent/v5_SmartAlarmRanking"
+                , data: {}
+                , method: "post"
+                , success: function (sdata) {
+                    me._renderList(sdata);
+                }
+                , error: function () {
+
+                }
+            });
+        }
+        // 部分
+        ,_renderList:function(sdata){
+            if(sdata.code!=0||sdata.data==undefined ||sdata==undefined ){
+                var _html=tpl_empty.render({
+                    data:sdata.data
+                });
+                warning_footer.empty().append(_html);
+                return;
+            }else {
+                var _html=tpl_warning.render({
+                    data:sdata.data
+                });
+                warning_footer.empty().append(_html);
+            }
+        }
+        ,_renderTotal:function(sdata){
+
+            if(sdata.code!=0||sdata==undefined || sdata.total == 0){
+                var _html=tpl_empty.render({
+                    data:sdata.data
+                });
+                warning_total.empty().append(_html);
+                return;
+            }else {
+                var _html=tpl_total.render({
+                    data:sdata.data
+                });
+
+                warning_total.empty().append(_html);
+            }
+        }
+        // 点击时间
+        ,_WarningClick:function () {
+            var me=this;
+            $("#warning_choose li a").click(function () {
+                    list.level =$(this).data("value");
+                    $(this).parent().addClass("acs");
+                    $(this).parent().siblings().removeClass("acs");
+                    me.gotoPage();
+            })
+            submit_btn.click(function () {
+                if($('#stimes').val()==""|| $('#etimes').val()==""){
+                    alert("请选择时间");
+                    return;
+                }
+                list.stime =$('#stimes').val();
+                list.etime =$('#etimes').val();
+
+                console.log(list);
+               me.gotoPage();
+            });
+            $(".pagination li a").on("click",function () {
+               alert($(this).data('value'))
+            })
+
+        }
+        // 分页
+        ,_renderPager:function(totalPages,curPageIndex){
+            var me=this;
+            pager_container.empty();
+            var panel_small_pager=$('#small-pager');
+            var _ui_totalPages=$('[ui="total-pages"]');
+            var _ui_currentPage=$('[ui="current-page"]');
+            _ui_currentPage.text(curPageIndex);
+            _ui_totalPages.text(totalPages);
+            var ui_pre_page=panel_small_pager.find('[ui="pre-page"]');
+            var ui_next_page=panel_small_pager.find('[ui="next-page"]');
+            if(curPageIndex>=totalPages){
+                ui_next_page.unbind("click").removeClass("disable").addClass("disable");
+            }
+            else{
+                ui_next_page.unbind("click").removeClass("disable");
+                ui_next_page.unbind("click").click(function(){
+                    var page_index=curPageIndex+1;
+                    me.gotoPage(page_index,function(){});
+                });
+
+            }
+            if(curPageIndex<=1){
+                ui_pre_page.unbind("click").removeClass("disable").addClass("disable");
+            }
+            else{
+                ui_pre_page.unbind("click").removeClass("disable");
+                ui_pre_page.unbind("click").click(function(){
+                    var page_index=curPageIndex-1;
+                    me.gotoPage(page_index,function(){});
+
+                });
+
+            }
+            if(totalPages<=1){
+                pager_container.empty();
+                return;
+            }
+            var _pager=new iPager({
+                totalPages:totalPages
+                ,currentPage:curPageIndex
+                ,container:pager_container
+                ,onRender:function(eles){
+                    $(eles).find('[ui="pager-item"]').click(function(){
+                        var _pageIndex=$(this).attr("pageIndex");
+                        //_gotoPage(_pageIndex);
+                        me.gotoPage(_pageIndex,function(){});
+                    });
+                }
+            });
+        }
+
+        // 消息提醒
+        ,showTip:function(text,cb){
+
+            var newTips = $("<div>");
+            $("body").append(newTips);
+            newTips.addClass('showtips');
+            newTips.text(text);
+            window.setTimeout(function() {
+                newTips.addClass('active');
+            }, 10);
+            g_tips = window.setTimeout(function() {
+                $(".showtips").remove();
+                if(cb){
+                    cb();
+                }
+            }, 3000);
+
+        }
+    };
+
+    module.exports=app;
+
+});

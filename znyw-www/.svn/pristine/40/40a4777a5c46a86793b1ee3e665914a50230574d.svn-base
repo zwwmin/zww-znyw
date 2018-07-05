@@ -1,0 +1,39 @@
+<!--单独ejs模板调用-->
+<%
+var _inc_now_stamp=new Date().getTime();
+%>
+
+<script type="text/javascript" src="/res/lib/util.min.js"></script>
+<script type="text/javascript">
+
+    window.ContextPath="";
+    window.__js_debug=false;
+    (function(){
+        var _queryObject=util.getQueryObject();
+        if(_queryObject["debug"]){
+            window.__js_debug=true;
+        }
+    })();
+
+</script>
+<script type="text/javascript" src="/javascripts/global.js"></script>
+<script type="text/javascript" src="/res/lib/ejs_production.js"></script>
+<script type="text/javascript" src="/res/ui/WebUI.js"></script>
+<script type="text/javascript" src="/res/ui/UiUtil.js"></script>
+<!--seajs引入-->
+<script type="text/javascript" src="/res/module/config.js?v=<%=_inc_now_stamp%>"></script>
+<!--<script type="text/javascript" src="/res/mobile/template/tpl.js?v=<%=_inc_now_stamp%>"></script>-->
+<!--<script type="text/javascript" src="/res/mobile/module/config.js?v=--><!--"></script>-->
+<!--<script type="text/javascript" src="/res/mobile/template/tpl.js?v=--><!--"></script>-->
+<script type="text/javascript" src="/res/lib/sea.js"></script>
+<script type="text/javascript" src="/res/config/seajs.config.js"></script>
+<script type="text/javascript" src="/res/js/jquery.js"></script>
+
+<!--表单验证。-->
+<script type="text/javascript" src="/res/lib/formValidate.min.js"></script>
+<script type="text/javascript" src="/res/config/formValidate.config.js?v=3"></script>
+<!--iTips-->
+<link href="/res/vendor/iTips/css/ns-default.css" rel="stylesheet" type="text/css"/>
+<link href="/res/vendor/iTips/css/ns-style-growl.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="/res/vendor/iTips/js/modernizr.custom.js"></script>
+<script type="text/javascript" src="/res/vendor/iTips/js/notificationFx.js"></script>

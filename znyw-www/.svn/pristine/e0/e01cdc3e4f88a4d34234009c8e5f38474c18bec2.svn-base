@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>智能代维</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="" rel="stylesheet">
+    <!--layui(未改版)-->
+    <link rel="stylesheet" type="text/css" href="../layui/css/layui_1.css">
+    <link rel="stylesheet" type="text/css" href="/res/css/map.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/AdminLTE.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/Admintxt.css">
+</head>
+<body>
+<div class="map_center">
+    <div class="header">
+        <div class="header_logo">
+            <img src="/res/images/imgv7/znyw_dpm_bld_logo@2x.png" alt="">
+        </div>
+        <div class="header_center">
+            <img src="/res/images/imgv7/znyw_dpm_title_background@2x.png" alt="">
+        </div>
+        <div class="header_user">
+            <ul>
+                <li>
+                    <div class="header_user_usinfoImg header_user_center" >
+                        <img src="<%=memberInfo.avatar%>" alt="">
+                    </div>
+                    <span class="header_user_tit">退出</span>
+                </li>
+                <li>
+                    <div class="header_user_weatherText header_user_center">
+                        <%=Weather.results[0].weather_data[0].wind%>
+                    </div>
+                    <span class="header_user_tit"><%=Weather.results[0].weather_data[0].weather%></span>
+                </li>
+                <li>
+                    <div class="header_user_weatherText2 header_user_center">
+                        <%=Weather.results[0].weather_data[0].temperature%>
+                    </div>
+                    <span class="header_user_tit">PM2.5： <%=Weather.results[0].pm25%></span>
+                </li>
+                <li>
+                    <div class="header_user_weatherImg header_user_center">
+                        <img src="<%=Weather.results[0].weather_data[0].nightPictureUrl%>" alt="">
+                    </div>
+                    <span class="header_user_tit">中国-广东省-东莞市</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="center">
+        <div class="center_header">
+            <span>平台运营时间</span>
+            <div class="center_header_txt">
+                <span class="special">1</span>
+                <span class="ordinary">年</span>
+                <span class="special">5</span>
+                <span class="ordinary">月</span>
+                <span class="special">106</span>
+                <span class="ordinary">天</span>
+                <span class="special">8</span>
+                <span class="ordinary">时</span>
+                <span class="special">18</span>
+                <span class="ordinary">分</span>
+                <span class="special">38</span>
+                <span class="ordinary">秒</span>
+            </div>
+        </div>
+        <div class="center_left">
+            <div class="center_left_Warning">
+                <div class="center_left_Warning_header">
+                    <img src="/res/images/imgv7/znyw_dpm_warming_mes@2x.png" alt="">
+                    <span>告警信息</span>
+                </div>
+                <div class="center_left_Warning_center">
+                    <span>告警次数</span>
+                    <div class="center_left_Warning_txt" id="total"> <span>次</span></div>
+                </div>
+                <div class="center_left_chart">
+                    <div class="center_left_chart_nav center_left_chart_nav_right">
+                        <div style="width: 81px;height: 82px;" id="chart_one"></div>
+                        <div class="chart_text">
+                            <span class="chart_text_span1" id="severity"></span>
+                            <span class="chart_text_span2" data-value="2">严重 ></span>
+                        </div>
+                    </div>
+                    <div class="center_left_chart_nav center_left_chart_nav_right">
+                        <div style="width: 81px;height: 82px;" id="chart_two"></div>
+                        <div class="chart_text">
+                            <span class="chart_text_span1" id="general"></span>
+                            <span class="chart_text_span2" data-value="1">普通 ></span>
+                        </div>
+                    </div>
+                    <div class="center_left_chart_nav">
+                        <div style="width: 81px;height: 82px;" id="chart_three"></div>
+                        <div class="chart_text">
+                            <span class="chart_text_span1" id="warning"></span>
+                            <span class="chart_text_span2" data-value="3">预警 ></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="center_left_tole center_left_tole_right" >
+                <div class="center_left_tole_text">总监测点</div>
+                <div class="center_left_tole_num" id="deviceNum"> <span>个</span></div>
+                <img src="/res/images/imgv7/znyw_dpm_switch board room@2x.png" alt="">
+            </div>
+            <div class="center_left_tole">
+                <div class="center_left_tole_text">分布镇区</div>
+                <div class="center_left_tole_num" id="hasTowns"> <span>个</span></div>
+                <img src="/res/images/imgv7/znyw_dpm_township@2x.png" alt="">
+            </div>
+        </div>
+        <div class="center_map" id="main" ></div>
+        <div class="center_right">
+            <div class="center_right_header">
+                <div class="center_right_header_wen">
+                    <span>总企业数</span>
+                    <div class="header_wen"><%=BaseInfo.length%><span>家</span></div>
+                </div>
+                <div class="center_right_header_img"></div>
+            </div>
+            <div class="SearchFor">
+                <input type="text" id="search-highlight" name="search-highlight" placeholder="搜索公司名" data-list=".highlight_list" autocomplete="off">
+                <ul  class="vertical highlight_list">
+                    <%
+                    for(var i = 0;i<BaseInfo.length;i++){
+                        var arr = BaseInfo[i]
+                    %>
+                    <li><a class="ListClick" data-value="<%=arr.sid%>" href="javascript:;"><%=arr.name%></a></li>
+                    <%}%>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer ">
+        <div class="footer_center"></div>
+    </div>
+
+    <!--<div class="layui-layer-shade mask_mappage"></div>-->
+
+</div>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/jquery/dist/jquery.min.js"></script>
+
+<!--ECharts-->
+<script type="text/javascript" src="../dist/echarts.common.min.js"></script>
+<script type="text/javascript" src="../dist/echarts.min.js"></script>
+
+<!--<script type="text/javascript" src="../dist/echarts.js"></script>-->
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=AKVZHbd090K288gmMjN4IztFBeleu4kQ"></script>
+<!--layui-->
+<script type="text/javascript" src="../layui/layui.all.js"></script>
+<% include layout/inc_js.ejs%>
+<!--搜索-->
+<script type="text/javascript" src="/res/vendor/search/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="/res/vendor/search/waypoints.min.js"></script>
+<script type="text/javascript" src="/res/vendor/search/waypoints-sticky.min.js"></script>
+<script type="text/javascript" src="/res/vendor/search/jquery.hideseek.min.js"></script>
+<script type="text/javascript">
+//    搜索框
+    $('#search-highlight').hideseek({
+        highlight: true
+    });
+window.onresize = function () {
+    changeDivHeight();
+}
+//当浏览器窗口大小改变时，设置显示内容的高度
+function changeDivHeight() {
+    var w = document.documentElement.clientWidth;//获取页面可见宽度
+    var h = (w - 650) * 0.75
+    document.getElementById('main').style.height = h + 'px';
+}
+//时间跳动
+var yearData=document.getElementsByClassName('center_header_txt')[0].getElementsByTagName('span')[0];
+var monthData=document.getElementsByClassName('center_header_txt')[0].getElementsByTagName('span')[2];
+var dayData=document.getElementsByClassName('center_header_txt')[0].getElementsByTagName('span')[4];
+var hourData=document.getElementsByClassName('center_header_txt')[0].getElementsByTagName('span')[6];
+var minuteData=document.getElementsByClassName('center_header_txt')[0].getElementsByTagName('span')[8];
+var secondData=document.getElementsByClassName('center_header_txt')[0].getElementsByTagName('span')[10];
+function showTime() {
+    var startTime = "2018-01-01 00:00";
+    var s1 = new Date(startTime.replace(/-/g, "/")),
+        s2 = new Date(),
+        runTime = parseInt((s2.getTime() - s1.getTime()) / 1000);
+//    年
+    yearData.innerHTML = Math.floor(runTime / 86400 / 365);
+    runTime = runTime % (86400 * 365);
+//    月
+    monthData.innerHTML = Math.floor(runTime / 86400 / 31);
+    runTime = runTime % (86400 * 30);
+//    日
+    dayData.innerHTML = Math.floor(runTime / 86400);
+    runTime = runTime % 86400;
+//    时
+    hourData.innerHTML = Math.floor(runTime / 3600);
+    runTime = runTime % 3600;
+//    分
+    minuteData.innerHTML = Math.floor(runTime / 60);
+    runTime = runTime % 60;
+//    秒
+    secondData.innerHTML = runTime;
+//    console.log(year,month,day,hour,minute,second);
+    window.setTimeout("showTime()",1000);
+}
+showTime();
+changeDivHeight();
+
+</script>
+
+<script>
+
+    seajs.use("p.mappage",function(page){
+        page.init();
+    });
+</script>
+
+
+</body>
+
+</html>

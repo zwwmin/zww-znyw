@@ -1,0 +1,482 @@
+/**
+ * Created by DGDL-08 on 2018/4/11.
+ */
+define("p.Intelligent_energy",function(require,exports,module){
+
+    var settings={};
+    var list={
+        transformerId:0,
+        timeType:1
+    };
+    var peak=[];// 峰
+    var flat=[];// 平
+    var valley=[]; // 谷
+    var total=[];// 总
+    var Average=[]; // 平均
+    var date=[] ;//r日期
+    var totalEnery=[]; //总能耗
+    // 总电量
+    var  data=[
+        {value:0, name:'峰'},
+        {value:0, name:'平'},
+        {value:0, name:'谷'}
+    ];
+    var  data1=[
+        {value:0, name:'峰'},
+        {value:0, name:'平'},
+        {value:0, name:'谷'}
+    ];
+
+
+    var app={
+        init:function(opts){
+            var me =this;
+            $.extend(settings,opts);
+            me.pierChartEvent(list);
+            me._WarningClick();
+        }
+        ,pierChartEvent:function (list) {
+            var me=this;
+            list.transformerId=$('#site').val();
+            $.ajax({
+                url:"/Intelligent/v5_SmartTotalEnergy"
+                ,data:list
+                ,method:"post"
+                ,success:function(res){
+                    console.log(res);
+                    if(res.code == 0){
+                        me.AnalysisTotal(res.data.zong);
+                        me.AnalysisMovements(res.data.zoushi);
+                    }else {
+                        alert(res.msg)
+                    }
+                }
+                ,error:function(){
+
+                }
+            });
+        }
+        // 点击事件
+        ,_WarningClick:function () {
+            var me=this;
+            $("#warning_choose li a").click(function () {
+                list.timeType =$(this).data("value");
+                $(this).parent().addClass("acs");
+                $(this).parent().siblings().removeClass("acs");
+                me.pierChartEvent(list);
+            });
+            $('#site').change(function(){
+                me.pierChartEvent(list);
+            });
+
+        }
+        // 数据分析（总用电费+总电量电费）
+        ,AnalysisTotal:function (sdata) {
+            var me=this;
+            data=[
+                {value:0, name:'峰'},
+                {value:0, name:'平'},
+                {value:0, name:'谷'}
+            ];
+            data1=[
+                {value:0, name:'峰'},
+                {value:0, name:'平'},
+                {value:0, name:'谷'}
+            ];
+            for(var i=0;i<sdata.length;i++){
+                var arr=sdata[i];
+                for(var s=0;s<data.length;s++){
+                    var arr2=data[i];
+                    if(arr.typeName == arr2.name){
+                        arr2.value= arr.totalEneryAmount;
+
+                    }
+                }
+
+                for(var e=0;e<data1.length;e++){
+                    var arr4=data1[e];
+                    if(arr.typeName == arr4.name){
+                        arr4.value= arr.totalPrice;
+                    }
+                }
+            }
+
+            me.TotalRendering();
+        }
+        //走势数据分析
+        ,AnalysisMovements:function (sdata) {
+            var me=this;
+             peak=[];// 峰
+             flat=[];// 平
+             valley=[]; // 谷
+             total=[];// 总
+             Average=[]; // 平均
+             date=[] ;//r日期
+             totalEnery=[]; //总能耗
+            for(var i=0;i<sdata.length;i++){
+                var arr=sdata[i];
+                // 峰
+                peak.push(arr.fengAmount);
+                // 平
+                flat.push(arr.pingAmount);
+                // 谷
+                valley.push(arr.guAmount);
+                // 总;
+                total.push(arr.totalPrice);
+                // 平均
+                Average.push(arr.avePrice);
+                //日期
+                totalEnery.push(arr.totalEneryAmount);
+                //总能耗
+                date.push(arr.date);
+            }
+
+            me.trendRendering()
+
+        }
+        // 总用电费渲染
+        ,TotalRendering:function () {
+            var numerical=0;
+            for (var s=0;s<data.length;s++){
+                numerical=  numerical +parseInt(data[s].value);
+            }
+            var numerical2=0;
+            for (var a=0;a<data1.length;a++){
+                numerical2 = numerical2 + parseInt(data1[a].value);
+            }
+            var myChart = echarts.init(document.getElementById('energy-ring1'));
+            // 指定图表的配置项和数据
+            var option = {
+                title: {
+                    text: numerical,
+                    subtext: 'kwh',
+                    x: 'center',
+                    y: 'center',
+                    textStyle: {
+                        fontWeight: 'normal',
+                        fontSize: 26
+                    }
+                },
+                tooltip: {
+                    show: true,
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b}: {c} ({d}%)"
+                },
+
+                color:['#f5a623','#66cc99','#1fbcec'],
+                series: [
+                    {
+                        name:'总用电费',
+                        type:'pie',
+                        label: {
+                            normal: {
+                                show: true,
+                                formatter: '{b}: {c}({d}%)'
+                            }
+                        },
+                        radius: ['50%', '70%'],
+                        avoidLabelOverlap: false,
+                        data:data
+                    }
+                ]
+            };
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+
+            var myChart1 = echarts.init(document.getElementById('energy-ring2'));
+
+            // 指定图表的配置项和数据
+            var option2 =  {
+                title: {
+                    text: numerical2,
+                    subtext: '元',
+                    x: 'center',
+                    y: 'center',
+                    textStyle: {
+                        fontWeight: 'normal',
+                        fontSize: 26
+                    }
+                },
+                color:['#f5a623','#66cc99','#1fbcec'],
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b}: {c} ({d}%)"
+                },
+                label: {
+                    normal: {
+                        formatter: '{b}\n{d}%'
+                    }
+
+                },
+                series: [
+                    {
+                        name:'总电量电费',
+                        type:'pie',
+                        label: {
+                            normal: {
+                                show: true,
+                                formatter: '{b}: {c}({d}%)'
+                            }
+                        },
+                        radius: ['50%', '70%'],
+                        avoidLabelOverlap: false,
+                        data:data1
+                    }
+                ]
+            };
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart1.setOption(option2);
+            window.addEventListener('resize',function(){
+                myChart1.resize();
+                myChart.resize();
+            });
+
+        }
+        ,trendRendering:function () {
+            var energy_line = echarts.init(document.getElementById('energy-line'));
+            var option3 = {
+                legend: {
+                    data:['峰','平','谷',"总电费","平均电度电费"]
+                },
+                "tooltip": {
+                    "trigger": "axis",
+                    "axisPointer": {
+                        "type": "shadow",
+                        textStyle: {
+                            color: "#fff"
+                        }
+
+                    },
+                },
+                "dataZoom": [{
+                    "show": true,
+                    "height": 30,
+                    "xAxisIndex": [
+                        0
+                    ],
+                    bottom: 30,
+                    "start": 10,
+                    "end": 80,
+                    handleSize: '110%',
+                    handleStyle:{
+                        color:"#1fbcec",
+
+                    },
+                    textStyle:{
+                        color:"#000"},
+                    borderColor:"#90979c"
+
+
+                }, {
+                    "type": "inside",
+                    "show": true,
+                    "height": 15,
+                    "start": 1,
+                    "end": 35
+                }],
+                "grid": {
+                    "borderWidth": 0,
+                    "top": 110,
+                    "bottom": 95,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+
+                "calculable": true,
+                "xAxis": [{
+                    "type": "category",
+                    "axisLine": {
+                        lineStyle: {
+                            color: '#90979c'
+                        }
+                    },
+                    "splitLine": {
+                        "show": false
+                    },
+                    "axisTick": {
+                        "show": false
+                    },
+                    "splitArea": {
+                        "show": false
+                    },
+                    "axisLabel": {
+                        "interval": 0,
+
+                    },
+                    "data": date
+                }],
+                "yAxis": [{
+                    "type": "value",
+                    "name":"电费（元）",
+                    "splitLine": {
+                        "show": true
+                    },
+                    axisLabel: {
+                        formatter: '{value}'
+                    },
+                    "axisLine": {
+                        lineStyle: {
+                            color: '#90979c'
+                        }
+                    }
+                },
+                    {"name":"电价（元）",
+                        "type": "value",
+                        "position": 'right',
+                        "splitLine": {
+                            "show": false
+                        },
+                        default: 5,
+                        axisLabel: {
+                            formatter: '{value}'
+                        },
+                        "axisLine": {
+                            lineStyle: {
+                                color: '#6c9c94'
+                            }
+                        }
+                    }],
+
+                "series": [
+                    {
+                        "name": "谷",
+                        "type": "bar",
+                        "stack": "电费",
+                        "itemStyle": {
+                            "normal": {
+                                "color": "#1fbcec"
+                            }
+                        },
+                        "data": valley
+                    },{
+                        "name": "平",
+                        "type": "bar",
+                        "stack": "电费",
+                        "itemStyle": {
+                            "normal": {
+                                "color": "#66cc99"
+                            }
+                        },
+                        "data": flat
+                    },{
+                        "name": "峰",
+                        "type": "bar",
+                        "stack": "电费",
+                        "barMaxWidth": 35,
+                        "barGap": "10%",
+                        "itemStyle": {
+                            "normal": {
+                                "color": "#f5a623"
+                            }
+                        },
+                        "data": peak,
+                    },{
+                        "name": "总电费",
+                        "type": "line",
+                        // "stack": "电费",
+                        symbol:'circle',
+                        "itemStyle": {
+                            "normal": {
+                                "color": "#b3c3ce"
+                            }
+                        },
+                        "data": total
+                    }, {
+                        "name": "平均电度电费",
+                        "type": "line",
+                        "stack": "电价",
+                        yAxisIndex: 1,
+                        symbol:'circle',
+                        "itemStyle": {
+                            "normal": {
+                                "color": "#7191fe"
+                            }
+                        },
+                        "data":Average
+                    }
+                ]
+            };
+            energy_line.setOption(option3);
+            window.onresize = energy_line.resize;
+            var energy_line2 = echarts.init(document.getElementById('energy-line2'));
+            var option4= {
+                tooltip : {
+                    trigger: 'axis'
+                },
+                grid: {
+                    left: '3%',
+                    top:'15%',
+                    containLabel: true
+                },
+                legend: {
+                    data:['能耗走势']
+                },
+                "dataZoom": [{
+                    "show": true,
+                    "height": 30,
+                    "xAxisIndex": [
+                        0
+                    ],
+                    bottom: 30,
+                    "start": 10,
+                    "end": 80,
+                    handleSize: '110%',
+                    handleStyle:{
+                        color:"#1fbcec",
+
+                    },
+                    textStyle:{
+                        color:"#000"},
+                    borderColor:"#90979c"
+
+
+                }, {
+                    "type": "inside",
+                    "show": true,
+                    "height": 15,
+                    "start": 1,
+                    "end": 35
+                }],
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'category',
+                        boundaryGap : false,
+                        data : date
+                    }
+                ],
+                yAxis : {
+                    type : 'value'
+                }
+                ,
+                series : [
+                    {
+                        name:'能耗走势',
+                        type:'line',
+                        areaStyle: {
+                            normal: {type: 'default',
+                                color:"#fdedd2"
+                            }
+                        },
+                        smooth:true,
+                        itemStyle: {
+                            normal: {areaStyle: {type: 'default'}}
+                        },
+                        data:totalEnery
+                    }
+                ]
+            };
+            energy_line2.setOption(option4);
+
+            window.addEventListener('resize',function(){
+                energy_line2.resize();
+                energy_line.resize();
+            });
+        }
+    };
+
+    module.exports=app;
+
+});

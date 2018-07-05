@@ -1,0 +1,40 @@
+/**
+ * Created by DGDL-08 on 2017/11/23.
+ */
+//省级
+var provs_data =[{"value": "20", "text": "广东", "parent_id": "1"}],
+    citys_data = {"20": [{"value": "1656", "text": "东莞市", "parent_id": "20"}]},
+    dists_data ={"1656": [{"value": "2951", "text": "中堂镇", "parent_id": "1656"}, {"value": "3042", "text": "东坑镇", "parent_id": "1656"}, {"value": "3079", "text": "道滘镇", "parent_id": "1656"}, {
+            "value": "3098",
+            "text": "沙田镇",
+            "parent_id": "1656"
+        }, {"value": "3101", "text": "高埗镇", "parent_id": "1656"}, {"value": "3103", "text": "石龙镇", "parent_id": "1656"}, {"value": "3105", "text": "石排镇", "parent_id": "1656"}, {
+            "value": "3106",
+            "text": "企石镇",
+            "parent_id": "1656"
+        }, {"value": "3112", "text": "石碣镇", "parent_id": "1656"}, {"value": "3117", "text": "洪梅镇", "parent_id": "1656"}, {"value": "3121", "text": "麻涌镇", "parent_id": "1656"}, {
+            "value": "3135",
+            "text": "桥头镇",
+            "parent_id": "1656"
+        }, {"value": "3152", "text": "望牛墩镇", "parent_id": "1656"}, {"value": "3172", "text": "茶山镇", "parent_id": "1656"}, {"value": "4088", "text": "谢岗镇", "parent_id": "1656"}, {
+            "value": "4148",
+            "text": "松山湖",
+            "parent_id": "1656"
+        }, {"value": "4256", "text": "莞城区", "parent_id": "1656"}, {"value": "4257", "text": "南城区", "parent_id": "1656"}, {"value": "4761", "text": "长安镇", "parent_id": "1656"}, {
+            "value": "4867",
+            "text": "寮步镇",
+            "parent_id": "1656"
+        }, {"value": "4872", "text": "大岭山镇", "parent_id": "1656"}, {"value": "4887", "text": "常平镇", "parent_id": "1656"}, {"value": "4911", "text": "厚街镇", "parent_id": "1656"}, {
+            "value": "4912",
+            "text": "万江区",
+            "parent_id": "1656"
+        }, {"value": "4933", "text": "樟木头镇", "parent_id": "1656"}, {"value": "4981", "text": "大朗镇", "parent_id": "1656"}, {"value": "5458", "text": "塘厦镇", "parent_id": "1656"}, {
+            "value": "5474",
+            "text": "凤岗镇",
+            "parent_id": "1656"
+        }, {"value": "5870", "text": "清溪镇", "parent_id": "1656"}, {"value": "5906", "text": "横沥镇", "parent_id": "1656"}, {"value": "36103", "text": "东城区", "parent_id": "1656"}, {
+            "value": "39462",
+            "text": "黄江镇",
+            "parent_id": "1656"
+        }, {"value": "39463", "text": "虎门镇", "parent_id": "1656"}]
+    };

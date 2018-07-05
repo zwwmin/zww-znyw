@@ -1,0 +1,665 @@
+@charset "utf-8";
+@import "mixin";
+$TopNavHeight : 40px;
+$AppWidth2 : 1200px;
+$topNavFontColor:#9b9b9b;
+$Color_1FBCEC: #1FBCEC;
+$Color_525160: #525160;
+$Color_f8f9fb:#f8f9fb;
+$Color_DAE9F0:#DAE9F0;
+$FontFamilyYaHei:'微软雅黑' !important;
+$FontFamily2:"Hiragino Sans GB","Microsoft Yahei",SimSun,Arial,"Helvetica Neue",Helvetica;
+$Color_6A6A6A:#6A6A6A;
+$Color_505050:#505050;
+$Color_4A4A4A:#4A4A4A;
+$Color_6A6A6A:#6A6A6A;
+
+
+._extend_top_nav_font{ color:$topNavFontColor; font-size:10px;  }
+body.v2Body {
+  font-family: "Hiragino Sans GB","Microsoft Yahei",SimSun,Arial,"Helvetica Neue",Helvetica;
+}
+
+.table_cell_of_3columns{
+  float:left;
+  width: 33%;
+}
+.table_cell_of_4columns{
+  float:left;
+  width: 25%;
+}
+.table_cell_of_6columns{
+  float:left;
+  width: 16.6%;
+}
+.v2NavBar{
+  width: 1200px;
+  margin: 0 auto;
+  padding-top:20px;
+  z-index: 99;
+  padding-left:15%;
+  padding-right:15%;
+  height: $TopNavHeight;
+  color:$topNavFontColor;
+  position: relative;
+  padding-bottom: 20px;
+
+  &.innerNav{
+    background: #FFF;
+  }
+  &.toFixed{
+    position: fixed;
+    top:0;
+    left: 0%;
+    right:0%;
+    padding-top: 20px;
+    border-bottom:1px solid #e0dfdf;
+    @include shadow(1px ,1px ,5px );
+    background: #FFF;
+    .v2Banner{
+      margin-top:0;
+
+    }
+  }
+  .bld_logo{
+    background: url("../images/img2/logo@1x.png") no-repeat center center;
+    width: 120px;
+    height: 40px;
+    display: inline-block;
+    float:left;
+    margin-right:35px;
+  }
+  .bld_logo1{
+    background: url("../images/img2/logohei@1x.png") no-repeat center center;
+    width: 120px;
+    height: 40px;
+    display: inline-block;
+    float:left;
+    margin-right:35px;
+  }
+
+  .wrap_menu_item{
+    @extend ._extend_top_nav_font;
+    text-align: center;
+    float:left;
+    display: inline-block;
+    line-height: $TopNavHeight;
+    height:$TopNavHeight;
+    font-size:16px;
+    margin-right: 30px;
+  }
+
+  .area_text{
+    color:#FFF;
+    text-align: center;
+    display: inline-block;
+
+    height: $TopNavHeight;
+    line-height: $TopNavHeight;
+    float:left;
+    padding-right:8px;
+    font-size: 16px !important;
+    background: url("../images/img2/arrow.png") no-repeat right (($TopNavHeight/2));
+    margin-right:55px;
+  }
+}
+
+
+
+/**首页的banner广告**/
+.v2Banner{
+  margin:0 auto;
+  background: url("../images/img2/background1920.jpg") repeat-x center center;
+  width: 100%;
+  height: 580px;
+  margin-top:-80px;
+  position: relative;
+  z-index: 2;
+  &.toFixed {
+    margin-top:0px;
+
+
+  }
+
+
+  .bannerSlogan{
+    background: url("../images/img2/selogan@1x.png") no-repeat center center;
+    width: 825px;
+    height: 57px;
+    margin:0 auto 0 auto;
+
+  }
+
+  .bannerSubTitle{
+    font-size:24px;
+    color:#EDEDED;
+    letter-spacing: 1px;
+    text-align: center;
+    padding:38px 0 55px 0;
+    font-family: '微软雅黑' !important;
+  }
+  .bannerButtons{
+    width:660px;
+    height:61px;
+    margin:0 auto;
+    z-index: 20;
+    font-family: '微软雅黑' !important;
+    .bannerButtonWrp{
+      float:left;
+      width: 33%;
+      text-align: center;
+
+    }
+    .bannerButton.on{
+
+      //background: $Color_1FBCEC;
+      //border:1px solid $Color_1FBCEC;
+      //@include radius(1234,23px);
+      background: url("../images/img2/elipse@1x.png") no-repeat center center;
+      height: 61px;
+      width: 177px;
+
+    }
+    .bannerButton{
+      display:inline-block;
+      height: 61px;
+      width: 177px;
+      line-height: 61px;
+      color:#FFFFFF;
+      font-size:20px;
+      background: url("../images/img2/elipsewhite@1x.png") no-repeat center center;
+      //font-size:14px;
+      //background: transparent;
+      //padding:0 10px;
+      //
+      //border:1px solid #FFF;
+      //@include radius(1234,23px);
+
+      &:_hover{
+
+        background: $Color_1FBCEC;
+
+        border:1px solid $Color_1FBCEC;
+        @include radius(1234,23px);
+      }
+
+    }
+
+
+  }
+
+  .bannerBottom{
+    background: url("../images/img2/polygon@1x.png") no-repeat center top;
+    width: 100%;
+    position: absolute;
+    bottom:0;
+    left:0;
+    height: 30px;
+    .leftBBottom{
+      position: absolute;
+      left:0;
+      width: 42%;
+      background: #FFF;
+      height: 25px;
+      bottom:0;
+    }
+    .rightBBottom{
+      position: absolute;
+      right:0;
+      width: 42%;
+      background: #FFF;
+      height: 25px;
+      bottom:0;
+    }
+  }
+
+}
+
+.albumTurns{
+  position: relative;
+  width: 1200px;
+  margin:0 auto;
+  overflow: hidden;
+  .cBtnLeft{
+
+    float: left;
+    background: url("../images/img2/Rectangleleft@1x.png") no-repeat center center;
+    width: 113px;
+    height: 519px;
+    margin-top:180px;
+    cursor: pointer;
+    //visibility: hidden;
+    display: block;
+    opacity: 0;
+    position:absolute;
+  }
+  .cBtnRight{
+    display: block;
+    float: right;
+    background: url("../images/img2/Rectangleright@1x.png") no-repeat center center;
+    width: 113px;
+    height: 519px;
+    margin-top:180px;
+    cursor: pointer;
+    //visibility: hidden;
+    opacity: 0;
+    position:absolute;
+  }
+
+  & .cBtnLeft,& .cBtnRight{
+    //transition:opacity 1s;
+    //-moz-transition:opacity 1s; /* Firefox 4 */
+    //-webkit-transition:opacity 1s; /* Safari and Chrome */
+    //-o-transition:opacity 1s; /* Opera */
+  }
+  &:hover .cBtnLeft,&:hover .cBtnRight{
+    //visibility: visible;
+    //opacity: 1;
+  }
+
+}
+
+.v2index{
+  width: $AppWidth2;
+  margin:0 auto;
+
+  .v2BlockTitle{
+    font-size:28px;
+    color:#424753;
+    //line-height: 36px;
+    text-align: center;
+  }
+
+  .blockArea{
+    text-align: center;
+    //height: 100px;
+  }
+  .unitWrp{
+    width: 360px;
+    overflow: hidden;
+    text-align: center;
+    display: inline-block;
+
+  }
+  .unitSequence{
+    //@include radius(1234,50%);
+    //color:$Color_1FBCEC;
+    //border:1px solid $Color_1FBCEC;
+    text-align: center;
+    display: inline-block;
+    background: url("../images/img2/Oval@1x.png") no-repeat center center;
+    width: 66px;
+    height: 66px;
+    font-size:29px;
+    line-height: 66px;
+    color:$Color_1FBCEC;
+  }
+
+  .unitTitle{
+    font-size:24px;
+    text-align: center;
+    line-height: 24px;
+    color:$Color_505050;
+  }
+
+  .unitDesc{
+    font-size:20px;
+    text-align: center;
+    line-height: 30px;
+    color:$Color_6A6A6A;
+  }
+
+
+  .cUnits{
+    width:1200px;
+    overflow: hidden;
+    .cBlockArea{
+      //height: 180px;
+      display: inline-block;
+      text-align: center;
+    }
+    .cUnitWrp:last-child{
+      margin-right: 0px;
+    }
+    .cUnitWrp{
+      //width: 130px;
+      display: inline-block;
+      text-align: center;
+      width: 270px;
+      float: left;
+      margin-right:39px;
+    }
+    .cUnitLogo{
+      @include radius(1234,50%);
+      width: 96px;
+      height: 96px;
+      display: inline-block;
+      text-align: center;
+      img{
+        width: 100%;
+        height: 100%;
+        @include radius(1234,50%);
+      }
+      clear: both;
+    }
+    .cUnitTitle{
+      font-size:18px;
+      line-height: 18px;
+      padding-top:40px;
+      clear: both;
+      color:$Color_505050;
+    }
+
+    .cLoc{
+      height: 20px;
+      line-height: 20px;
+      font-size:16px;
+      background: url("../images/img2/location@2x.png") no-repeat left 40px;
+      background-size: 18px 22px;
+      display: inline-block;
+      text-align: center;
+      clear: both;
+      padding:44px 0 30px 23px;
+      color:$Color_4A4A4A;
+
+    }
+    .cDesc{
+      height: 18px;
+      line-height: 18px;
+      font-size:14px;
+      display: inline-block;
+      text-align: center;
+      clear: both;
+      color:$Color_6A6A6A;
+    }
+    .cBtnDetail{
+      width: 220px;
+      height: 79px;
+      background: url("../images/img2/Rectangledark@1x.png") no-repeat center center;
+      display: inline-block;
+      text-align: center;
+      font-size:18px;
+      line-height: 74px;
+      clear: both;
+      &:hover{
+        background: url("../images/img2/Rectanglebright@1x.png") no-repeat center 4px;
+      }
+
+    }
+  }
+
+  .numbersWrp{
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    letter-spacing: 0;
+  }
+  .numberUnit{
+    background: url("../images/img2/Rectangle@1x.png") no-repeat center center;
+    width: 50px;
+    height: 81px;
+    display: inline-block;
+    text-align: center;
+    line-height: 81px;
+    padding:0 2px;
+
+    font-size:50px;
+    color:white;
+
+  }
+  .numberTitle{
+    font-size:36px;
+    padding-top:25px;
+    text-align: center;
+  }
+
+
+  .l_number_panel{
+    width: 30%;
+    text-align: left;
+    float: left;
+    .numbersWrp,.numberTitle{
+      text-align: center;
+    }
+  }
+
+  .m_number_panel{
+    width: 40%;
+    text-align: center;
+    float: left;
+    .numbersWrp,.numberTitle{
+      text-align: center;
+    }
+  }
+
+  .r_number_panel{
+    width: 30%;
+    text-align: right;
+    float: left;
+    .numbersWrp,.numberTitle{
+      text-align: center;
+    }
+  }
+
+
+
+
+}
+.bloc_bg_2{
+  background: $Color_f8f9fb;
+
+}
+.bloc_bg_3{
+  background: $Color_DAE9F0;
+
+}
+.numberDataBottom{
+  background: url("../images/img2/people@1x.png") no-repeat center center;
+  height: 51px;
+  width: 100%;
+  position: relative;
+  bottom: 0;
+}
+/**按钮**/
+.tBtn_style1{
+
+  color:#1FBCEC;
+  font-size:18px;
+  background: url("../images/img2/Rectangletop@1x.png") no-repeat center center ;
+  height: 37px;
+  width: 72px;
+  line-height: 37px;
+  text-align: center;
+  display: inline-block;
+
+
+}
+
+.footerV3{
+  width: $AppWidth2;
+  text-align: center;
+  margin: 0 auto;
+  padding-top:45px;
+  .footerColumn{
+    text-align: center;
+  }
+  .fColTitle{
+    font-size:25px;
+    line-height: 55px;
+    width: 100%;
+    color:$Color_4A4A4A;
+    text-align: left;
+    display: inline-block;
+    //font-family: Helvetica;
+  }
+  .fColSubTitle{
+    width: 100%;
+    font-size:22px;
+    line-height: 52px;
+    color:$Color_6A6A6A;
+    text-align: left;
+    display: inline-block;
+    //font-family: "Helvetica Neue";
+  }
+
+  .fQrCode{
+    img{
+      width: 100%;
+    }
+  }
+  .fQrTips{
+    font-size:25px;
+    color:$Color_525160;
+    text-align: center;
+    display: inline-block;
+  }
+
+  .small_bottom_text{
+    text-align: center;
+    font-size:22px;
+    color:$Color_525160;
+    line-height: 52px;
+    padding:0 5px;
+  }
+
+}
+
+
+
+//---快捷申请相关。
+.v2_header{
+  height:70px;
+  width: 100%;
+  line-height: 70px;
+  font-size:16px;
+  color:#4a4a4a;
+  background: white;
+
+  .header_wrp{
+    padding-left:285px;
+    padding-right:297px;
+
+  }
+  .header_logo{
+    background: url("../images/img2/logo@1x.png") no-repeat center center;
+    width: 108px;
+    height: 70px;
+    display: inline-block;
+
+
+    margin-right:111px;
+    vertical-align: middle;
+
+  }
+  .header_nav_wrp{
+    float:left;
+    height: 70px;
+    width: 500px;
+  }
+  .header_left_navs{
+
+    display: inline-block;
+    height: 70px;
+
+    margin-right:30px;
+
+    font-size:16px;
+    color:#4a4a4a;
+    &:hover{
+      color:#1fbccc;
+      border-top:3px solid #1fbccc;
+      height: 67px;
+      line-height: 62px;
+
+
+    }
+    &.active{
+      color:#1fbccc;
+      border-top:3px solid #1fbccc;
+      height: 67px;
+      line-height: 62px;
+    }
+  }
+
+  .memberAreaWrp{
+    float:right;
+    height: 70px;
+    text-align: right;
+    line-height: 70px;
+  }
+  .member_avatar{
+    display: inline-block;
+    vertical-align: middle;
+    //line-height: 70px;
+    width: 36px;
+    height: 36px;
+    & img{
+      width: 36px;
+      height: 36px;
+    }
+    @include radius(1234,36px);
+    margin-right:13px;
+  }
+  .memberTips{
+    display: inline-block;
+  }
+  .memberNameBtn{
+    background: url("../images/img2/Triangle@1x.png") no-repeat right center;
+    padding-right:18px;
+    display: inline-block;
+    position:relative;
+    overflow: visible;
+
+    &:hover{
+      .member_small_layer{
+        display: block;
+      }
+    }
+    .member_small_layer{
+      background: url("../images/img2/small_member_frame@1x.png") center center no-repeat;
+      width: 127px;
+      height: 151px;
+      position: absolute;
+      left:-50%;
+      top:70px;
+      display: none;
+      .member_layer_link{
+        //padding:15px 25px 15px 45px;
+
+        font-size:14px;
+        line-height: 36px;
+        height: 36px;
+        text-align: left;
+        padding-left:40px;
+
+        
+      }
+      
+      .icon_link_vip{
+        background: url("../images/img2/vip_icon@1x.png") 20px center no-repeat;
+      }
+
+      .icon_link_exit{
+        background: url("../images/img2/exit_icon@1x.png") 20px center no-repeat;
+      }
+
+      .icon_link_order{
+        background: url("../images/img2/order_icon@1x.png") 20px center no-repeat;
+      }
+    }
+
+  }
+
+
+
+
+}
+
+.quick_apply_banner{
+  background: url("../images/img2/quick_apply_bg@1x.png") center center no-repeat;
+  height: 211px;
+  width: 100%;
+
+}
+
+

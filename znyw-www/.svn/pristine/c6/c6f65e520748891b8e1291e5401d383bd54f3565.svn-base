@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>智能代维</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="" rel="stylesheet">
+    <!-- iCheck for checkboxes and radio inputs -->
+
+
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/AdminLTE.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/Admintxt.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/bootstrap-daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/Ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/skins/skin-blue.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/iCheck/all.css">
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+    <%-partial("layout/Intelligent.ejs",{data:{TotalMenu:"System_environment",CurrentMenu:"system",memberInfo:memberInfo,BaseInfo:BaseInfo}})%>
+    <!--主体-->
+    <div class="content-wrapper">
+        <section class="content">
+            <% for (var i=0;i<data.data.length;i++){
+                var arr=data.data[i];
+                var sdata=arr.subItems.length/2;
+            %>
+            <div class="box">
+                <div class="box">
+                    <div class="row">
+                        <div class="col-sm-6" >
+                            <div class="box-body">
+                                <img src="<%=arr.poster%>" width="100%" height="100%" class="" alt="">
+                            </div>
+                        </div>
+                        <div class="col-sm-6" >
+                            <div class="box-body">
+                                <div class="environment_header"><%=arr.display%></div>
+                                <div class="environment_center_left ">
+
+                                    <%
+                                    for(var s=0;s<sdata;s++){
+                                        var ta = arr.subItems[s]
+                                        if(s%2 == 0){
+                                    %>
+                                    <div class="environment_center_1 "><%=ta.display%>：<span><%=ta.value%><%=ta.unit%></span></div>
+                                    <%}else{ %>
+                                    <div class="environment_center_1 environment_center_back"><%=ta.display%>：<span><%=ta.value%><%=ta.unit%></span></div>
+                                    <%}}%>
+
+                                </div>
+                                <div class="environment_center_right ">
+                                    <%
+                                    for(var r=sdata;r<arr.subItems.length;r++){
+                                        var tr = arr.subItems[r]
+                                        if(r%2 == 0){
+                                    %>
+                                    <div class="environment_center_1 "><%=tr.display%>：<span><%=tr.value%><%=tr.unit%></span></div>
+                                    <%}else{ %>
+                                    <div class="environment_center_1 environment_center_back"><%=tr.display%>：<span><%=tr.value%><%=tr.unit%></span></div>
+                                    <%}}%>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <%}%>
+
+        </section>
+        <!-- /.content -->
+    </div>
+    <!--底部-->
+    <!--<footer class="main-footer">-->
+
+    <!--<div class="pull-right hidden-xs">-->
+    <!--Anything you want-->
+    <!--</div>-->
+    <!--&lt;!&ndash; Default to the left &ndash;&gt;-->
+    <!--<strong>Copyright &copy; 2016 <a href="#">Company</a>.</strong> All rights reserved.-->
+    <!--</footer>-->
+
+    <!--点击打开right的侧边栏-->
+    <!--<div class="control-sidebar-bg"></div>-->
+
+</div>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/dist/js/adminlte.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/moment/min/moment.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
+
+
+
+</body>
+
+</html>

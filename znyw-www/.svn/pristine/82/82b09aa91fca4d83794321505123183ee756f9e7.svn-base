@@ -1,0 +1,39 @@
+(function ($) {
+    'use strict';
+    $.fn.error = function (options) {
+        var dom = $(this);
+        //错误提示框位置:errorStyle 
+        /**
+         * error向上显示：'error-top'
+         * error向右显示：'error-right'
+         * error向下显示：'error-bottom'
+         * error向左显示：'error-left'           
+         **/
+         
+        var default_option = {
+            errorStyle: 'error-bottom',
+            msg: (typeof(options) == 'string' ? options : options.msg)
+        };
+         
+        default_option = $.extend(default_option, options);//合并用户输入参数
+         
+        //错误提示模板
+        var error_tpl = '<div class="jq-error '+ default_option.errorStyle +'" style=""><div></div>'+
+                         default_option.msg +'</div>';
+         
+        if (dom.next('div').hasClass('jq-error')){
+             dom.next('div').remove();
+        }
+
+        //插入错误提示
+        dom.after(error_tpl);
+        if(default_option.time == 0){
+
+        }else {
+            setTimeout(function(){
+                $(".error-right").remove();
+            },default_option.time);
+        }
+
+    };
+})(jQuery);

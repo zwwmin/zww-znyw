@@ -1,0 +1,14 @@
+<%for (var i in data){
+    var arr = data[i]
+    if(i == 0){
+%>
+<div class="analysis_radio_btn" data-property="Total_two" data-value="<%=arr.itemId%>">
+    <div class="layui-icon layui-icon-radio analysis_radio_btn_icon" ></div>
+    <span><%=arr.name%></span>
+</div>
+<%}else {%>
+<div class="analysis_radio_btn" data-property="Total_two" data-value="<%=arr.itemId%>">
+    <div class="layui-icon layui-icon-circle analysis_radio_btn_icon" ></div>
+    <span><%=arr.name%></span>
+</div>
+<%}}%>

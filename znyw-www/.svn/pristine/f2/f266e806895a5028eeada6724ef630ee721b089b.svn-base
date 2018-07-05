@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>智能代维</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="" rel="stylesheet">
+    <!-- iCheck for checkboxes and radio inputs -->
+
+
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/AdminLTE.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/Admintxt.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/bootstrap-daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/Ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/dist/css/skins/skin-blue.css">
+    <link rel="stylesheet" type="text/css" href="../AdminLTE-2.4.1/bower_components/iCheck/all.css">
+
+    <script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/iCheck/icheck.js"></script>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+    <%-partial("layout/Intelligent.ejs",{data:{TotalMenu:"usage",CurrentMenu:"analysis",memberInfo:memberInfo,BaseInfo:BaseInfo}})%>
+    <!--主体-->
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="content-site">
+                <span>监控点:</span>
+                <select name="" id="site">
+                    <% for (var i=0;i<BaseInfo.loads.length;i++){
+                        var arr = BaseInfo.loads[i];
+                    %>
+                    <option value="<%=arr.id%>"><%=arr.name%></option>
+                    <%}%>
+
+                </select>
+            </div>
+
+            <div class=" row content-all-wrapper-menu " style="margin-top: 20px;">
+                <div class="col-xs-12 content-all-wrapper-menu-top " style="margin: 0;float: left;">
+
+                    <div class="box " style="border-top:0;padding-bottom: 15px;float: left;background: white;">
+                        <div class=" analysis_radio" style="width: 100%;" >
+                            <div class="form-group-span">电流质量：</div>
+                            <div id="choose_one" class="form-group-span-rad" style="display: inline-block">
+
+                            </div>
+
+                        </div>
+
+                        <div id="choose_two" style="float: left;width: 100%;">
+
+
+
+                        </div>
+
+                        <div class="analysis_radio" style="width: 100%;" >
+                            <div class="form-group-span float" >查询时间段：</div>
+                            <div class="form-group-span-rad">
+                                <div class="float display_inlibl " >
+                                    <label>
+                                        <input type="radio" name="real_time" value="0" class="flat-red" checked>
+                                        实时【5分钟】
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="real_time" value="1" class="flat-red">
+                                        历史
+                                    </label>
+                                </div>
+                                <div class="float display_inlibl" >
+                                    <div class="input-group" style="width: 230px;">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        <input type="text" style="height: 30px;" class="form-control pull-right" id="reservationtime" disabled>
+                                    </div>
+
+                                </div>
+                                <div class="float display_inlibl" style="margin-left: 25px;" >
+                                    <label>
+                                        <input type="radio" name="time" value="1" class="flat-red" checked  disabled>
+                                        小时
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="time" value="0" class="flat-red" disabled>
+                                        天
+                                    </label>
+                                    <a class="btn btn-primary" data-value="1" role="button" data-toggle="collapse" id="determine"  aria-expanded="false" >确定</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            </div>
+            <div class=" row content-all-wrapper-menu " >
+                <div class="col-xs-12 content-all-wrapper-menu-top " style="height: 460px;" >
+                    <div id="container" style="width: 100%;height: 400px;">
+
+                    </div>
+                    <div class="intelligent_max">
+                        <div class="intelligent_max_div">
+                            <span class="intelligent_max_span1">最大值：</span>
+                            <span class="intelligent_max_span2" id="max"> </span>
+                        </div>
+                        <div class="intelligent_max_div">
+                            <span class="intelligent_max_span1">最小值：</span>
+                            <span class="intelligent_max_span2" id="min" style="color: #f5a623"> </span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- /.content -->
+    </div>
+    <!--底部-->
+    <!--<footer class="main-footer">-->
+
+    <!--<div class="pull-right hidden-xs">-->
+    <!--Anything you want-->
+    <!--</div>-->
+    <!--&lt;!&ndash; Default to the left &ndash;&gt;-->
+    <!--<strong>Copyright &copy; 2016 <a href="#">Company</a>.</strong> All rights reserved.-->
+    <!--</footer>-->
+
+    <!--点击打开right的侧边栏-->
+    <!--<div class="control-sidebar-bg"></div>-->
+
+    <input type="hidden" name="stime" id="stimes" value="">
+    <input type="hidden" name="etime" id="etimes" value="">
+</div>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/dist/js/adminlte.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/moment/min/moment.min.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
+<script type="text/javascript" src="../AdminLTE-2.4.1/bower_components/iCheck/icheck.js"></script>
+<!--ECharts-->
+<script type="text/javascript" src="../dist/echarts.common.min.js"></script>
+
+<script>
+
+    var timeStamp = new Date(new Date().setHours(0, 0, 0, 0)) / 1000;
+    var time = timeStamp - 86400 * 1;
+//    开始
+    $('#stimes').val(time *1000  )
+//    结束
+    $('#etimes').val(timeStamp *1000)
+    $('#reservationtime').daterangepicker({
+         "locale": {
+             "direction": "ltr",
+             "format": "YYYY/MM/DD",
+             "separator": " - ",
+             "applyLabel": "Apply",
+             "cancelLabel": "Cancel",
+             "fromLabel": "From",
+             "toLabel": "To",
+             "customRangeLabel": "Custom",
+             "daysOfWeek": [
+                 "Su",
+                 "Mo",
+                 "Tu",
+                 "We",
+                 "Th",
+                 "Fr",
+                 "Sa"
+             ],
+             "monthNames": [
+                 "01月",
+                 "02月",
+                 "03月",
+                 "04月",
+                 "05月",
+                 "06月",
+                 "07月",
+                 "08月",
+                 "09月",
+                 "10月",
+                 "11月",
+                 "12月"
+             ],
+             "firstDay": 1
+         },
+        autoclose: true
+     }, function(start, end, label) {
+         var etime =end.format('YYYY/MM/DD');
+         var stime =start.format('YYYY/MM/DD');
+         $('#stimes').val(Date.parse(stime))
+         $('#etimes').val(Date.parse(etime))
+     });
+
+</script>
+<% include layout/inc_js.ejs%>
+<script>
+    var pageOptions={};
+
+    seajs.use("p.Intelligent_analysis",function(page){
+        page.init(pageOptions);
+    });
+
+</script>
+</body>
+
+</html>

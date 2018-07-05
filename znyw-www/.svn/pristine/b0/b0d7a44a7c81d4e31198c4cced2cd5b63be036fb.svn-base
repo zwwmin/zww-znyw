@@ -1,0 +1,671 @@
+
+var image_upload_warning_code={
+    OverAmount:"OverAmount" //超出数量。
+    ,NoPhoto:"NoPhoto" //没有选择图片。
+    ,OverSize:"OverSize" //超出限制上传图片大小。
+    ,NotAllowFormat:"NotAllowFormat" //不允许上传的格式。
+};
+var CompanyHtmlImageUploader=function(_opts){
+    var settings={
+        limit:_opts.limits //限制最多上传5张图片。
+        ,max_size:6*1024*1024 //单张图片最大上传容量。
+        ,outOfSizeTips:"照片上传：文件不能超过2M!请使用容量更小的照片"
+        ,uploadURL:"" //上传图片的路径。
+        ,uploadKey:"" //上传时候图片的key名称。
+        ,beforeUpload:function(imgFile,paras,uploadItemObj){
+            return true;
+        } //上传前的处理。假如返回的是false，那么就不上传了。。
+        ,onAllTaskBegin:function(){
+
+        }//在所有任务都开始了的时候，就执行这个方法。
+        ,onUploadComplete:function(itemElement,server_data,itemObject){
+            return true;
+        } //上传结束后的处理。
+
+        ,uploadType:"muti" //上传模式，批量。有：muti及single
+
+        ,onWarning:function(ErrorCode,data){
+            var _errorStr="";
+            if(ErrorCode==image_upload_warning_code.NoPhoto){
+                _errorStr="请选择图片";
+            }
+            else if(ErrorCode==image_upload_warning_code.NotAllowFormat){
+                _errorStr="文件类型必须是JPG、JPEG、PNG或GIF!";
+            }
+            else if(ErrorCode==image_upload_warning_code.OverAmount){
+                _errorStr="最多只能上传8张图片。";
+            }
+            else if(ErrorCode==image_upload_warning_code.OverSize){
+                _errorStr="文件不能超过2M，请使用更小的照片。";
+            }
+            image_upload_warning_code.UploadLimit=true;
+            alert(_errorStr);
+        }
+        ,onDelete:function(itemElement){
+            itemElement.remove();
+        }
+        ,onItemClick:function(itemElement){
+
+        }
+        ,tpl:""
+        ,fileInput:""
+        ,container:"" //显示图片上传的容器。
+
+        ,defaultImages:[] //默认初始化时候需要显示这些图片。--格式如下：{image:"dfdfdf" }注意，假如这个是对象，那么图片只会取image的地址，但是，其他属性将会放到对应item的属性里面去。
+        ,onInit:function(uploadElements){
+
+        }//初始化时候执行的方法。
+
+    };
+    $.extend(settings,_opts);
+
+
+
+    var _tpl=new EJS({url:"/res/ui-template/multi-upload-img.ejs"});
+    var _fileInput=$(settings.fileInput);
+    var _container=$(settings.container);
+    var _current_fileInput={};
+
+
+
+
+    var innerTools={
+        getBase4FromImgFile:function(file,callBack){
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var base64Img= e.target.result;
+                // var $img = $('<img>').attr("src", e.target.result)
+                // $('#preview').empty().append($img)
+                if(callBack){
+                    callBack(base64Img);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    var appData={};
+
+
+    var UploadItemUI=function(i_opts,base64Image){
+        var iSettings={};
+        $.extend(iSettings,i_opts);
+        var __html=_tpl.render({});
+        var _root=$(__html);
+        //--各个ui
+        var ui_preview_image=_root.find('[ui="preview-image"]');
+        var ui_upload_item=_root.find('[ui="upload-item"]');
+        var ui_mask=_root.find('[ui="mask"]');
+        var ui_progress=_root.find('[ui="progress"]');
+        var ui_inner_progress=_root.find('[ui="inner-progress"]');
+        var ui_success_tips=_root.find('[ui="success-tips"]');
+        var ui_error_tips=_root.find('[ui="error-tips"]');
+        var ui_normal_tips=_root.find('[ui="normal-tips"]');
+
+        var ui_state_tips=_root.find('[ui="state-tips"]');
+        var ui_del_button=_root.find('[ui="del-button"]');
+
+        var firstInit=true;
+        var iApp={
+            init:function(){
+                if(!firstInit){
+                    return;
+                }
+                firstInit=false;
+                var me=this;
+                me._initUI();
+                me._initEvents();
+
+
+            }
+            ,_initEvents:function(){
+
+                ui_del_button.click(function(event){
+                    var _this=$(this);
+                    var attr = $("#industry-list").children(".hmlu_img_item");
+                    console.log(attr);
+                    console.log(attr.length);
+                    if(attr.length == 1){
+                        $('#reqair_upload').addClass('hmlu-upload-button_two')
+                    }
+                    var _itemRoot=_this.closest('[ui="upload-item"]');
+                    settings.onDelete(_itemRoot);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    _itemRoot.detach();
+                });
+                _root.click(function(){
+                    settings.onItemClick(_root);
+                });
+
+            }
+            ,_initUI:function(){
+                ui_preview_image.attr("src",base64Image);
+            }
+
+            ,getRoot:function(){
+                return _root;
+            }
+            //--显示上传中界面。
+            ,showUploading:function(){
+                ui_success_tips.hide();
+                ui_error_tips.hide();
+                ui_normal_tips.hide();
+                ui_del_button.hide();
+                ui_mask.show();
+                ui_progress.show();
+                ui_state_tips.show();
+            }
+            //--设定当前上传百分比。
+            ,setProgress:function(percent){
+                var _int=parseInt(percent);
+                if(_int<=0){
+                    _int=0;
+                }
+                if(_int>=100){
+                    _int=100;
+                }
+                ui_inner_progress.css("width",_int+"%");
+            }
+            //--显示上传成功页面。
+            ,showSuccess:function(msg){
+
+                ui_progress.hide();
+                ui_state_tips.hide();
+                ui_normal_tips.hide();
+                ui_error_tips.hide();
+                ui_mask.show();
+                ui_success_tips.show();
+                // 不顯示刪除按鈕
+                // ui_del_button.show();
+                _root.attr("state","true");
+                if(msg){
+                    ui_success_tips.text(msg);
+                }
+
+            }
+            //--显示额外信息。
+
+            //--显示上传失败页面。
+            ,showError:function(msg){
+
+                ui_progress.hide();
+                ui_state_tips.hide();
+                ui_normal_tips.hide();
+                ui_success_tips.hide();
+
+                ui_error_tips.show();
+                ui_mask.show();
+                // 不顯示刪除按鈕
+                ui_del_button.show();
+                _root.attr("state","false");
+                if(msg){
+                    ui_error_tips.text(msg);
+                }
+            }
+            //--显示上传成功页面。
+            ,showOrigin:function(msg){
+
+                ui_progress.hide();
+                ui_state_tips.hide();
+                ui_success_tips.hide();
+                ui_error_tips.hide();
+                ui_normal_tips.hide();
+                ui_mask.hide();
+                // 不顯示刪除按鈕
+                ui_del_button.show();
+                console.log("成功");
+                if(msg){
+                    ui_normal_tips.text(msg);
+                }
+            }
+            ,showNormalTips:function(msg){
+
+                ui_progress.hide();
+                ui_state_tips.hide();
+
+                ui_success_tips.hide();
+
+                ui_error_tips.hide();
+                ui_normal_tips.show();
+                ui_mask.show();
+                // 不顯示刪除按鈕
+                ui_del_button.show();
+                if(msg){
+                    ui_normal_tips.text(msg);
+                }
+            }
+            ,setStateTips:function(text){
+                ui_state_tips.text(text);
+            }
+
+
+        };
+        iApp.init();
+        return iApp;
+    };
+
+
+
+
+
+    var app={
+        init:function(){
+            var me=this;
+            me.initFileEvents();
+            //--初始化相关图片显示ui。
+            me.initUI();
+
+        }
+
+        ,initFileEvents:function(){
+            var me=this;
+            me.resetFileInput(settings.fileInput);
+
+        }
+        //--这里需要将有关的file 文本框替换成为新的。
+        ,replaceNewFileInput:function(){
+            var me=this;
+            var _new_file_input=_current_fileInput.clone();
+            var _parent=_current_fileInput.parent();
+            _current_fileInput.remove();
+            _parent.append(_new_file_input);
+            me.resetFileInput(_new_file_input);
+        }
+        //--重新设定上传按钮事件，请注意，假如要hack onchange事件的话，那么这个方法调用是必不可少的。
+        ,resetFileInput:function(__file_input){
+            var me=this;
+            _fileInput=$(__file_input);
+            _current_fileInput=_fileInput;
+            var _fileDom=_fileInput[0];
+            $(_fileInput).change(function(){
+                if (_fileDom.files.length === 0) {
+                    settings.onWarning(image_upload_warning_code.NoPhoto);
+                    return; }
+                var _currentTotal=me.getTotalCount();
+                if(_currentTotal+_fileDom.files.length>settings.limit){
+                    // alert("总共最多只能上传"+settings.limit+"张图片。");
+                    me.replaceNewFileInput();
+                    settings.onWarning(image_upload_warning_code.OverAmount);
+                    return;
+                }
+                var __files=_fileDom.files;
+                if(settings.uploadType=="single"){
+                    __files=[];
+                    __files.push(_fileDom.files[0]);
+                }
+                if(__files.length >1 ){
+                    alert('每次只能传1张图片');
+                    return
+                }else {
+
+                    var oFile = __files[0];
+                    if(!new RegExp("(jpg|jpeg|gif|png|bmp)+","gi").test(oFile.type)){
+                        //alert("照片上传：文件类型必须是JPG、JPEG、PNG或GIF!");
+                        me.replaceNewFileInput();
+                        settings.onWarning(image_upload_warning_code.NotAllowFormat);
+                        return;
+                    }
+                    if(oFile.size>settings.max_size){
+                        //alert(settings.outOfSizeTips);
+                        me.replaceNewFileInput();
+                        settings.onWarning(image_upload_warning_code.OverSize);
+                        return;
+                    }
+                }
+
+                // for(var i=0;i<__files.length;i++){
+                //
+                //     var oFile = __files[i];
+                //     if(!new RegExp("(jpg|jpeg|gif|png|bmp)+","gi").test(oFile.type)){
+                //         //alert("照片上传：文件类型必须是JPG、JPEG、PNG或GIF!");
+                //         me.replaceNewFileInput();
+                //         settings.onWarning(image_upload_warning_code.NotAllowFormat);
+                //         return;
+                //     }
+                //     if(oFile.size>settings.max_size){
+                //         //alert(settings.outOfSizeTips);
+                //         me.replaceNewFileInput();
+                //         settings.onWarning(image_upload_warning_code.OverSize);
+                //         return;
+                //     }
+                //
+                // }
+
+                //--下面用队列来完成了。
+                //--没办法，里面是异步的，for循环会先循环一次然后执行异步内容，也就是说，所有的变量最后都会变成最后一个。现在采用队列执行的方式来处理。
+
+                var _queueBusy=false;
+                var _queueFinish=false;
+                var _currentQueueIndex=0;
+                var _vars={};
+                var _queueInterval=setInterval(function(){
+                    if(_queueBusy==true){
+                        return;
+                    }
+                    if(_queueFinish==true){
+                        clearInterval(_queueInterval);
+                        settings.onAllTaskBegin();
+                        me.replaceNewFileInput();
+                        return;
+                    }
+                    if(_currentQueueIndex>=__files.length){
+                        _queueFinish=true;
+                        return;
+                    }
+                    _queueBusy=true;
+                    var _oFile=__files[_currentQueueIndex];
+                    console.log("现在执行队列："+_currentQueueIndex);
+
+                    var i=_currentQueueIndex;
+                    _currentQueueIndex++;
+
+                    var oFile=__files[i];
+                    innerTools.getBase4FromImgFile(oFile,function(base64imgData){
+
+                        var _uploadItem=UploadItemUI({},base64imgData);
+                        var _thisItemRoot=_uploadItem.getRoot();
+
+
+                        var _lastUploadItemElement=_container.find('[ui="upload-item"]:last');//.after(_thisItemRoot);
+                        if(_lastUploadItemElement.length>0){
+                            _lastUploadItemElement.after(_thisItemRoot);
+                        }
+                        else{
+                            _container.prepend(_thisItemRoot);
+                        }
+                        var attr = $("#industry-list").children(".hmlu_img_item");
+                        console.log(attr);
+                        console.log(attr.length);
+                        if(attr.length == 1){
+                            $('#reqair_upload').removeClass('hmlu-upload-button_two')
+                        }
+                        $('.hmlu-upload-button').hide();
+                        //_container.append(_thisItemRoot);
+                        _uploadItem.showUploading();
+
+
+                        var blob = URL.createObjectURL(oFile);
+
+                        var obj={
+                            width: 1500,
+                            quality: 10
+                        };
+                        var img = new Image();
+                        img.src = blob;
+
+                        img.onload = function() {
+                            var that = this;
+                            //生成比例
+
+                            if(oFile.size<2 *1024*1024){
+                                w = that.width ;
+                                h = that.height;
+                            }else {
+                                var w = that.width,
+                                    h = that.height,
+                                    scale = w / h;
+                                w = obj.width || w;
+                                h = w / scale;
+                            }
+
+
+
+                            //生成canvas
+                            var canvas = document.createElement('canvas');
+                            var ctx = canvas.getContext('2d');
+                            $(canvas).attr({
+                                width: w,
+                                height: h
+                            });
+                            ctx.drawImage(that, 0, 0, w, h);
+
+                            /**
+                             * 生成base64
+                             * 兼容修复移动设备需要引入mobileBUGFix.js
+                             */
+                            var base64 = canvas.toDataURL('image/jpeg', obj.quality || 0.8);
+
+                            // 修复IOS
+                            if (navigator.userAgent.match(/iphone/i)) {
+                                var mpImg = new MegaPixImage(img);
+                                mpImg.render(canvas, {
+                                    maxWidth: w,
+                                    maxHeight: h,
+                                    quality: obj.quality || 1
+                                });
+                                base64 = canvas.toDataURL('image/jpeg', obj.quality || 1);
+                            }
+
+                            // 修复android
+                            if (navigator.userAgent.match(/Android/i)) {
+                                var encoder = new JPEGEncoder();
+                                base64 = encoder.encode(ctx.getImageData(0, 0, w, h), obj.quality * 100 || 80);
+                            }
+
+                            // 生成结果
+                            var result = {
+                                base64: base64,
+                                clearBase64: base64.substr(base64.indexOf(',') + 1)
+                            };
+                            // 执行后函数
+                            me._tryUpload(oFile,_uploadItem,result);
+                        };
+                        _queueBusy=false;
+                    });
+
+
+                },20);
+
+            });
+        }
+        ,getTotalCount:function(){
+            return _container.find('[ui="upload-item"]').length;
+        }
+        //--尝试上传过程。
+        ,_tryUpload:function(file,uploadItemObject,result){
+            var xhr = new XMLHttpRequest();
+
+            function uploadFile() {
+                var aa=result.base64;
+                //截取base64后边的主要内容
+                var arr = aa.split(',');
+                var type = arr[0].match(/:(.*?);/)[1];//获得图片的类型
+                ////////////////---把base64转化为二进制----//////////////////
+                var text = window.atob(aa.split(",")[1]);
+                var buffer = new Uint8Array(text.length);
+
+                var pecent = 0, loop = null;
+                for (var i = 0; i < text.length; i++) {
+                    buffer[i] = text.charCodeAt(i);
+                }
+                var blob = getBlob([buffer], type);
+
+                var fd = new FormData();
+                fd.append(settings.uploadKey, blob);
+                var _paras={};
+                var __res=settings.beforeUpload(file,_paras,uploadItemObject);
+
+                if(__res!=undefined&&__res===false){
+                    return;
+                }
+                for(var key in _paras){
+                    fd.append(key,_paras[key]);
+                }
+                xhr.onreadystatechange = zswFun;
+                xhr.upload.addEventListener("progress", uploadProgress, false);
+                xhr.addEventListener("load", uploadComplete, false);
+                xhr.addEventListener("error", uploadFailed, false);
+                xhr.addEventListener("abort", uploadCanceled, false);
+                xhr.open("POST", settings.uploadURL);
+                xhr.send(fd);
+            }
+            function zswFun() {
+                if(xhr.readyState == 4) {
+                    //判断对象状态是否交互成功,如果成功则为200
+
+                    if(xhr.status == 200) {
+                        //接收数据,得到服务器输出的纯文本数据
+                        var response = xhr.responseText;
+                        var obj = JSON.parse(response);
+                        $(".hmlu_img_item:last").attr('data-align', obj.data[0].url);
+                        $('.hmlu-upload-button').show();
+                    }
+                }
+            }
+            function uploadProgress(evt) {
+                if (evt.lengthComputable) {
+                    var percentComplete = Math.round(evt.loaded * 100 / evt.total);
+                    uploadItemObject.setProgress(percentComplete);
+                    //document.getElementById('progressNumber').innerHTML = percentComplete.toString() + '%';
+                }
+                else {
+                    //document.getElementById('progressNumber').innerHTML = 'unable to compute';
+                    uploadItemObject.setStateTips("未知上传进度");
+                }
+            }
+            // 上傳成功顯示
+            function uploadComplete(evt) {
+                /* This event is raised when the server send back a response */
+                //alert(evt.target.responseText);
+                /*1.xhr.readyState:XMLHttpRequest狀態，等於4表示數據已經接收完畢
+
+                 2.xhr.status:狀態碼，200表示正常
+
+                 3.xhr.responseText:server回應的文字數據*/
+                //console.log(evt.target.status);
+                //console.log(evt.target.readyState);
+                //console.log(xhr.status);
+                var sst = evt.currentTarget.response;
+                // var attr = object(sst);
+                //     console.log(attr)
+
+                if(evt.target.status!=200){
+                    uploadItemObject.showError(evt.target.status+"错误");
+                }
+                else{
+                    console.log("x显示");
+                    // if(settings.onUploadComplete(uploadItemObject.getRoot(),evt.target.responseText,uploadItemObject)==true){
+                        uploadItemObject.showOrigin();
+                    }
+                    // else{
+                    //     uploadItemObject.showError();
+
+                    // }
+
+                // }
+
+            }
+
+            function uploadFailed(evt) {
+                //alert("There was an error attempting to upload the file.");
+                uploadItemObject.showError();
+            }
+
+            function uploadCanceled(evt) {
+                //alert("The upload has been canceled by the user or the browser dropped the connection.");
+                uploadItemObject.showError();
+            }
+            function getBlob(buffer, format) {
+                try {
+                    return new Blob(buffer, {type: format});
+                } catch (e) {
+                    var bb = new (window.BlobBuilder || window.WebKitBlobBuilder || window.MSBlobBuilder);
+                    buffer.forEach(function(buf) {
+                        bb.append(buf);
+                    });
+                    return bb.getBlob(format);
+                }
+            }
+            uploadFile();
+            /**
+             * 获取blob对象的兼容性写法
+             * @param buffer
+             * @param format
+             * @returns {*}
+             */
+
+        }
+
+        ,initUI:function(){
+            //--下面用队列来完成了。
+            //--没办法，里面是异步的，for循环会先循环一次然后执行异步内容，也就是说，所有的变量最后都会变成最后一个。现在采用队列执行的方式来处理。
+
+            var _queueBusy=false;
+            var _queueFinish=false;
+            var _currentQueueIndex=0;
+            var _vars={};
+            var _queueInterval=setInterval(function(){
+                if(_queueBusy==true){
+                    return;
+                }
+                if(_queueFinish==true){
+                    clearInterval(_queueInterval);
+                    return;
+                }
+                if(_currentQueueIndex>=settings.defaultImages.length){
+                    _queueFinish=true;
+                    settings.onInit(_container.find('[ui="upload-item"]'));
+                    return;
+                }
+                _queueBusy=true;
+                var _oFile=settings.defaultImages[_currentQueueIndex];
+
+                var i=_currentQueueIndex;
+                _currentQueueIndex++;
+
+                var oFile=_oFile;
+                var _imgURL="";
+                var _paras={};
+                if(typeof(oFile)=="object"){
+                    _imgURL=oFile["image"]?oFile["image"]:oFile["url"];
+                    $.extend(_paras,oFile);
+                    delete _paras["image"];
+                    delete _paras["url"];
+                }
+                else if(typeof (oFile)=="string"){
+                    _imgURL=oFile;
+                }
+                else{
+                    _imgURL=oFile;
+                }
+
+                var _uploadItem=UploadItemUI({},_imgURL);
+                var _thisItemRoot=_uploadItem.getRoot();
+                for(var _key in _paras){
+                    _thisItemRoot.attr(_key,_paras[_key]);
+                }
+                var _lastUploadItemElement=_container.find('[ui="upload-item"]:last');//.after(_thisItemRoot);
+                if(_lastUploadItemElement.length>0){
+                    _lastUploadItemElement.after(_thisItemRoot);
+                }
+                else{
+                    _container.prepend(_thisItemRoot);
+                }
+                //_container.append(_thisItemRoot);
+                _uploadItem.showOrigin();
+
+                _queueBusy=false;
+
+
+
+            },10);
+        }
+    };
+
+
+    app.init();
+
+    var returnObj={
+        resetFileInput:function(fileinput){
+
+            return;
+            app.resetFileInput(fileinput);
+        }
+    };
+
+    return returnObj;
+
+
+
+};
